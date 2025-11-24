@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Gestão MEI Fácil</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --success: #16a34a;
+            --danger: #dc2626;
+            --warning: #ca8a04;
+            --dark: #1e293b;
+            --light: #f1f5f9;
+            --white: #ffffff;
+            --gray: #94a3b8;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, sans-serif; }
+        body { background-color: var(--light); color: var(--dark); padding-bottom: 80px; }
+
+        /* --- Header --- */
+        header {
+            background: var(--primary);
+            color: var(--white);
+            padding: 20px;
+            border-radius: 0 0 20px 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        header h1 { font-size: 1.2rem; font-weight: 600; }
+        header .subtitle { font-size: 0.9rem; opacity: 0.9; }
+
+        /* --- Containers & Cards --- */
+        .container { padding: 15px; max-width: 600px; margin: 0 auto; }
+        .card {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        /* --- Dashboard Summary --- */
+        .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: -30px; }
+        .summary-card {
+            background: var(--white);
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        .summary-card small { color: var(--gray); font-size: 0.8rem; text-transform: uppercase; }
+        .summary-card .value { font-weight: 700; font-size: 1.1rem; margin-top: 5px; }
+        .text-green { color: var(--success); }
+        .text-red { color: var(--danger); }
+        .text-blue { color: var(--primary); }
+
+        /* --- MEI Limit Bar --- */
+        .limit-container { margin-top: 15px; }
+        .progress-bar-bg { background: #e2e8f0; height: 10px; border-radius: 5px; overflow: hidden; margin-top: 5px; }
+        .progress-bar-fill { height: 100%; background: var(--primary); width: 0%; transition: width 0.5s; }
+        .limit-warning { color: var(--warning); font-weight: bold; font-size: 0.9rem; margin-top: 5px; display: none; }
+
+        /* --- Forms --- */
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: 500; color: var(--dark); }
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 1rem;
+            background: var(--white);
+        }
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+        .type-selector { display: flex; gap: 10px; margin-bottom: 15px; }
+        .type-btn {
+            flex: 1; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px;
+            text-align: center; cursor: pointer; background: white;
+        }
+        .type-btn.active { border-color: var(--primary); background: #eff6ff; color: var(--primary); font-weight: bold; }
+        .type-btn.active.expense { border-color: var(--danger); background: #fef2f2; color: var(--danger); }
+
+        /* --- List & History --- */
+        .transaction-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .t-info h4 { font-size: 0.95rem; margin-bottom: 2px; }
+        .t-info small { color: var(--gray); font-size: 0.8rem; }
+        .t-value { font-weight: 600; }
+
+        /* --- Bottom Nav --- */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: var(--white);
+            display: flex;
+            justify-content: space-around;
+            padding: 12px 0;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            z-index: 100;
+        }
+        .nav-item {
+            text-align: center;
+            color: var(--gray);
+            font-size: 0.75rem;
+            background: none; border: none;
+            cursor: pointer;
+        }
+        .nav-item i { display: block; font-size: 1.4rem; margin-bottom: 4px; }
+        .nav-item.active { color: var(--primary); }
+
+        /* --- Views Logic --- */
+        .view { display: none; animation: fadeIn 0.3s; }
+        .view.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* --- DAS Checklist --- */
+        .das-item {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 10px; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 10px;
+        }
+        .das-check { transform: scale(1.5); }
+
+        /* --- Onboarding Overlay --- */
+        #onboarding {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--primary); color: white; z-index: 999;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            padding: 30px; text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ONBOARDING -->
+    <div id="onboarding" style="display: none;">
+        <i class="fas fa-chart-line fa-3x mb-3"></i>
+        <h2 style="margin-bottom: 15px;">Bem-vindo ao Gestão MEI</h2>
+        <p style="margin-bottom: 30px;">Controle suas finanças, acompanhe o limite do MEI e gerencie seu DAS em um só lugar.</p>
+        <button class="btn btn-light" onclick="closeOnboarding()" style="color: var(--primary)">Começar Agora</button>
+    </div>
+
+    <!-- VIEW: DASHBOARD -->
+    <div id="view-dashboard" class="view active">
+        <header>
+            <h1>Olá, Empreendedor(a)</h1>
+            <div class="subtitle">Visão Geral do Mês</div>
+            <div style="height: 20px;"></div>
+        </header>
+
+        <div class="container">
+            <div class="summary-grid">
+                <div class="summary-card">
+                    <small>Entradas</small>
+                    <div class="value text-green" id="dash-income">R$ 0,00</div>
+                </div>
+                <div class="summary-card">
+                    <small>Saídas</small>
+                    <div class="value text-red" id="dash-expense">R$ 0,00</div>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top: 15px; text-align: center;">
+                <small>SALDO ATUAL</small>
+                <div class="value text-blue" style="font-size: 1.5rem; font-weight: 800;" id="dash-balance">R$ 0,00</div>
+            </div>
+
+            <div class="card">
+                <div style="display: flex; justify-content: space-between;">
+                    <strong>Limite MEI Anual</strong>
+                    <small id="limit-text">0% usado</small>
+                </div>
+                <div class="limit-container">
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" id="limit-bar"></div>
+                    </div>
+                    <div id="limit-alert" class="limit-warning">⚠️ Atenção: Você está perto do limite!</div>
+                    <small style="color: var(--gray); display: block; margin-top: 5px;">Acumulado: <span id="limit-accumulated">R$ 0,00</span> / R$ 81.000</small>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 style="font-size: 1rem; margin-bottom: 10px;">Últimos Lançamentos</h3>
+                <div id="recent-transactions">
+                    <!-- JS vai preencher aqui -->
+                    <p style="text-align: center; color: var(--gray); padding: 10px;">Nenhum registro ainda.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- VIEW: ADICIONAR -->
+    <div id="view-add" class="view">
+        <header>
+            <h1>Novo Registro</h1>
+        </header>
+        <div class="container">
+            <div class="card">
+                <div class="type-selector">
+                    <div class="type-btn active" id="btn-type-income" onclick="setType('income')">
+                        <i class="fas fa-arrow-up"></i> Entrada
+                    </div>
+                    <div class="type-btn" id="btn-type-expense" onclick="setType('expense')">
+                        <i class="fas fa-arrow-down"></i> Saída
+                    </div>
+                </div>
+
+                <form id="transaction-form">
+                    <div class="form-group">
+                        <label>Valor (R$)</label>
+                        <input type="number" id="t-amount" step="0.01" placeholder="0,00" required inputmode="decimal">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Descrição</label>
+                        <input type="text" id="t-desc" placeholder="Ex: Venda Produto X / Conta Luz" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Categoria</label>
+                        <select id="t-category">
+                            <option value="Venda">Venda / Serviço</option>
+                            <option value="Aluguel">Aluguel</option>
+                            <option value="Fornecedor">Fornecedor</option>
+                            <option value="Imposto">Imposto / DAS</option>
+                            <option value="Outros">Outros</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Data</label>
+                        <input type="date" id="t-date" required>
+                    </div>
+
+                    <button type="submit" class="btn btn-success">Salvar Registro</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- VIEW: DAS & OBRIGAÇÕES -->
+    <div id="view-das" class="view">
+        <header>
+            <h1>Obrigações MEI</h1>
+        </header>
+        <div class="container">
+            <div class="card">
+                <h3>Controle de DAS <span id="current-year"></span></h3>
+                <p style="font-size: 0.8rem; color: var(--gray); margin-bottom: 15px;">Marque os meses pagos.</p>
+                <div id="das-list">
+                    <!-- JS Gera lista -->
+                </div>
+            </div>
+            
+            <div class="card" style="border-left: 4px solid var(--warning);">
+                <h3>Declaração Anual (DASN)</h3>
+                <p>Prazo: Até 31 de Maio.</p>
+                <button class="btn btn-primary" style="margin-top: 10px; padding: 8px;" onclick="alert('Lembrete: Acesse o Portal do Empreendedor para declarar.')">Lembrar-me</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- VIEW: RELATÓRIOS -->
+    <div id="view-reports" class="view">
+        <header>
+            <h1>Relatórios</h1>
+        </header>
+        <div class="container">
+            <div class="card">
+                <h3>Exportar Dados</h3>
+                <p style="font-size: 0.9rem; margin-bottom: 15px;">Gere um arquivo para seu controle ou contador.</p>
+                <button class="btn btn-primary" onclick="exportCSV()"><i class="fas fa-file-csv"></i> Baixar Relatório Excel/CSV</button>
+                <br><br>
+                <button class="btn btn-success" onclick="shareWhatsApp()"><i class="fab fa-whatsapp"></i> Enviar Resumo no WhatsApp</button>
+            </div>
+
+            <div class="card" style="margin-top: 20px;">
+                <h3>Configurações</h3>
+                <button class="btn btn-danger" onclick="resetData()" style="margin-top: 10px;">Apagar Todos os Dados</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- BOTTOM NAVIGATION -->
+    <nav class="bottom-nav">
+        <button class="nav-item active" onclick="switchView('dashboard')">
+            <i class="fas fa-home"></i> Início
+        </button>
+        <button class="nav-item" onclick="switchView('add')">
+            <i class="fas fa-plus-circle" style="font-size: 1.8rem; color: var(--primary);"></i> Add
+        </button>
+        <button class="nav-item" onclick="switchView('das')">
+            <i class="fas fa-file-invoice-dollar"></i> DAS
+        </button>
+        <button class="nav-item" onclick="switchView('reports')">
+            <i class="fas fa-chart-pie"></i> Relat.
+        </button>
+    </nav>
+
+    <script>
+        // --- ESTADO DA APLICAÇÃO ---
+        const state = {
+            transactions: [],
+            das: {},
+            currentType: 'income',
+            meiLimit: 81000
+        };
+
+        // --- INICIALIZAÇÃO ---
+        function init() {
+            const savedData = localStorage.getItem('meiApp_data');
+            if (savedData) {
+                const parsed = JSON.parse(savedData);
+                state.transactions = parsed.transactions || [];
+                state.das = parsed.das || {};
+            } else {
+                // Show onboarding if no data
+                document.getElementById('onboarding').style.display = 'flex';
+            }
+
+            // Set default date
+            document.getElementById('t-date').valueAsDate = new Date();
+            document.getElementById('current-year').textContent = new Date().getFullYear();
+
+            updateDashboard();
+            renderDASList();
+        }
+
+        function closeOnboarding() {
+            document.getElementById('onboarding').style.display = 'none';
+        }
+
+        function saveData() {
+            localStorage.setItem('meiApp_data', JSON.stringify({
+                transactions: state.transactions,
+                das: state.das
+            }));
+            updateDashboard();
+        }
+
+        // --- NAVEGAÇÃO ---
+        function switchView(viewName) {
+            document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+            document.getElementById('view-' + viewName).classList.add('active');
+            
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            // Simples lógica para active state (melhorar se necessário)
+            if(viewName === 'dashboard') document.querySelectorAll('.nav-item')[0].classList.add('active');
+            if(viewName === 'add') document.querySelectorAll('.nav-item')[1].classList.add('active');
+            if(viewName === 'das') document.querySelectorAll('.nav-item')[2].classList.add('active');
+            if(viewName === 'reports') document.querySelectorAll('.nav-item')[3].classList.add('active');
+        }
+
+        // --- ADICIONAR TRANSAÇÃO ---
+        function setType(type) {
+            state.currentType = type;
+            document.getElementById('btn-type-income').classList.toggle('active', type === 'income');
+            document.getElementById('btn-type-expense').classList.toggle('active', type === 'expense');
+            
+            const btnType = document.getElementById('btn-type-expense');
+            if(type === 'expense') btnType.classList.add('expense');
+            else btnType.classList.remove('expense');
+        }
+
+        document.getElementById('transaction-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const amount = parseFloat(document.getElementById('t-amount').value);
+            const desc = document.getElementById('t-desc').value;
+            const cat = document.getElementById('t-category').value;
+            const date = document.getElementById('t-date').value;
+
+            const transaction = {
+                id: Date.now(),
+                type: state.currentType,
+                amount: amount,
+                desc: desc,
+                category: cat,
+                date: date
+            };
+
+            state.transactions.unshift(transaction); // Add to beginning
+            saveData();
+            
+            // Reset form and go back
+            e.target.reset();
+            document.getElementById('t-date').valueAsDate = new Date();
+            switchView('dashboard');
+        });
+
+        // --- DASHBOARD LOGIC ---
+        function updateDashboard() {
+            let income = 0;
+            let expense = 0;
+            let annualRevenue = 0;
+            const currentYear = new Date().getFullYear();
+            const currentMonth = new Date().getMonth();
+
+            // Filter for current month display
+            const monthTransactions = state.transactions.filter(t => {
+                const tDate = new Date(t.date);
+                return tDate.getMonth() === currentMonth && tDate.getFullYear() === currentYear;
+            });
+
+            // Calculate Month Totals
+            monthTransactions.forEach(t => {
+                if (t.type === 'income') income += t.amount;
+                else expense += t.amount;
+            });
+
+            // Calculate Annual Revenue for MEI Limit
+            state.transactions.forEach(t => {
+                const tDate = new Date(t.date);
+                if (t.type === 'income' && tDate.getFullYear() === currentYear) {
+                    annualRevenue += t.amount;
+                }
+            });
+
+            // Update UI
+            document.getElementById('dash-income').textContent = formatCurrency(income);
+            document.getElementById('dash-expense').textContent = formatCurrency(expense);
+            document.getElementById('dash-balance').textContent = formatCurrency(income - expense);
+
+            // Update MEI Limit
+            const percentage = (annualRevenue / state.meiLimit) * 100;
+            document.getElementById('limit-bar').style.width = `${Math.min(percentage, 100)}%`;
+            document.getElementById('limit-text').textContent = `${percentage.toFixed(1)}% usado`;
+            document.getElementById('limit-accumulated').textContent = formatCurrency(annualRevenue);
+            
+            if (percentage > 80) {
+                document.getElementById('limit-bar').style.background = 'var(--warning)';
+                document.getElementById('limit-alert').style.display = 'block';
+            } else {
+                document.getElementById('limit-bar').style.background = 'var(--primary)';
+                document.getElementById('limit-alert').style.display = 'none';
+            }
+
+            // Update Recent List
+            const list = document.getElementById('recent-transactions');
+            list.innerHTML = '';
+            state.transactions.slice(0, 5).forEach(t => {
+                const color = t.type === 'income' ? 'text-green' : 'text-red';
+                const sign = t.type === 'income' ? '+' : '-';
+                const dateFormatted = new Date(t.date).toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit'});
+                
+                list.innerHTML += `
+                    <div class="transaction-item">
+                        <div class="t-info">
+                            <h4>${t.desc}</h4>
+                            <small>${dateFormatted} • ${t.category}</small>
+                        </div>
+                        <div class="t-value ${color}">${sign} ${formatCurrency(t.amount)}</div>
+                    </div>
+                `;
+            });
+        }
+
+        // --- DAS LOGIC ---
+        function renderDASList() {
+            const container = document.getElementById('das-list');
+            const months = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+            const currentYear = new Date().getFullYear();
+            
+            container.innerHTML = '';
+            months.forEach((m, index) => {
+                const key = `${currentYear}-${index}`;
+                const isPaid = state.das[key] || false;
+                
+                container.innerHTML += `
+                    <div class="das-item">
+                        <span>${m}</span>
+                        <input type="checkbox" class="das-check" 
+                            ${isPaid ? 'checked' : ''} 
+                            onchange="toggleDAS('${key}')">
+                    </div>
+                `;
+            });
+        }
+
+        function toggleDAS(key) {
+            state.das[key] = !state.das[key];
+            saveData();
+        }
+
+        // --- EXPORT & UTILS ---
+        function formatCurrency(value) {
+            return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
+
+        function exportCSV() {
+            let csvContent = "data:text/csv;charset=utf-8,Data,Tipo,Categoria,Descrição,Valor\n";
+            state.transactions.forEach(t => {
+                csvContent += `${t.date},${t.type},${t.category},${t.desc},${t.amount}\n`;
+            });
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "relatorio_mei.csv");
+            document.body.appendChild(link);
+            link.click();
+        }
+
+        function shareWhatsApp() {
+            let income = 0, expense = 0;
+            // Simple monthly summary logic
+            const currentMonth = new Date().getMonth();
+            state.transactions.forEach(t => {
+                if(new Date(t.date).getMonth() === currentMonth) {
+                    if(t.type === 'income') income += t.amount; else expense += t.amount;
+                }
+            });
+            
+            const text = `Resumo MEI deste mês:%0AEntradas: ${formatCurrency(income)}%0ASaídas: ${formatCurrency(expense)}%0ALucro: ${formatCurrency(income - expense)}`;
+            window.open(`https://wa.me/?text=${text}`, '_blank');
+        }
+
+        function resetData() {
+            if(confirm("Tem certeza? Isso apagará todos os registros.")) {
+                localStorage.removeItem('meiApp_data');
+                location.reload();
+            }
+        }
+
+        // Start App
+        init();
+
+    </script>
+</body>
+</html>
