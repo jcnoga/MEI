@@ -3,13 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MEI Simples - Acesso</title>
+    <title>MEI Simples - Cadastro Completo</title>
     
-    <!-- Bibliotecas Externas -->
+    <!-- Fontes e Ícones -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
     <style>
         :root {
@@ -20,118 +18,123 @@
             --surface: #ffffff;
             --text-main: #1f2937;
             --text-muted: #6b7280;
-            --danger: #ef4444;
             --border: #e5e7eb;
+            --danger: #ef4444;
             --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        * { box-sizing: border-box; margin: 0; padding: 0; outline: none; -webkit-tap-highlight-color: transparent; }
         body { font-family: 'Poppins', sans-serif; background: var(--bg-light); color: var(--text-main); height: 100vh; overflow-x: hidden; }
 
         .hidden { display: none !important; }
-        .btn { border: none; padding: 12px; border-radius: 10px; font-weight: 600; cursor: pointer; width: 100%; font-size: 1rem; margin-top: 10px; transition: 0.2s; }
+        
+        /* Botões */
+        .btn { border: none; padding: 14px; border-radius: 12px; font-weight: 600; cursor: pointer; width: 100%; font-size: 1rem; margin-top: 15px; transition: 0.2s; }
         .btn-primary { background: var(--primary); color: white; }
         .btn-primary:hover { background: var(--primary-dark); }
-        .btn-text { background: none; color: var(--secondary); font-size: 0.85rem; margin-top: 15px; width: auto; display: inline-block; }
-        
-        /* AUTH SCREEN STYLES */
+        .btn-logout { background: none; border: none; color: var(--danger); font-size: 1.2rem; cursor: pointer; }
+
+        /* Tela de Autenticação */
         #auth-screen { 
-            height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; 
+            min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; 
             padding: 20px; background: var(--surface); 
         }
-        .auth-card {
-            width: 100%; max-width: 400px; text-align: center;
-        }
+        .auth-card { width: 100%; max-width: 400px; text-align: center; }
         .logo-area i { font-size: 3.5rem; color: var(--primary); margin-bottom: 10px; }
+        
         .auth-input { 
-            width: 100%; padding: 14px; margin-bottom: 12px; border-radius: 10px; 
-            border: 1px solid var(--border); background: var(--bg-light); font-size: 1rem; outline: none;
+            width: 100%; padding: 14px; margin-bottom: 10px; border-radius: 10px; 
+            border: 1px solid var(--border); background: var(--bg-light); font-size: 0.95rem; 
             transition: border 0.3s;
         }
-        .auth-input:focus { border-color: var(--primary); }
+        .auth-input:focus { border-color: var(--primary); background: #fff; }
         
-        .auth-links { display: flex; justify-content: space-between; margin-top: 10px; font-size: 0.85rem; }
+        .auth-links { display: flex; justify-content: space-between; margin-top: 15px; font-size: 0.85rem; }
         .auth-links span { cursor: pointer; color: var(--text-muted); }
         .auth-links span:hover { color: var(--primary); text-decoration: underline; }
 
-        /* APP STYLES (Simplificado para o contexto) */
+        /* Tela do App */
         #app-screen { padding-bottom: 80px; }
-        header { background: var(--surface); padding: 15px 20px; box-shadow: var(--shadow); display: flex; justify-content: space-between; align-items: center; }
+        header { background: var(--surface); padding: 15px 20px; box-shadow: var(--shadow); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; }
         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-        .card { background: var(--surface); padding: 20px; border-radius: 16px; box-shadow: var(--shadow); margin-bottom: 15px; }
-        .logout-btn { color: var(--danger); font-size: 1.5rem; background: none; border: none; cursor: pointer; }
+        .card { background: var(--surface); padding: 25px; border-radius: 16px; box-shadow: var(--shadow); text-align: center; margin-top: 20px; }
 
     </style>
 </head>
 <body>
 
-    <!-- 1. TELA DE AUTENTICAÇÃO (LOGIN / CADASTRO / RECUPERAÇÃO) -->
+    <!-- 1. TELA DE AUTENTICAÇÃO -->
     <section id="auth-screen">
         <div class="auth-card">
             <div class="logo-area">
                 <i class="fa-solid fa-store"></i>
                 <h1>MEI Simples</h1>
-                <p id="auth-subtitle" style="color: var(--text-muted); margin-bottom: 30px;">Gerencie seu negócio</p>
+                <p id="auth-subtitle" style="color: var(--text-muted); margin-bottom: 25px;">Gestão completa do seu negócio</p>
             </div>
 
             <form id="auth-form" onsubmit="event.preventDefault();">
-                <!-- Nome (Apenas Cadastro) -->
-                <input type="text" id="auth-name" class="auth-input hidden" placeholder="Seu Nome Completo">
                 
-                <!-- Email -->
+                <!-- CAMPOS DE CADASTRO (Invisíveis no Login) -->
+                <div id="register-fields" class="hidden">
+                    <input type="text" id="auth-name" class="auth-input" placeholder="Seu Nome Completo">
+                    <input type="text" id="auth-fantasy" class="auth-input" placeholder="Nome Fantasia (Nome do Negócio)">
+                    <input type="number" id="auth-doc" class="auth-input" placeholder="CPF ou CNPJ (somente números)">
+                </div>
+
+                <!-- CAMPOS COMUNS -->
                 <input type="email" id="auth-email" class="auth-input" placeholder="Seu E-mail" required>
-                
-                <!-- Senha -->
                 <input type="password" id="auth-pass" class="auth-input" placeholder="Senha" required>
                 
-                <!-- Confirmar Senha (Apenas Cadastro) -->
+                <!-- CONFIRMAÇÃO (Apenas Cadastro) -->
                 <input type="password" id="auth-confirm" class="auth-input hidden" placeholder="Confirme a senha">
 
-                <!-- Botão Principal -->
                 <button class="btn btn-primary" id="btn-auth-action" onclick="app.handleAuthAction()">
                     Entrar
                 </button>
             </form>
 
-            <!-- Links de Navegação -->
             <div class="auth-links">
-                <span id="link-forgot" onclick="app.setAuthMode('reset')">Esqueci minha senha</span>
-                <span id="link-create" onclick="app.setAuthMode('register')">Criar nova conta</span>
-                <span id="link-login" class="hidden" onclick="app.setAuthMode('login')">Voltar para Login</span>
+                <span id="link-forgot" onclick="app.setAuthMode('reset')">Esqueci a senha</span>
+                <span id="link-create" onclick="app.setAuthMode('register')">Criar conta</span>
+                <span id="link-login" class="hidden" onclick="app.setAuthMode('login')">Voltar ao Login</span>
             </div>
             
             <p style="margin-top: 30px; font-size: 0.75rem; color: var(--text-muted);">
-                *Modo Demo Offline Ativo (salva no navegador)
+                *Modo Demo Offline (salva no navegador)
             </p>
         </div>
     </section>
 
-    <!-- 2. APP PRINCIPAL (DASHBOARD) -->
+    <!-- 2. TELA PRINCIPAL (DASHBOARD) -->
     <section id="app-screen" class="hidden">
         <header>
-            <div>
-                <h3 id="user-display-name">Olá, MEI</h3>
-                <small>Painel de Controle</small>
+            <div style="text-align: left;">
+                <h3 id="display-fantasy" style="font-size: 1rem; margin-bottom: 2px;">Minha Loja</h3>
+                <small id="display-name" style="color: var(--text-muted)">Olá, Usuário</small>
             </div>
-            <button class="logout-btn" onclick="app.logout()">
+            <button class="btn-logout" onclick="app.logout()" title="Sair">
                 <i class="fa-solid fa-right-from-bracket"></i>
             </button>
         </header>
 
         <div class="container">
-            <div class="card" style="text-align: center; padding: 40px;">
+            <div class="card">
                 <i class="fa-solid fa-check-circle" style="font-size: 3rem; color: var(--primary); margin-bottom: 15px;"></i>
                 <h2>Bem-vindo!</h2>
-                <p style="color: var(--text-muted)">Você fez login com sucesso.</p>
-                <br>
-                <p>Aqui entraria o Dashboard completo (Gráficos, Entradas, Saídas, etc).</p>
+                <p>Login realizado com sucesso.</p>
+                <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
+                
+                <div style="text-align: left; font-size: 0.9rem; color: var(--text-muted);">
+                    <p><strong>CNPJ/CPF:</strong> <span id="display-doc">---</span></p>
+                    <p><strong>Email:</strong> <span id="display-email">---</span></p>
+                </div>
             </div>
         </div>
     </section>
 
     <script type="module">
         // ==========================================================
-        // CONFIGURAÇÃO FIREBASE (Preencha para usar Real)
+        // CONFIGURAÇÃO FIREBASE (Preencha as chaves para Online)
         // ==========================================================
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
         import { 
@@ -143,8 +146,8 @@
             signOut, 
             onAuthStateChanged 
         } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
-        // Deixe vazio para usar MODO OFFLINE (LocalStorage)
         const firebaseConfig = {
             apiKey: "",
             authDomain: "",
@@ -163,77 +166,67 @@
                 this.authMode = 'login'; // login | register | reset
                 this.user = null;
                 this.isFirebase = false;
-                this.auth = null;
-
-                // Inicializar Firebase se houver config
+                
                 if (firebaseConfig.apiKey) {
                     try {
                         const app = initializeApp(firebaseConfig);
                         this.auth = getAuth(app);
+                        this.db = getFirestore(app);
                         this.isFirebase = true;
                         this.initFirebaseListener();
-                    } catch(e) { console.warn("Fallback Local"); }
+                    } catch(e) { console.warn("Firebase config error, using local"); }
                 } else {
                     this.checkLocalAuth();
                 }
             }
 
-            // --- Gerenciamento de UI de Autenticação ---
-
+            // --- Gerenciamento da Interface de Login ---
             setAuthMode(mode) {
                 this.authMode = mode;
                 
-                // Elementos
-                const nameInput = document.getElementById('auth-name');
+                const regFields = document.getElementById('register-fields');
+                const confirmInput = document.getElementById('auth-confirm');
                 const passInput = document.getElementById('auth-pass');
-                const confInput = document.getElementById('auth-confirm');
                 const btnAction = document.getElementById('btn-auth-action');
                 const subtitle = document.getElementById('auth-subtitle');
                 
-                // Links
                 const linkForgot = document.getElementById('link-forgot');
                 const linkCreate = document.getElementById('link-create');
                 const linkLogin = document.getElementById('link-login');
 
-                // Reset de visibilidade
-                nameInput.classList.add('hidden');
-                confInput.classList.add('hidden');
+                // Reset
+                regFields.classList.add('hidden');
+                confirmInput.classList.add('hidden');
                 passInput.classList.remove('hidden');
                 linkLogin.classList.remove('hidden');
                 linkForgot.classList.add('hidden');
                 linkCreate.classList.add('hidden');
 
-                // Lógica de cada modo
                 if (mode === 'login') {
                     subtitle.innerText = "Acesse sua conta";
                     btnAction.innerText = "Entrar";
                     linkForgot.classList.remove('hidden');
                     linkCreate.classList.remove('hidden');
                     linkLogin.classList.add('hidden');
-                    passInput.required = true;
                 } 
                 else if (mode === 'register') {
-                    subtitle.innerText = "Crie sua conta grátis";
-                    btnAction.innerText = "Cadastrar";
-                    nameInput.classList.remove('hidden');
-                    confInput.classList.remove('hidden');
-                    passInput.required = true;
+                    subtitle.innerText = "Cadastro MEI";
+                    btnAction.innerText = "Cadastrar e Entrar";
+                    regFields.classList.remove('hidden'); // Mostra Nome, Fantasia e Doc
+                    confirmInput.classList.remove('hidden');
                 } 
                 else if (mode === 'reset') {
                     subtitle.innerText = "Recuperar Senha";
                     btnAction.innerText = "Enviar Link";
-                    passInput.classList.add('hidden'); // Não precisa de senha pra resetar
-                    passInput.required = false;
+                    passInput.classList.add('hidden');
                 }
             }
 
             async handleAuthAction() {
                 const email = document.getElementById('auth-email').value;
                 const pass = document.getElementById('auth-pass').value;
-                const name = document.getElementById('auth-name').value;
-                const confirm = document.getElementById('auth-confirm').value;
-
-                if (!email) return alert("Por favor, digite seu e-mail.");
+                
+                if (!email) return alert("Digite o e-mail.");
 
                 try {
                     // 1. LOGIN
@@ -241,115 +234,118 @@
                         if (this.isFirebase) {
                             await signInWithEmailAndPassword(this.auth, email, pass);
                         } else {
-                            // Mock Login
-                            const stored = JSON.parse(localStorage.getItem('mei_users') || '[]');
-                            const user = stored.find(u => u.email === email && u.pass === pass);
-                            if (user) {
-                                this.loginSuccess({ email: user.email, displayName: user.name });
-                            } else {
-                                alert("Usuário não encontrado ou senha incorreta (Modo Demo: Crie uma conta primeiro).");
-                            }
+                            // Local Login
+                            const users = JSON.parse(localStorage.getItem('mei_users') || '[]');
+                            const user = users.find(u => u.email === email && u.pass === pass);
+                            if (user) this.loginSuccess(user);
+                            else alert("E-mail ou senha incorretos.");
                         }
                     } 
                     // 2. CADASTRO
                     else if (this.authMode === 'register') {
-                        if (!pass || pass.length < 6) return alert("A senha deve ter pelo menos 6 caracteres.");
+                        // Captura dados extras
+                        const name = document.getElementById('auth-name').value;
+                        const fantasy = document.getElementById('auth-fantasy').value;
+                        const docId = document.getElementById('auth-doc').value;
+                        const confirm = document.getElementById('auth-confirm').value;
+
+                        // Validações
+                        if (!name || !fantasy || !docId) return alert("Preencha todos os campos do cadastro.");
+                        if (pass.length < 6) return alert("A senha deve ter no mínimo 6 dígitos.");
                         if (pass !== confirm) return alert("As senhas não conferem.");
-                        if (!name) return alert("Digite seu nome.");
 
                         if (this.isFirebase) {
+                            // Cria Auth e Salva Detalhes no Firestore
                             const cred = await createUserWithEmailAndPassword(this.auth, email, pass);
                             await updateProfile(cred.user, { displayName: name });
-                            // O listener vai pegar o login automático
-                        } else {
-                            // Mock Register
-                            const users = JSON.parse(localStorage.getItem('mei_users') || '[]');
-                            if (users.find(u => u.email === email)) return alert("Email já cadastrado.");
                             
-                            users.push({ email, pass, name });
+                            // Salvar dados extras (Fantasia, Doc) no DB
+                            await setDoc(doc(this.db, "users", cred.user.uid), {
+                                name: name,
+                                fantasy: fantasy,
+                                document: docId,
+                                email: email,
+                                createdAt: new Date()
+                            });
+                            // O listener vai logar automático
+                        } else {
+                            // Cadastro Local
+                            const users = JSON.parse(localStorage.getItem('mei_users') || '[]');
+                            if (users.find(u => u.email === email)) return alert("Email já usado.");
+                            
+                            const newUser = { email, pass, name, fantasy, document: docId };
+                            users.push(newUser);
                             localStorage.setItem('mei_users', JSON.stringify(users));
-                            alert("Cadastro realizado! Faça login.");
-                            this.setAuthMode('login');
+                            
+                            alert("Conta criada com sucesso!");
+                            this.loginSuccess(newUser);
                         }
                     } 
-                    // 3. RECUPERAÇÃO DE SENHA
+                    // 3. RESET
                     else if (this.authMode === 'reset') {
-                        if (this.isFirebase) {
+                        if(this.isFirebase) {
                             await sendPasswordResetEmail(this.auth, email);
-                            alert("Email de recuperação enviado! Verifique sua caixa de entrada.");
-                            this.setAuthMode('login');
-                        } else {
-                            // Mock Reset
-                            alert(`[SIMULAÇÃO] Um link de recuperação foi enviado para ${email}.`);
-                            this.setAuthMode('login');
                         }
+                        alert(`Link de recuperação enviado para ${email}`);
+                        this.setAuthMode('login');
                     }
 
                 } catch (error) {
-                    this.handleError(error);
+                    console.error(error);
+                    alert("Erro: " + error.message);
                 }
             }
 
-            // --- Sessão e Navegação ---
-
-            loginSuccess(user) {
-                this.user = user;
-                if (!this.isFirebase) {
-                    localStorage.setItem('mei_session', JSON.stringify(user));
+            // --- Sessão ---
+            async loginSuccess(user) {
+                // Se for Firebase, tenta buscar dados extras no Firestore
+                if (this.isFirebase && !user.fantasy) {
+                    const docSnap = await getDoc(doc(this.db, "users", user.uid));
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+                        user = { ...user, fantasy: data.fantasy, document: data.document, displayName: data.name };
+                    }
                 }
-                document.getElementById('user-display-name').innerText = `Olá, ${user.displayName || 'Empreendedor'}`;
+
+                this.user = user;
+                
+                // Salvar sessão local se offline
+                if(!this.isFirebase) localStorage.setItem('mei_session', JSON.stringify(user));
+
+                // Atualizar UI
+                document.getElementById('display-name').innerText = `Olá, ${user.displayName || user.name}`;
+                document.getElementById('display-fantasy').innerText = user.fantasy || 'Meu Negócio';
+                document.getElementById('display-email').innerText = user.email;
+                document.getElementById('display-doc').innerText = user.document || '---';
+
                 document.getElementById('auth-screen').classList.add('hidden');
                 document.getElementById('app-screen').classList.remove('hidden');
             }
 
             logout() {
-                if (this.isFirebase) {
-                    signOut(this.auth);
-                } else {
+                if (this.isFirebase) signOut(this.auth);
+                else {
                     localStorage.removeItem('mei_session');
-                    this.user = null;
                     window.location.reload();
                 }
             }
 
-            // --- Listeners de Estado ---
-
             initFirebaseListener() {
                 onAuthStateChanged(this.auth, (user) => {
-                    if (user) {
-                        this.loginSuccess(user);
-                    } else {
-                        this.showLogin();
+                    if (user) this.loginSuccess(user);
+                    else {
+                        document.getElementById('app-screen').classList.add('hidden');
+                        document.getElementById('auth-screen').classList.remove('hidden');
                     }
                 });
             }
 
             checkLocalAuth() {
                 const session = localStorage.getItem('mei_session');
-                if (session) {
-                    this.loginSuccess(JSON.parse(session));
-                } else {
-                    this.showLogin();
-                }
-            }
-
-            showLogin() {
-                document.getElementById('app-screen').classList.add('hidden');
-                document.getElementById('auth-screen').classList.remove('hidden');
-            }
-
-            handleError(error) {
-                console.error(error);
-                let msg = error.message;
-                if (msg.includes("auth/wrong-password")) msg = "Senha incorreta.";
-                if (msg.includes("auth/user-not-found")) msg = "Usuário não encontrado.";
-                if (msg.includes("auth/email-already-in-use")) msg = "Este email já está em uso.";
-                if (msg.includes("auth/invalid-email")) msg = "Email inválido.";
-                alert(msg);
+                if (session) this.loginSuccess(JSON.parse(session));
             }
         }
 
-        // Inicializar
         window.app = new AppController();
     </script>
 </body>
