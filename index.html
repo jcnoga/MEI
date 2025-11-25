@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MEI Simples - Gestão Completa</title>
+    <title>MEI Simples - Gestão & Backup</title>
     
-    <!-- Bibliotecas (Ícones, Gráficos e PDF) -->
+    <!-- Bibliotecas -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -13,36 +13,25 @@
 
     <style>
         :root {
-            --primary: #00bf63;
+            --primary: #00bf63; /* Verde Principal */
             --primary-dark: #00914b;
-            --secondary: #5e17eb;
-            --bg-light: #f4f6f8;
+            --secondary: #5e17eb; /* Roxo Secundário */
+            --bg-light: #f3f4f6;
             --surface: #ffffff;
             --text-main: #1f2937;
             --text-muted: #6b7280;
             --danger: #ef4444;
-            --warning: #f59e0b;
             --border: #e5e7eb;
-            --shadow: 0 4px 10px rgba(0,0,0,0.08);
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
             --radius: 16px;
-        }
-
-        body.dark-mode {
-            --bg-light: #111827;
-            --surface: #1f2937;
-            --text-main: #f9fafb;
-            --text-muted: #9ca3af;
-            --border: #374151;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; outline: none; -webkit-tap-highlight-color: transparent; }
         body { font-family: 'Poppins', sans-serif; background: var(--bg-light); color: var(--text-main); height: 100vh; overflow-x: hidden; }
 
-        /* Utilitários */
         .hidden { display: none !important; }
         .flex { display: flex; align-items: center; }
         .justify-between { justify-content: space-between; }
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .container { max-width: 600px; margin: 0 auto; padding: 0 20px; }
         
         /* Botões */
@@ -50,41 +39,21 @@
         .btn-primary { background: var(--primary); color: white; }
         .btn-secondary { background: var(--secondary); color: white; }
         .btn-danger { background: var(--danger); color: white; }
+        .btn-dark { background: var(--text-main); color: white; }
         .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-main); }
         
         /* Cards */
         .card { background: var(--surface); padding: 20px; border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 15px; }
 
-        /* ================= TELA DE LOGIN ================= */
-        #auth-screen { 
-            min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; 
-            padding: 20px; background: var(--surface); position: fixed; top: 0; width: 100%; z-index: 9999;
-        }
-        .auth-card { width: 100%; max-width: 400px; text-align: center; }
-        .logo-area i { font-size: 3.5rem; color: var(--primary); margin-bottom: 10px; }
-        .auth-input { 
-            width: 100%; padding: 14px; margin-bottom: 10px; border-radius: 10px; 
-            border: 1px solid var(--border); background: var(--bg-light); font-size: 0.95rem; 
-        }
-        .auth-links { display: flex; justify-content: space-between; margin-top: 15px; font-size: 0.85rem; color: var(--text-muted); cursor: pointer; }
+        /* TELA DE LOGIN */
+        #auth-screen { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; background: var(--surface); position: fixed; top: 0; width: 100%; z-index: 9999; }
+        .auth-input { width: 100%; padding: 14px; margin-bottom: 10px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg-light); }
 
-        /* ================= TELA PRINCIPAL (APP) ================= */
+        /* TELA PRINCIPAL */
         #app-screen { padding-bottom: 90px; }
-        
-        /* Header */
         header { background: var(--surface); padding: 15px 0; position: sticky; top: 0; z-index: 50; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-        .profile-pic { width: 42px; height: 42px; border-radius: 50%; background: var(--secondary); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.2rem; }
         
-        /* Barra de Limite MEI */
-        .limit-bar-container { margin-bottom: 10px; }
-        .progress-bg { height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; margin-top: 5px; }
-        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--secondary)); width: 0%; transition: width 1s; }
-
-        /* Estatísticas */
-        .stat-card h3 { font-size: 0.85rem; color: var(--text-muted); font-weight: 400; }
-        .stat-card .value { font-size: 1.4rem; font-weight: 700; margin-top: 5px; }
-
-        /* Lista de Transações */
+        /* Lista Transações */
         .tx-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); }
         .tx-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; margin-right: 10px; }
         .bg-green { background: #dcfce7; color: #166534; }
@@ -92,574 +61,444 @@
         .text-green { color: var(--primary); }
         .text-red { color: var(--danger); }
 
-        /* Navegação Inferior */
+        /* Bottom Nav */
         .bottom-nav { position: fixed; bottom: 0; width: 100%; background: var(--surface); border-top: 1px solid var(--border); padding: 10px 0; display: flex; justify-content: space-around; z-index: 100; padding-bottom: max(10px, env(safe-area-inset-bottom)); }
         .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text-muted); font-size: 0.7rem; background: none; border: none; cursor: pointer; }
         .nav-item i { font-size: 1.4rem; margin-bottom: 4px; }
         .nav-item.active { color: var(--primary); font-weight: 600; }
-
-        /* FAB (Botão Flutuante) */
-        .fab-group { position: fixed; bottom: 85px; right: 20px; display: flex; flex-direction: column; gap: 10px; align-items: flex-end; z-index: 90; }
-        .fab { width: 56px; height: 56px; border-radius: 50%; border: none; color: white; box-shadow: 0 4px 15px rgba(0,0,0,0.2); font-size: 1.5rem; display: flex; align-items: center; justify-content: center; cursor: pointer; }
 
         /* Modal */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 200; display: flex; justify-content: center; align-items: flex-end; backdrop-filter: blur(2px); }
         .modal-content { background: var(--surface); width: 100%; max-width: 600px; border-radius: 24px 24px 0 0; padding: 25px; animation: slideUp 0.3s ease; max-height: 90vh; overflow-y: auto; }
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
         
-        .form-group label { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 5px; margin-top: 15px; }
-        .form-input, .form-select { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg-light); color: var(--text-main); }
+        .form-group label { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 5px; margin-top: 10px; }
+        .form-input, .form-select { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg-light); color: var(--text-main); font-family: inherit; font-size: 1rem; }
 
+        /* Tipo Switch */
+        .type-switch { display: flex; background: var(--bg-light); border-radius: 12px; padding: 4px; margin-bottom: 15px; }
+        .type-opt { flex: 1; text-align: center; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: 500; color: var(--text-muted); transition: 0.2s; }
+        .type-opt.active.inc { background: var(--primary); color: white; }
+        .type-opt.active.exp { background: var(--danger); color: white; }
+
+        /* Backup Area */
+        .backup-box { border: 2px dashed var(--border); padding: 20px; text-align: center; border-radius: 12px; margin-top: 10px; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <!-- 1. TELA DE LOGIN / CADASTRO -->
+    <!-- 1. TELA DE LOGIN -->
     <section id="auth-screen">
-        <div class="auth-card">
-            <div class="logo-area">
-                <i class="fa-solid fa-store"></i>
-                <h1>MEI Simples</h1>
-                <p id="auth-subtitle" style="color: var(--text-muted); margin-bottom: 25px;">Gestão do seu Negócio</p>
-            </div>
-
-            <form id="auth-form" onsubmit="event.preventDefault();">
-                <!-- Campos Cadastro -->
-                <div id="register-fields" class="hidden">
-                    <input type="text" id="auth-name" class="auth-input" placeholder="Seu Nome Completo">
-                    <input type="text" id="auth-fantasy" class="auth-input" placeholder="Nome Fantasia (Ex: João Eletricista)">
-                    <input type="tel" id="auth-doc" class="auth-input" placeholder="CPF ou CNPJ (somente números)">
+        <div style="text-align:center; max-width:400px; width:100%;">
+            <i class="fa-solid fa-store" style="font-size:3.5rem; color:var(--primary); margin-bottom:10px;"></i>
+            <h1>MEI Simples</h1>
+            <p style="color:var(--text-muted); margin-bottom:20px;">Gestão Financeira & Backup</p>
+            
+            <form onsubmit="event.preventDefault(); app.handleLogin();">
+                <!-- Register Fields -->
+                <div id="reg-fields" class="hidden">
+                    <input type="text" id="auth-name" class="auth-input" placeholder="Seu Nome">
+                    <input type="text" id="auth-fantasy" class="auth-input" placeholder="Nome do Negócio (Fantasia)">
+                    <input type="tel" id="auth-doc" class="auth-input" placeholder="CPF ou CNPJ">
                 </div>
-
-                <!-- Campos Comuns -->
-                <input type="email" id="auth-email" class="auth-input" placeholder="Seu E-mail" required>
+                <!-- Common -->
+                <input type="email" id="auth-email" class="auth-input" placeholder="Email" required>
                 <input type="password" id="auth-pass" class="auth-input" placeholder="Senha" required>
-                <input type="password" id="auth-confirm" class="auth-input hidden" placeholder="Confirme a senha">
-
-                <button class="btn btn-primary" style="margin-top: 15px;" onclick="app.handleAuthAction()">
-                    <span id="btn-auth-text">Entrar</span>
-                </button>
+                
+                <button class="btn btn-primary" id="btn-auth">Entrar</button>
             </form>
-
-            <div class="auth-links">
-                <span id="link-create" onclick="app.setAuthMode('register')">Criar nova conta</span>
-                <span id="link-login" class="hidden" onclick="app.setAuthMode('login')">Já tenho conta</span>
+            
+            <div style="margin-top:15px; display:flex; justify-content:space-between; font-size:0.85rem; color:var(--text-muted); cursor:pointer;">
+                <span onclick="app.toggleAuthMode()" id="link-toggle">Criar conta</span>
             </div>
-            <p style="margin-top: 30px; font-size: 0.75rem; color: var(--text-muted);">*Modo Demo Offline</p>
         </div>
     </section>
 
-    <!-- 2. APLICAÇÃO PRINCIPAL -->
+    <!-- 2. APP PRINCIPAL -->
     <section id="app-screen" class="hidden">
-        
-        <!-- HEADER -->
         <header>
             <div class="container flex justify-between">
-                <div class="flex" style="gap: 12px;">
-                    <div class="profile-pic" id="header-initial">M</div>
-                    <div>
-                        <h2 style="font-size: 1rem;" id="header-fantasy">Minha Empresa</h2>
-                        <p style="font-size: 0.75rem; color: var(--text-muted)">
-                            <span id="header-name">Usuário</span> | <span id="header-doc">000...</span>
-                        </p>
-                    </div>
+                <div>
+                    <h2 style="font-size:1rem;" id="head-fantasy">Minha Empresa</h2>
+                    <p style="font-size:0.75rem; color:var(--text-muted);" id="head-name">Usuário</p>
                 </div>
-                <button onclick="app.logout()" style="background:none; border:none; color: var(--danger); font-size: 1.2rem;">
-                    <i class="fa-solid fa-right-from-bracket"></i>
+                <button onclick="app.openModal('income')" class="btn-primary" style="width:auto; padding:8px 15px; font-size:0.8rem; border-radius:20px;">
+                    <i class="fa-solid fa-plus"></i> Novo
                 </button>
             </div>
         </header>
 
-        <main class="container" style="padding-top: 20px;">
+        <main class="container" style="padding-top:20px;">
             
-            <!-- VIEW: DASHBOARD -->
-            <div id="view-dashboard">
-                <!-- Limite MEI -->
-                <div class="card">
-                    <div class="flex justify-between" style="font-size: 0.8rem; margin-bottom: 5px;">
-                        <span>Limite Anual (R$ 81k)</span>
-                        <span id="limit-percent">0%</span>
-                    </div>
-                    <div class="progress-bg">
-                        <div class="progress-fill" id="limit-bar"></div>
-                    </div>
-                    <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 5px; text-align: right;">
-                        Acumulado: <strong id="acumulado-anual">R$ 0,00</strong>
-                    </p>
-                </div>
-
-                <!-- Cards Resumo -->
-                <div class="grid-2">
-                    <div class="card stat-card">
-                        <h3>Saldo do Mês</h3>
-                        <div class="value" id="dash-saldo">R$ 0,00</div>
-                    </div>
-                    <div class="card stat-card">
-                        <h3>Lucro Líquido</h3>
-                        <div class="value text-green" id="dash-lucro">R$ 0,00</div>
+            <!-- DASHBOARD -->
+            <div id="view-home">
+                <div class="card" style="background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white;">
+                    <p style="opacity:0.9; font-size:0.9rem;">Saldo Atual</p>
+                    <h1 style="font-size:2.5rem; margin:5px 0;" id="dash-bal">R$ 0,00</h1>
+                    <div class="flex justify-between" style="font-size:0.85rem; margin-top:10px; background:rgba(0,0,0,0.1); padding:10px; border-radius:10px;">
+                        <span><i class="fa-solid fa-arrow-up"></i> Entradas: <span id="dash-inc">0,00</span></span>
+                        <span><i class="fa-solid fa-arrow-down"></i> Saídas: <span id="dash-exp">0,00</span></span>
                     </div>
                 </div>
 
-                <!-- Gráfico -->
-                <div class="card">
-                    <h3 style="margin-bottom: 15px;">Fluxo Financeiro</h3>
-                    <canvas id="chart-finance" height="150"></canvas>
+                <div class="flex justify-between" style="margin-bottom:10px; align-items:center;">
+                    <h3>Histórico Recente</h3>
+                    <small style="color:var(--text-muted)" id="tx-count">0 registros</small>
                 </div>
-
-                <!-- Lista Recente -->
-                <div class="flex justify-between" style="margin-bottom: 10px;">
-                    <h3>Últimas</h3>
-                    <button class="btn-outline" style="width: auto; padding: 5px 12px; font-size: 0.8rem;" onclick="app.navTo('finance')">Ver Todas</button>
-                </div>
-                <div id="dash-tx-list"></div>
+                <div id="list-recent"></div>
+                <button class="btn btn-outline" style="margin-top:10px;" onclick="app.navTo('finance')">Ver Extrato Completo</button>
             </div>
 
-            <!-- VIEW: FINANCEIRO -->
+            <!-- FINANCEIRO (Lista Completa) -->
             <div id="view-finance" class="hidden">
-                <div class="card" style="background: #dcfce7; text-align: center; border: 1px solid #bbf7d0;">
-                    <h3 style="color: #166534;">Caixa Total</h3>
-                    <h1 style="color: #14532d; font-size: 2.2rem;" id="fin-total">R$ 0,00</h1>
+                <h2 style="margin-bottom:15px;">Extrato Detalhado</h2>
+                <div class="flex" style="gap:10px; margin-bottom:15px;">
+                    <input type="month" id="filter-date" class="form-input" onchange="app.renderData()">
+                    <button class="btn btn-secondary" style="width:auto;" onclick="app.renderData()"><i class="fa-solid fa-filter"></i></button>
                 </div>
-                <div class="flex justify-between" style="margin-bottom: 15px;">
-                    <h3>Extrato Completo</h3>
-                    <button class="btn-outline" style="width: auto; padding: 6px 12px;" onclick="app.exportPDF()">
-                        <i class="fa-solid fa-file-pdf"></i> PDF
-                    </button>
-                </div>
-                <div id="finance-list"></div>
-                <div style="height: 100px;"></div>
+                <div id="list-full"></div>
             </div>
 
-            <!-- VIEW: DAS/IMPOSTOS -->
-            <div id="view-das" class="hidden">
-                <div class="card" style="text-align: center; padding: 40px 20px;">
-                    <i class="fa-solid fa-barcode" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 15px;"></i>
-                    <h2>Pagamento DAS</h2>
-                    <p style="color: var(--text-muted); margin-bottom: 20px; font-size: 0.9rem;">
-                        Acesse o portal do governo para emitir seu boleto mensal (~R$ 70,00).
+            <!-- CONFIGURAÇÕES & BACKUP -->
+            <div id="view-settings" class="hidden">
+                <h2>Configurações</h2>
+                
+                <div class="card">
+                    <h3><i class="fa-solid fa-cloud-arrow-down"></i> Backup & Restore</h3>
+                    <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:15px;">
+                        Salve seus dados no computador/celular e restaure quando quiser.
                     </p>
-                    <button class="btn btn-primary" onclick="window.open('https://www.gov.br/empresas-e-negocios/pt-br/empreendedor/servicos-para-mei/pagamento-de-contribuicao-mensal', '_blank')">
-                        Ir para PGMEI (Gov.br)
+                    
+                    <button class="btn btn-dark" onclick="app.backupData()">
+                        <i class="fa-solid fa-download"></i> Fazer Backup (Baixar Arquivo)
                     </button>
-                </div>
-                <h3>Histórico Simulado</h3>
-                <div class="card">
-                    <div class="tx-item"><span>Nov/2025</span><span class="text-green"><i class="fa-solid fa-check"></i> Pago</span></div>
-                    <div class="tx-item"><span>Out/2025</span><span class="text-green"><i class="fa-solid fa-check"></i> Pago</span></div>
-                    <div class="tx-item" style="border:none;"><span>Set/2025</span><span class="text-red">Pendente</span></div>
-                </div>
-            </div>
 
-            <!-- VIEW: FERRAMENTAS -->
-            <div id="view-tools" class="hidden">
-                <h3>Calculadora de Preço</h3>
+                    <div class="backup-box" onclick="document.getElementById('file-input').click()">
+                        <i class="fa-solid fa-upload" style="font-size:1.5rem; color:var(--text-muted)"></i>
+                        <p style="margin-top:5px; font-size:0.9rem;">Toque para restaurar backup</p>
+                        <input type="file" id="file-input" accept=".json" class="hidden" onchange="app.restoreData(this)">
+                    </div>
+                </div>
+
                 <div class="card">
-                    <div class="form-group">
-                        <label>Custo do Produto (R$)</label>
-                        <input type="number" id="calc-cost" class="form-input">
-                    </div>
-                    <div class="form-group">
-                        <label>Margem de Lucro (%)</label>
-                        <input type="number" id="calc-margin" class="form-input" placeholder="Ex: 30">
-                    </div>
-                    <button class="btn btn-secondary" style="margin-top: 15px;" onclick="app.calcPrice()">Calcular Venda</button>
-                    <div style="margin-top: 15px; text-align: center;">
-                        <span style="font-size: 0.9rem;">Venda por:</span>
-                        <h2 style="color: var(--primary);" id="calc-result">R$ 0,00</h2>
-                    </div>
+                    <h3><i class="fa-solid fa-user"></i> Dados da Conta</h3>
+                    <p><strong>Nome:</strong> <span id="conf-name">-</span></p>
+                    <p><strong>Fantasia:</strong> <span id="conf-fantasy">-</span></p>
+                    <p><strong>CNPJ/CPF:</strong> <span id="conf-doc">-</span></p>
+                    <button class="btn btn-danger" style="margin-top:15px;" onclick="app.logout()">
+                        <i class="fa-solid fa-right-from-bracket"></i> Sair do App
+                    </button>
                 </div>
             </div>
 
         </main>
 
-        <!-- Botões Flutuantes (FAB) -->
-        <div class="fab-group">
-            <div class="flex hidden" id="fab-options" style="flex-direction: column; align-items: flex-end; gap: 10px;">
-                <button class="btn btn-danger" style="width: auto; box-shadow: 0 4px 10px rgba(0,0,0,0.2);" onclick="app.openModal('expense')">
-                    <i class="fa-solid fa-minus"></i> Despesa
-                </button>
-                <button class="btn btn-primary" style="width: auto; box-shadow: 0 4px 10px rgba(0,0,0,0.2);" onclick="app.openModal('income')">
-                    <i class="fa-solid fa-plus"></i> Receita
-                </button>
-            </div>
-            <button class="fab btn-secondary" onclick="app.toggleFab()">
-                <i class="fa-solid fa-plus" id="fab-icon"></i>
-            </button>
-        </div>
-
-        <!-- Menu Inferior -->
+        <!-- MENU INFERIOR -->
         <nav class="bottom-nav">
-            <button class="nav-item active" onclick="app.navTo('dashboard', this)"><i class="fa-solid fa-chart-pie"></i>Início</button>
-            <button class="nav-item" onclick="app.navTo('finance', this)"><i class="fa-solid fa-wallet"></i>Caixa</button>
-            <button class="nav-item" onclick="app.navTo('das', this)"><i class="fa-solid fa-barcode"></i>DAS</button>
-            <button class="nav-item" onclick="app.navTo('tools', this)"><i class="fa-solid fa-calculator"></i>Tools</button>
+            <button class="nav-item active" onclick="app.navTo('home', this)"><i class="fa-solid fa-chart-pie"></i>Início</button>
+            <button class="nav-item" onclick="app.navTo('finance', this)"><i class="fa-solid fa-list"></i>Extrato</button>
+            <button class="nav-item" onclick="app.navTo('settings', this)"><i class="fa-solid fa-gear"></i>Ajustes</button>
         </nav>
     </section>
 
-    <!-- MODAL DE TRANSAÇÃO -->
-    <div id="tx-modal" class="modal-overlay hidden" onclick="if(event.target===this) app.closeModal()">
+    <!-- MODAL DE CADASTRO -->
+    <div id="modal-tx" class="modal-overlay hidden" onclick="if(event.target===this) app.closeModal()">
         <div class="modal-content">
-            <div class="flex justify-between" style="margin-bottom: 20px;">
-                <h2 id="modal-title">Nova Transação</h2>
-                <i class="fa-solid fa-xmark" style="font-size: 1.5rem;" onclick="app.closeModal()"></i>
+            <div class="flex justify-between">
+                <h2>Nova Movimentação</h2>
+                <i class="fa-solid fa-xmark" onclick="app.closeModal()" style="font-size:1.5rem; padding:10px;"></i>
             </div>
             
+            <!-- Seletor Tipo -->
+            <div class="type-switch">
+                <div class="type-opt active inc" id="opt-inc" onclick="app.setType('income')">Entrada (Receita)</div>
+                <div class="type-opt" id="opt-exp" onclick="app.setType('expense')">Saída (Despesa)</div>
+            </div>
+
             <div class="form-group">
                 <label>Valor (R$)</label>
-                <input type="number" id="tx-amount" class="form-input" style="font-size: 1.5rem; font-weight: bold;" placeholder="0,00">
+                <input type="number" id="tx-val" class="form-input" style="font-size:1.5rem; font-weight:bold;" step="0.01" placeholder="0,00">
             </div>
+
             <div class="form-group">
-                <label>Descrição</label>
-                <input type="text" id="tx-desc" class="form-input" placeholder="Ex: Venda, Material...">
+                <label>Data</label>
+                <input type="date" id="tx-date" class="form-input">
             </div>
-            <div class="grid-2">
-                <div class="form-group">
-                    <label>Categoria</label>
-                    <select id="tx-cat" class="form-select">
-                        <option value="venda">Venda</option>
-                        <option value="servico">Serviço</option>
-                        <option value="material">Material</option>
-                        <option value="contas">Contas</option>
-                        <option value="imposto">Imposto</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Data</label>
-                    <input type="date" id="tx-date" class="form-input">
-                </div>
+
+            <div class="form-group">
+                <label>Categoria / Motivo</label>
+                <select id="tx-cat" class="form-select">
+                    <!-- Opções preenchidas via JS -->
+                </select>
             </div>
-            <button class="btn btn-primary" id="btn-save-tx" style="margin-top: 20px;" onclick="app.saveTransaction()">Salvar</button>
+
+            <div class="form-group">
+                <label>Descrição (Opcional)</label>
+                <input type="text" id="tx-desc" class="form-input" placeholder="Detalhes (ex: Cliente João)">
+            </div>
+
+            <button class="btn btn-primary" style="margin-top:20px;" onclick="app.saveTx()">Salvar Movimento</button>
         </div>
     </div>
 
-    <script type="module">
-        // ==========================================================
-        // CONFIGURAÇÃO FIREBASE
-        // ==========================================================
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, collection, addDoc, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
-
-        const firebaseConfig = {
-            apiKey: "",
-            authDomain: "",
-            projectId: "",
-            storageBucket: "",
-            messagingSenderId: "",
-            appId: ""
-        };
-
-        // ==========================================================
-        // CONTROLLER GERAL
-        // ==========================================================
-        class App {
+    <script>
+        class MeiApp {
             constructor() {
                 this.user = null;
-                this.transactions = [];
-                this.isFirebase = false;
-                this.authMode = 'login';
-                this.chartInstance = null;
-                this.currentType = 'income';
+                this.txs = [];
+                this.view = 'home';
+                this.curType = 'income';
+                this.isRegistering = false;
+                
+                // Categorias Padrão
+                this.cats = {
+                    income: ['Venda de Produto', 'Prestação de Serviço', 'Recebimento Atrasado', 'Outra Entrada'],
+                    expense: ['Compra de Mercadoria', 'Material de Uso', 'Conta (Luz/Água/Net)', 'Aluguel', 'Imposto (DAS)', 'Transporte', 'Retirada Pessoal']
+                };
 
-                if (firebaseConfig.apiKey) {
-                    try {
-                        const app = initializeApp(firebaseConfig);
-                        this.auth = getAuth(app);
-                        this.db = getFirestore(app);
-                        this.isFirebase = true;
-                        this.initFirebase();
-                    } catch(e) { console.warn("Modo Local"); this.initLocal(); }
-                } else {
-                    this.initLocal();
-                }
-            }
-
-            // --- INICIALIZAÇÃO ---
-            initLocal() {
-                const session = localStorage.getItem('mei_session');
-                if(session) this.loginSuccess(JSON.parse(session));
-                else document.getElementById('auth-screen').classList.remove('hidden');
-            }
-
-            initFirebase() {
-                onAuthStateChanged(this.auth, async (user) => {
-                    if (user) {
-                        // Buscar dados extras (Fantasy/CPF)
-                        const docRef = doc(this.db, "users", user.uid);
-                        const docSnap = await getDoc(docRef);
-                        const userData = docSnap.exists() ? { ...user, ...docSnap.data() } : user;
-                        this.loginSuccess(userData);
-                    } else {
-                        document.getElementById('app-screen').classList.add('hidden');
-                        document.getElementById('auth-screen').classList.remove('hidden');
-                    }
-                });
+                this.checkSession();
             }
 
             // --- AUTH ---
-            setAuthMode(mode) {
-                this.authMode = mode;
-                const els = {
-                    reg: document.getElementById('register-fields'),
-                    conf: document.getElementById('auth-confirm'),
-                    pass: document.getElementById('auth-pass'),
-                    btn: document.getElementById('btn-auth-text'),
-                    linkCreate: document.getElementById('link-create'),
-                    linkLogin: document.getElementById('link-login')
-                };
-
-                if (mode === 'register') {
-                    els.reg.classList.remove('hidden');
-                    els.conf.classList.remove('hidden');
-                    els.btn.innerText = "Cadastrar e Entrar";
-                    els.linkCreate.classList.add('hidden');
-                    els.linkLogin.classList.remove('hidden');
+            toggleAuthMode() {
+                this.isRegistering = !this.isRegistering;
+                const el = document.getElementById('reg-fields');
+                const btn = document.getElementById('btn-auth');
+                const link = document.getElementById('link-toggle');
+                
+                if(this.isRegistering) {
+                    el.classList.remove('hidden');
+                    btn.innerText = "Cadastrar e Entrar";
+                    link.innerText = "Já tenho conta";
                 } else {
-                    els.reg.classList.add('hidden');
-                    els.conf.classList.add('hidden');
-                    els.btn.innerText = "Entrar";
-                    els.linkCreate.classList.remove('hidden');
-                    els.linkLogin.classList.add('hidden');
+                    el.classList.add('hidden');
+                    btn.innerText = "Entrar";
+                    link.innerText = "Criar conta";
                 }
             }
 
-            async handleAuthAction() {
+            handleLogin() {
                 const email = document.getElementById('auth-email').value;
                 const pass = document.getElementById('auth-pass').value;
 
-                if (this.authMode === 'login') {
-                    if (this.isFirebase) {
-                        try { await signInWithEmailAndPassword(this.auth, email, pass); }
-                        catch(e) { alert("Erro ao entrar: " + e.message); }
-                    } else {
-                        // Local Login
-                        const users = JSON.parse(localStorage.getItem('mei_users') || '[]');
-                        const user = users.find(u => u.email === email && u.pass === pass);
-                        if (user) this.loginSuccess(user);
-                        else alert("Email ou senha inválidos (Crie uma conta se for a primeira vez).");
-                    }
-                } else {
-                    // Register
+                if(!email || !pass) return alert("Preencha email e senha");
+
+                // Modo Local Simplificado
+                const users = JSON.parse(localStorage.getItem('mei_users') || '[]');
+                
+                if (this.isRegistering) {
                     const name = document.getElementById('auth-name').value;
                     const fantasy = document.getElementById('auth-fantasy').value;
-                    const docId = document.getElementById('auth-doc').value;
-                    const conf = document.getElementById('auth-confirm').value;
+                    const doc = document.getElementById('auth-doc').value;
+                    if(!name) return alert("Preencha seu nome");
 
-                    if (!name || !fantasy || !docId) return alert("Preencha todos os campos.");
-                    if (pass !== conf) return alert("Senhas não conferem.");
-
-                    if (this.isFirebase) {
-                        try {
-                            const cred = await createUserWithEmailAndPassword(this.auth, email, pass);
-                            await updateProfile(cred.user, { displayName: name });
-                            await setDoc(doc(this.db, "users", cred.user.uid), {
-                                name, fantasy, document: docId, email, createdAt: new Date()
-                            });
-                        } catch(e) { alert("Erro ao cadastrar: " + e.message); }
-                    } else {
-                        // Local Register
-                        const users = JSON.parse(localStorage.getItem('mei_users') || '[]');
-                        const newUser = { email, pass, name, fantasy, document: docId, uid: Date.now().toString() };
-                        users.push(newUser);
-                        localStorage.setItem('mei_users', JSON.stringify(users));
-                        this.loginSuccess(newUser);
-                    }
+                    const newUser = { email, pass, name, fantasy, doc, id: Date.now() };
+                    users.push(newUser);
+                    localStorage.setItem('mei_users', JSON.stringify(users));
+                    this.login(newUser);
+                } else {
+                    const user = users.find(u => u.email === email && u.pass === pass);
+                    if(user) this.login(user);
+                    else alert("Dados incorretos.");
                 }
             }
 
-            loginSuccess(user) {
+            login(user) {
                 this.user = user;
-                if(!this.isFirebase) localStorage.setItem('mei_session', JSON.stringify(user));
+                localStorage.setItem('mei_session', JSON.stringify(user));
                 
-                // Preencher Header
-                document.getElementById('header-fantasy').innerText = user.fantasy || user.displayName || "Meu Negócio";
-                document.getElementById('header-name').innerText = user.displayName || user.name || "Admin";
-                document.getElementById('header-doc').innerText = user.document || user.docId || "CPF/CNPJ";
-                document.getElementById('header-initial').innerText = (user.fantasy || user.name || "M")[0].toUpperCase();
+                // Load Txs
+                const data = localStorage.getItem(`mei_data_${user.id}`);
+                this.txs = data ? JSON.parse(data) : [];
 
-                // Trocar telas
+                // UI
+                document.getElementById('head-fantasy').innerText = user.fantasy || "Meu Negócio";
+                document.getElementById('head-name').innerText = user.name;
+                document.getElementById('conf-name').innerText = user.name;
+                document.getElementById('conf-fantasy').innerText = user.fantasy || "-";
+                document.getElementById('conf-doc').innerText = user.doc || "-";
+
                 document.getElementById('auth-screen').classList.add('hidden');
                 document.getElementById('app-screen').classList.remove('hidden');
                 
-                // Carregar Dados do Dashboard
-                this.loadTransactions();
+                // Init Date
+                document.getElementById('filter-date').value = new Date().toISOString().slice(0,7);
+                this.renderData();
+            }
+
+            checkSession() {
+                const session = localStorage.getItem('mei_session');
+                if(session) this.login(JSON.parse(session));
             }
 
             logout() {
-                if (this.isFirebase) signOut(this.auth);
-                else {
-                    localStorage.removeItem('mei_session');
-                    window.location.reload();
-                }
+                localStorage.removeItem('mei_session');
+                location.reload();
             }
 
-            // --- LÓGICA DO DASHBOARD ---
-            loadTransactions() {
-                if(this.isFirebase) {
-                    const q = query(collection(this.db, 'users', this.user.uid, 'transactions'), orderBy('date', 'desc'));
-                    onSnapshot(q, (snap) => {
-                        this.transactions = snap.docs.map(d => ({id:d.id, ...d.data()}));
-                        this.renderDashboard();
-                    });
-                } else {
-                    const saved = localStorage.getItem(`mei_txs_${this.user.uid || this.user.email}`);
-                    if (saved) {
-                        this.transactions = JSON.parse(saved);
-                    } else {
-                        // Dados iniciais fictícios para não ficar vazio
-                        this.transactions = [
-                            {id: 1, type: 'income', amount: 1200, category: 'servico', desc: 'Serviço Exemplo', date: new Date().toISOString().split('T')[0]},
-                            {id: 2, type: 'expense', amount: 75, category: 'imposto', desc: 'DAS Mensal', date: new Date().toISOString().split('T')[0]}
-                        ];
-                    }
-                    this.renderDashboard();
-                }
-            }
-
-            saveTransaction() {
-                const amount = parseFloat(document.getElementById('tx-amount').value);
-                const desc = document.getElementById('tx-desc').value;
-                const cat = document.getElementById('tx-cat').value;
-                const date = document.getElementById('tx-date').value || new Date().toISOString().split('T')[0];
-
-                if(!amount || !desc) return alert("Preencha valor e descrição");
-
-                const tx = { type: this.currentType, amount, desc, category: cat, date };
-
-                if(this.isFirebase) {
-                    addDoc(collection(this.db, 'users', this.user.uid, 'transactions'), tx);
-                } else {
-                    tx.id = Date.now();
-                    this.transactions.unshift(tx);
-                    localStorage.setItem(`mei_txs_${this.user.uid || this.user.email}`, JSON.stringify(this.transactions));
-                    this.renderDashboard();
-                }
-                this.closeModal();
-                document.getElementById('tx-amount').value = '';
-                document.getElementById('tx-desc').value = '';
-            }
-
-            renderDashboard() {
-                const list = document.getElementById('dash-tx-list');
-                const fullList = document.getElementById('finance-list');
-                list.innerHTML = ''; 
-                fullList.innerHTML = '';
-
-                let inc = 0, exp = 0, annual = 0;
+            // --- NAVIGATION ---
+            navTo(viewId, btn) {
+                ['home', 'finance', 'settings'].forEach(v => document.getElementById('view-'+v).classList.add('hidden'));
+                document.getElementById('view-'+viewId).classList.remove('hidden');
                 
-                // Ordenar e iterar
-                this.transactions.sort((a,b) => new Date(b.date) - new Date(a.date));
+                if(btn) {
+                    document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                }
+            }
 
-                this.transactions.forEach((tx, idx) => {
-                    const isInc = tx.type === 'income';
-                    if(isInc) { inc += Number(tx.amount); annual += Number(tx.amount); }
-                    else exp += Number(tx.amount);
+            // --- MODAL & FORM ---
+            openModal(type) {
+                this.setType(type);
+                document.getElementById('tx-date').value = new Date().toISOString().split('T')[0];
+                document.getElementById('tx-val').value = '';
+                document.getElementById('tx-desc').value = '';
+                document.getElementById('modal-tx').classList.remove('hidden');
+            }
+
+            closeModal() { document.getElementById('modal-tx').classList.add('hidden'); }
+
+            setType(type) {
+                this.curType = type;
+                const incBtn = document.getElementById('opt-inc');
+                const expBtn = document.getElementById('opt-exp');
+                const catSel = document.getElementById('tx-cat');
+
+                if(type === 'income') {
+                    incBtn.classList.add('active'); expBtn.classList.remove('active');
+                } else {
+                    expBtn.classList.add('active'); incBtn.classList.remove('active');
+                }
+
+                // Popular Categorias
+                catSel.innerHTML = '';
+                this.cats[type].forEach(c => {
+                    const opt = document.createElement('option');
+                    opt.value = c; opt.innerText = c;
+                    catSel.appendChild(opt);
+                });
+            }
+
+            saveTx() {
+                const val = parseFloat(document.getElementById('tx-val').value);
+                const date = document.getElementById('tx-date').value;
+                const cat = document.getElementById('tx-cat').value;
+                const desc = document.getElementById('tx-desc').value || cat;
+
+                if(!val || !date) return alert("Preencha valor e data.");
+
+                const tx = {
+                    id: Date.now(),
+                    type: this.curType,
+                    val, date, cat, desc
+                };
+
+                this.txs.push(tx);
+                this.saveData();
+                this.closeModal();
+                this.renderData();
+            }
+
+            saveData() {
+                localStorage.setItem(`mei_data_${this.user.id}`, JSON.stringify(this.txs));
+            }
+
+            // --- RENDER ---
+            renderData() {
+                const listHome = document.getElementById('list-recent');
+                const listFull = document.getElementById('list-full');
+                listHome.innerHTML = ''; listFull.innerHTML = '';
+
+                let bal = 0, inc = 0, exp = 0;
+
+                // Ordenar por data
+                const sorted = [...this.txs].sort((a,b) => new Date(b.date) - new Date(a.date));
+
+                sorted.forEach((tx, i) => {
+                    if(tx.type === 'income') { bal += tx.val; inc += tx.val; }
+                    else { bal -= tx.val; exp += tx.val; }
 
                     const html = `
                         <div class="tx-item">
                             <div class="flex">
-                                <div class="tx-icon ${isInc ? 'bg-green' : 'bg-red'}">
-                                    <i class="fa-solid ${isInc ? 'fa-arrow-up' : 'fa-arrow-down'}"></i>
+                                <div class="tx-icon ${tx.type==='income'?'bg-green':'bg-red'}">
+                                    <i class="fa-solid ${tx.type==='income'?'fa-arrow-up':'fa-arrow-down'}"></i>
                                 </div>
                                 <div>
-                                    <h4 style="font-size:0.9rem;">${tx.desc}</h4>
-                                    <small style="color:var(--text-muted)">${new Date(tx.date).toLocaleDateString('pt-BR')}</small>
+                                    <h4 style="font-size:0.9rem;">${tx.cat}</h4>
+                                    <small style="color:var(--text-muted)">${new Date(tx.date).toLocaleDateString('pt-BR')} • ${tx.desc}</small>
                                 </div>
                             </div>
-                            <strong class="${isInc ? 'text-green' : 'text-red'}">
-                                ${isInc ? '+' : '-'} R$ ${Number(tx.amount).toFixed(2)}
+                            <strong class="${tx.type==='income'?'text-green':'text-red'}">
+                                ${tx.type==='income'?'+':'-'} ${tx.val.toLocaleString('pt-BR', {style:'currency', currency:'BRL'})}
                             </strong>
-                        </div>`;
+                        </div>
+                    `;
                     
-                    if(idx < 5) list.innerHTML += html;
-                    fullList.innerHTML += html;
+                    if(i < 5) listHome.innerHTML += html;
+                    listFull.innerHTML += html;
                 });
 
-                // Atualizar Cards
-                const bal = inc - exp;
-                document.getElementById('dash-saldo').innerText = `R$ ${bal.toFixed(2)}`;
-                document.getElementById('dash-lucro').innerText = `R$ ${bal.toFixed(2)}`;
-                document.getElementById('fin-total').innerText = `R$ ${bal.toFixed(2)}`;
+                // Dashboard Values
+                document.getElementById('dash-bal').innerText = bal.toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
+                document.getElementById('dash-inc').innerText = inc.toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
+                document.getElementById('dash-exp').innerText = exp.toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
+                document.getElementById('tx-count').innerText = `${this.txs.length} registros`;
+            }
+
+            // --- BACKUP & RESTORE ---
+            backupData() {
+                if(this.txs.length === 0) return alert("Não há dados para salvar.");
                 
-                // Limite MEI
-                document.getElementById('acumulado-anual').innerText = `R$ ${annual.toFixed(2)}`;
-                const limitPct = Math.min((annual / 81000) * 100, 100).toFixed(1);
-                document.getElementById('limit-bar').style.width = `${limitPct}%`;
-                document.getElementById('limit-percent').innerText = `${limitPct}%`;
+                const backupObj = {
+                    user: this.user,
+                    transactions: this.txs,
+                    generatedAt: new Date().toISOString()
+                };
 
-                this.renderChart(inc, exp);
-            }
-
-            renderChart(inc, exp) {
-                const ctx = document.getElementById('chart-finance').getContext('2d');
-                if (this.chartInstance) this.chartInstance.destroy();
-                this.chartInstance = new Chart(ctx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: ['Receitas', 'Despesas'],
-                        datasets: [{
-                            data: [inc, exp],
-                            backgroundColor: ['#00bf63', '#ef4444'],
-                            borderWidth: 0
-                        }]
-                    },
-                    options: { maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
-                });
-            }
-
-            // --- UI HELPERS ---
-            navTo(viewId, btn) {
-                ['dashboard', 'finance', 'das', 'tools'].forEach(id => document.getElementById('view-'+id).classList.add('hidden'));
-                document.getElementById('view-'+viewId).classList.remove('hidden');
+                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupObj));
+                const downloadAnchorNode = document.createElement('a');
                 
-                document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
-                if(btn) btn.classList.add('active');
+                // Formata Data no Nome do Arquivo (YYYY-MM-DD)
+                const dateStr = new Date().toISOString().slice(0,10);
+                const fileName = `backup_mei_${dateStr}.json`;
+                
+                downloadAnchorNode.setAttribute("href", dataStr);
+                downloadAnchorNode.setAttribute("download", fileName);
+                document.body.appendChild(downloadAnchorNode);
+                downloadAnchorNode.click();
+                downloadAnchorNode.remove();
             }
 
-            toggleFab() {
-                const opts = document.getElementById('fab-options');
-                const icon = document.getElementById('fab-icon');
-                if (opts.classList.contains('hidden')) {
-                    opts.classList.remove('hidden');
-                    icon.classList.remove('fa-plus'); icon.classList.add('fa-xmark');
-                } else {
-                    opts.classList.add('hidden');
-                    icon.classList.remove('fa-xmark'); icon.classList.add('fa-plus');
-                }
-            }
+            restoreData(input) {
+                const file = input.files[0];
+                if(!file) return;
 
-            openModal(type) {
-                this.currentType = type;
-                document.getElementById('modal-title').innerText = type === 'income' ? 'Nova Receita' : 'Nova Despesa';
-                document.getElementById('btn-save-tx').className = type === 'income' ? 'btn btn-primary' : 'btn btn-danger';
-                document.getElementById('tx-modal').classList.remove('hidden');
-                this.toggleFab();
-            }
-            closeModal() { document.getElementById('tx-modal').classList.add('hidden'); }
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const json = JSON.parse(e.target.result);
+                        if(json.transactions && Array.isArray(json.transactions)) {
+                            
+                            if(confirm(`Restaurar backup de ${new Date(json.generatedAt).toLocaleDateString()}? Isso substituirá os dados atuais.`)) {
+                                this.txs = json.transactions;
+                                this.saveData();
+                                this.renderData();
+                                alert("Dados restaurados com sucesso!");
+                            }
 
-            calcPrice() {
-                const cost = parseFloat(document.getElementById('calc-cost').value);
-                const margin = parseFloat(document.getElementById('calc-margin').value);
-                if(cost && margin) {
-                    const price = cost + (cost * (margin/100));
-                    document.getElementById('calc-result').innerText = `R$ ${price.toFixed(2)}`;
-                }
-            }
-
-            exportPDF() {
-                const { jsPDF } = window.jspdf;
-                const doc = new jsPDF();
-                doc.text(`Relatório MEI - ${this.user.fantasy}`, 10, 10);
-                let y = 20;
-                this.transactions.forEach(t => {
-                    doc.text(`${t.date} | ${t.type.toUpperCase()} | R$ ${t.amount} | ${t.desc}`, 10, y);
-                    y += 10;
-                });
-                doc.save('relatorio-mei.pdf');
+                        } else {
+                            alert("Arquivo de backup inválido.");
+                        }
+                    } catch(err) {
+                        alert("Erro ao ler arquivo.");
+                    }
+                };
+                reader.readAsText(file);
             }
         }
 
-        window.app = new App();
+        window.app = new MeiApp();
     </script>
 </body>
 </html>
