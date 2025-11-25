@@ -138,7 +138,6 @@
                     </div>
                 </div>
 
-                <!-- Atalho NF -->
                 <div id="nf-shortcut" class="hidden" style="margin-bottom: 15px;">
                     <button class="btn btn-secondary" onclick="app.openNFLink()">
                         <i class="fa-solid fa-file-invoice"></i> Emitir Nota Fiscal (Site Prefeitura)
@@ -152,7 +151,7 @@
                 </div>
             </div>
 
-            <!-- VIEW: CADASTROS (NOVO) -->
+            <!-- VIEW: CADASTROS -->
             <div id="view-registers" class="hidden">
                 <h2>Cadastros</h2>
                 <div class="tab-menu">
@@ -166,16 +165,13 @@
                     <button class="btn-primary btn-sm" onclick="app.openRegModal()"><i class="fa-solid fa-plus"></i> Adicionar</button>
                 </div>
 
-                <div id="reg-list">
-                    <!-- Lista injetada via JS -->
-                </div>
+                <div id="reg-list"></div>
             </div>
 
             <!-- VIEW: CONFIGURAÇÕES -->
             <div id="view-settings" class="hidden">
                 <h2>Configurações</h2>
                 
-                <!-- Card Perfil -->
                 <div class="card">
                     <h3><i class="fa-solid fa-id-card"></i> Dados da Empresa</h3>
                     <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:10px;">
@@ -189,7 +185,6 @@
                     </button>
                 </div>
 
-                <!-- Card Fiscal/Docs -->
                 <div class="card">
                     <h3><i class="fa-solid fa-folder-open"></i> Fiscal & Docs</h3>
                     
@@ -206,7 +201,6 @@
                     </button>
                 </div>
 
-                <!-- Card Backup -->
                 <div class="card">
                     <h3><i class="fa-solid fa-cloud-arrow-down"></i> Segurança</h3>
                     <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:10px;">Salve seus dados para transferir de aparelho.</p>
@@ -224,7 +218,6 @@
                     <button class="btn btn-danger" onclick="app.logout()">Sair</button>
                 </div>
 
-                <!-- RODAPÉ -->
                 <div class="app-footer">
                     <p>Desenvolvido por <a href="https://www.websitelog.com.br" target="_blank" class="website-link">Websitelog</a></p>
                     
@@ -278,7 +271,7 @@
         </div>
     </div>
 
-    <!-- MODAL: CADASTRO (GENÉRICO PARA CLI/FORN/PROD) -->
+    <!-- MODAL: CADASTRO (CLIENTE/FORN/PROD) -->
     <div id="modal-reg" class="modal-overlay hidden" onclick="if(event.target===this) app.closeModal('modal-reg')">
         <div class="modal-content">
             <div class="flex justify-between"><h2 id="reg-modal-title">Novo Item</h2><i class="fa-solid fa-xmark" onclick="app.closeModal('modal-reg')"></i></div>
@@ -297,16 +290,12 @@
     <div id="modal-profile" class="modal-overlay hidden" onclick="if(event.target===this) app.closeModal('modal-profile')">
         <div class="modal-content">
             <div class="flex justify-between"><h2>Editar Dados</h2><i class="fa-solid fa-xmark" onclick="app.closeModal('modal-profile')"></i></div>
-            
             <label class="form-label">Nome Completo</label>
             <input type="text" id="edit-name" class="auth-input">
-            
-            <label class="form-label">Nome Fantasia (Empresa)</label>
-            <input type="text" id="edit-fantasy" class="auth-input" placeholder="Ex: Doces da Ana">
-            
+            <label class="form-label">Nome Fantasia</label>
+            <input type="text" id="edit-fantasy" class="auth-input">
             <label class="form-label">CPF ou CNPJ</label>
-            <input type="tel" id="edit-doc" class="auth-input" placeholder="Somente números">
-
+            <input type="tel" id="edit-doc" class="auth-input">
             <button class="btn btn-primary" onclick="app.saveProfile()">Atualizar</button>
         </div>
     </div>
@@ -341,7 +330,7 @@ const firebaseConfig = {
   measurementId: "G-PE631DFGE0"
 };
 
-        // COLOQUE O LINK DO SEU PDF AQUI (Google Drive, Dropbox, etc.)
+
         const SEU_LINK_PDF = "https://www.exemplo.com/seu-manual.pdf"; 
 
         class App {
@@ -359,7 +348,8 @@ const firebaseConfig = {
 
                 this.isRegister = false;
                 this.curType = 'income';
-                this.curRegTab = 'clients'; // clients | suppliers | products
+                this.curRegTab = 'clients'; 
+                this.editIdx = null; // Controle de Edição
 
                 this.categories = {
                     income: ['Venda de Produto', 'Prestação de Serviço', 'Outras Receitas'],
@@ -423,7 +413,6 @@ const firebaseConfig = {
                 document.getElementById('app-screen').classList.remove('hidden');
                 document.getElementById('conf-email').innerText = this.user.email;
 
-                // Carregar Dados Locais
                 const uid = this.user.uid;
                 this.txs = JSON.parse(localStorage.getItem(`mei_data_${uid}`) || '[]');
                 this.profile = JSON.parse(localStorage.getItem(`mei_profile_${uid}`) || '{"fantasy":"","doc":""}');
@@ -444,11 +433,10 @@ const firebaseConfig = {
                 document.getElementById('conf-nf-link').value = this.settings.nfLink || '';
             }
 
-            // --- CADASTROS (NOVA FUNCIONALIDADE) ---
+            // --- CADASTROS ---
             setRegTab(tab) {
                 this.curRegTab = tab;
                 document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-                // Simples highlight baseado na ordem (pode melhorar)
                 const btns = document.querySelectorAll('.tab-btn');
                 if(tab === 'clients') btns[0].classList.add('active');
                 if(tab === 'suppliers') btns[1].classList.add('active');
@@ -474,7 +462,10 @@ const firebaseConfig = {
 
                 data.forEach((item, idx) => {
                     let subInfo = '';
-                    if(this.curRegTab === 'products') subInfo = `R$ ${parseFloat(item.price).toFixed(2)}`;
+                    if(this.curRegTab === 'products') {
+                        subInfo = `R$ ${parseFloat(item.price).toFixed(2)}`;
+                        if(item.supplier) subInfo += ` | F: ${item.supplier}`;
+                    }
                     else subInfo = item.phone || item.doc || '-';
 
                     list.innerHTML += `
@@ -483,32 +474,73 @@ const firebaseConfig = {
                             <strong>${item.name}</strong><br>
                             <small style="color:var(--text-muted)">${subInfo}</small>
                         </div>
-                        <button class="btn-outline btn-sm" onclick="app.deleteRegister(${idx})" style="border:none; color:var(--danger);"><i class="fa-solid fa-trash"></i></button>
+                        <div style="display:flex; gap:10px;">
+                            <button class="btn-outline btn-sm" onclick="app.openRegModal(${idx})" style="border:none; color:var(--primary);"><i class="fa-solid fa-pen"></i></button>
+                            <button class="btn-outline btn-sm" onclick="app.deleteRegister(${idx})" style="border:none; color:var(--danger);"><i class="fa-solid fa-trash"></i></button>
+                        </div>
                     </div>`;
                 });
             }
 
-            openRegModal() {
+            // ABERTURA DE MODAL COM SUPORTE A EDIÇÃO
+            openRegModal(idx = null) {
+                this.editIdx = idx; // Se idx não for nulo, estamos editando
                 document.getElementById('reg-name').value = '';
                 const extra = document.getElementById('reg-fields-extra');
                 extra.innerHTML = '';
 
+                let data = null;
+                if (idx !== null) {
+                    if(this.curRegTab === 'clients') data = this.clients[idx];
+                    else if(this.curRegTab === 'suppliers') data = this.suppliers[idx];
+                    else data = this.products[idx];
+                }
+
+                if(idx !== null) document.getElementById('reg-name').value = data.name;
+
                 if(this.curRegTab === 'products') {
-                    document.getElementById('reg-modal-title').innerText = "Novo Produto";
+                    document.getElementById('reg-modal-title').innerText = idx !== null ? "Editar Produto" : "Novo Produto";
+                    
+                    // Gerar lista de fornecedores
+                    let supOptions = '<option value="">Sem Fornecedor</option>';
+                    this.suppliers.forEach(s => {
+                        supOptions += `<option value="${s.name}">${s.name}</option>`;
+                    });
+
                     extra.innerHTML = `
                         <label class="form-label">Preço de Venda (R$)</label>
                         <input type="number" id="reg-price" class="auth-input" step="0.01">
                         <label class="form-label">Custo (Opcional)</label>
                         <input type="number" id="reg-cost" class="auth-input" step="0.01">
+                        <label class="form-label">Fornecedor</label>
+                        <select id="reg-supplier" class="auth-input">${supOptions}</select>
                     `;
+                    
+                    if(idx !== null) {
+                        setTimeout(() => {
+                            document.getElementById('reg-price').value = data.price;
+                            document.getElementById('reg-cost').value = data.cost;
+                            document.getElementById('reg-supplier').value = data.supplier || '';
+                        }, 50);
+                    }
                 } else {
-                    document.getElementById('reg-modal-title').innerText = this.curRegTab === 'clients' ? "Novo Cliente" : "Novo Fornecedor";
+                    document.getElementById('reg-modal-title').innerText = this.curRegTab === 'clients' ? 
+                        (idx !== null ? "Editar Cliente" : "Novo Cliente") : 
+                        (idx !== null ? "Editar Fornecedor" : "Novo Fornecedor");
+                    
                     extra.innerHTML = `
                         <label class="form-label">Telefone / WhatsApp</label>
                         <input type="tel" id="reg-phone" class="auth-input">
                         <label class="form-label">CPF / CNPJ</label>
                         <input type="text" id="reg-doc" class="auth-input">
                     `;
+
+                    if(idx !== null) {
+                        setTimeout(() => {
+                            document.getElementById('reg-phone').value = data.phone;
+                            document.getElementById('reg-doc').value = data.doc;
+                        }, 50);
+                    }
                 }
                 document.getElementById('modal-reg').classList.remove('hidden');
             }
@@ -522,16 +554,24 @@ const firebaseConfig = {
                 if(this.curRegTab === 'products') {
                     newItem.price = document.getElementById('reg-price').value || 0;
                     newItem.cost = document.getElementById('reg-cost').value || 0;
-                    this.products.push(newItem);
+                    newItem.supplier = document.getElementById('reg-supplier').value || '';
+                    
+                    if (this.editIdx !== null) this.products[this.editIdx] = newItem;
+                    else this.products.push(newItem);
+                    
                     localStorage.setItem(`mei_products_${this.user.uid}`, JSON.stringify(this.products));
+
                 } else {
                     newItem.phone = document.getElementById('reg-phone').value || '';
                     newItem.doc = document.getElementById('reg-doc').value || '';
+                    
                     if(this.curRegTab === 'clients') {
-                        this.clients.push(newItem);
+                        if (this.editIdx !== null) this.clients[this.editIdx] = newItem;
+                        else this.clients.push(newItem);
                         localStorage.setItem(`mei_clients_${this.user.uid}`, JSON.stringify(this.clients));
                     } else {
-                        this.suppliers.push(newItem);
+                        if (this.editIdx !== null) this.suppliers[this.editIdx] = newItem;
+                        else this.suppliers.push(newItem);
                         localStorage.setItem(`mei_suppliers_${this.user.uid}`, JSON.stringify(this.suppliers));
                     }
                 }
