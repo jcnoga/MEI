@@ -158,6 +158,7 @@
                     <button class="tab-btn active" onclick="app.setRegTab('clients')">Clientes</button>
                     <button class="tab-btn" onclick="app.setRegTab('suppliers')">Fornecedores</button>
                     <button class="tab-btn" onclick="app.setRegTab('products')">Produtos</button>
+                    <button class="tab-btn" onclick="app.setRegTab('services')">Serviços</button>
                 </div>
 
                 <div class="flex justify-between" style="margin-bottom: 15px;">
@@ -271,7 +272,7 @@
         </div>
     </div>
 
-    <!-- MODAL: CADASTRO (CLIENTE/FORN/PROD) -->
+    <!-- MODAL: CADASTRO (CLIENTE/FORN/PROD/SERV) -->
     <div id="modal-reg" class="modal-overlay hidden" onclick="if(event.target===this) app.closeModal('modal-reg')">
         <div class="modal-content">
             <div class="flex justify-between"><h2 id="reg-modal-title">Novo Item</h2><i class="fa-solid fa-xmark" onclick="app.closeModal('modal-reg')"></i></div>
@@ -331,7 +332,7 @@ const firebaseConfig = {
 };
 
 
-        const SEU_LINK_PDF = "https://www.exemplo.com/seu-manual.pdf"; 
+        const SEU_LINK_PDF = "https://drive.google.com/file/d/1gMocDMAey8q35-bcJsRip7Zm0v2mCrMS/view?usp=sharing"; 
 
         class App {
             constructor() {
@@ -345,11 +346,12 @@ const firebaseConfig = {
                 this.clients = [];
                 this.suppliers = [];
                 this.products = [];
+                this.services = []; // Novo
 
                 this.isRegister = false;
                 this.curType = 'income';
                 this.curRegTab = 'clients'; 
-                this.editIdx = null; // Controle de Edição
+                this.editIdx = null; 
 
                 this.categories = {
                     income: ['Venda de Produto', 'Prestação de Serviço', 'Outras Receitas'],
@@ -421,6 +423,7 @@ const firebaseConfig = {
                 this.clients = JSON.parse(localStorage.getItem(`mei_clients_${uid}`) || '[]');
                 this.suppliers = JSON.parse(localStorage.getItem(`mei_suppliers_${uid}`) || '[]');
                 this.products = JSON.parse(localStorage.getItem(`mei_products_${uid}`) || '[]');
+                this.services = JSON.parse(localStorage.getItem(`mei_services_${uid}`) || '[]');
 
                 this.render();
                 this.renderHeader();
@@ -441,8 +444,9 @@ const firebaseConfig = {
                 if(tab === 'clients') btns[0].classList.add('active');
                 if(tab === 'suppliers') btns[1].classList.add('active');
                 if(tab === 'products') btns[2].classList.add('active');
+                if(tab === 'services') btns[3].classList.add('active');
 
-                const titles = { clients: 'Clientes', suppliers: 'Fornecedores', products: 'Produtos' };
+                const titles = { clients: 'Clientes', suppliers: 'Fornecedores', products: 'Produtos', services: 'Serviços' };
                 document.getElementById('reg-title').innerText = titles[tab];
                 this.renderRegList();
             }
@@ -454,6 +458,7 @@ const firebaseConfig = {
                 if(this.curRegTab === 'clients') data = this.clients;
                 if(this.curRegTab === 'suppliers') data = this.suppliers;
                 if(this.curRegTab === 'products') data = this.products;
+                if(this.curRegTab === 'services') data = this.services;
 
                 if(data.length === 0) {
                     list.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding:20px;">Nenhum item cadastrado.</p>';
@@ -465,6 +470,9 @@ const firebaseConfig = {
                     if(this.curRegTab === 'products') {
                         subInfo = `R$ ${parseFloat(item.price).toFixed(2)}`;
                         if(item.supplier) subInfo += ` | F: ${item.supplier}`;
+                    }
+                    else if(this.curRegTab === 'services') {
+                        subInfo = `R$ ${parseFloat(item.price).toFixed(2)}`;
                     }
                     else subInfo = item.phone || item.doc || '-';
 
@@ -484,7 +492,7 @@ const firebaseConfig = {
 
             // ABERTURA DE MODAL COM SUPORTE A EDIÇÃO
             openRegModal(idx = null) {
-                this.editIdx = idx; // Se idx não for nulo, estamos editando
+                this.editIdx = idx; 
                 document.getElementById('reg-name').value = '';
                 const extra = document.getElementById('reg-fields-extra');
                 extra.innerHTML = '';
@@ -493,15 +501,14 @@ const firebaseConfig = {
                 if (idx !== null) {
                     if(this.curRegTab === 'clients') data = this.clients[idx];
                     else if(this.curRegTab === 'suppliers') data = this.suppliers[idx];
-                    else data = this.products[idx];
+                    else if(this.curRegTab === 'products') data = this.products[idx];
+                    else data = this.services[idx];
                 }
 
                 if(idx !== null) document.getElementById('reg-name').value = data.name;
 
                 if(this.curRegTab === 'products') {
                     document.getElementById('reg-modal-title').innerText = idx !== null ? "Editar Produto" : "Novo Produto";
-                    
-                    // Gerar lista de fornecedores
                     let supOptions = '<option value="">Sem Fornecedor</option>';
                     this.suppliers.forEach(s => {
                         supOptions += `<option value="${s.name}">${s.name}</option>`;
@@ -523,6 +530,21 @@ const firebaseConfig = {
                             document.getElementById('reg-supplier').value = data.supplier || '';
                         }, 50);
                     }
+                } else if(this.curRegTab === 'services') {
+                    document.getElementById('reg-modal-title').innerText = idx !== null ? "Editar Serviço" : "Novo Serviço";
+                    extra.innerHTML = `
+                        <label class="form-label">Preço de Venda (R$)</label>
+                        <input type="number" id="reg-price" class="auth-input" step="0.01">
+                        <label class="form-label">Custo (Opcional)</label>
+                        <input type="number" id="reg-cost" class="auth-input" step="0.01">
+                    `;
+                    if(idx !== null) {
+                        setTimeout(() => {
+                            document.getElementById('reg-price').value = data.price;
+                            document.getElementById('reg-cost').value = data.cost;
+                        }, 50);
+                    }
+
                 } else {
                     document.getElementById('reg-modal-title').innerText = this.curRegTab === 'clients' ? 
                         (idx !== null ? "Editar Cliente" : "Novo Cliente") : 
@@ -558,8 +580,15 @@ const firebaseConfig = {
                     
                     if (this.editIdx !== null) this.products[this.editIdx] = newItem;
                     else this.products.push(newItem);
-                    
                     localStorage.setItem(`mei_products_${this.user.uid}`, JSON.stringify(this.products));
+
+                } else if (this.curRegTab === 'services') {
+                    newItem.price = document.getElementById('reg-price').value || 0;
+                    newItem.cost = document.getElementById('reg-cost').value || 0;
+                    
+                    if (this.editIdx !== null) this.services[this.editIdx] = newItem;
+                    else this.services.push(newItem);
+                    localStorage.setItem(`mei_services_${this.user.uid}`, JSON.stringify(this.services));
 
                 } else {
                     newItem.phone = document.getElementById('reg-phone').value || '';
@@ -587,9 +616,12 @@ const firebaseConfig = {
                 } else if (this.curRegTab === 'suppliers') {
                     this.suppliers.splice(idx, 1);
                     localStorage.setItem(`mei_suppliers_${this.user.uid}`, JSON.stringify(this.suppliers));
-                } else {
+                } else if (this.curRegTab === 'products') {
                     this.products.splice(idx, 1);
                     localStorage.setItem(`mei_products_${this.user.uid}`, JSON.stringify(this.products));
+                } else {
+                    this.services.splice(idx, 1);
+                    localStorage.setItem(`mei_services_${this.user.uid}`, JSON.stringify(this.services));
                 }
                 this.renderRegList();
             }
@@ -768,7 +800,8 @@ const firebaseConfig = {
                     settings: this.settings,
                     clients: this.clients,
                     suppliers: this.suppliers,
-                    products: this.products
+                    products: this.products,
+                    services: this.services
                 };
                 const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(payload));
                 const a = document.createElement('a');
@@ -787,7 +820,7 @@ const firebaseConfig = {
                         
                         // Restaurar Transações
                         if(json.txs) this.txs = json.txs;
-                        else if(Array.isArray(json)) this.txs = json; // Legado
+                        else if(Array.isArray(json)) this.txs = json; 
                         
                         // Restaurar Outros Dados
                         if(json.profile) this.profile = json.profile;
@@ -795,6 +828,7 @@ const firebaseConfig = {
                         if(json.clients) this.clients = json.clients;
                         if(json.suppliers) this.suppliers = json.suppliers;
                         if(json.products) this.products = json.products;
+                        if(json.services) this.services = json.services;
 
                         // Salvar tudo no LocalStorage
                         const uid = this.user.uid;
@@ -804,6 +838,7 @@ const firebaseConfig = {
                         localStorage.setItem(`mei_clients_${uid}`, JSON.stringify(this.clients));
                         localStorage.setItem(`mei_suppliers_${uid}`, JSON.stringify(this.suppliers));
                         localStorage.setItem(`mei_products_${uid}`, JSON.stringify(this.products));
+                        localStorage.setItem(`mei_services_${uid}`, JSON.stringify(this.services));
 
                         this.render();
                         this.renderHeader();
