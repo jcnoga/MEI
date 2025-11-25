@@ -36,7 +36,8 @@
         .btn-danger { background: var(--danger); color: white; }
         .btn-dark { background: var(--text-main); color: white; }
         .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-main); }
-        
+        .btn-sm { padding: 5px 10px; font-size: 0.8rem; width: auto; margin: 0; }
+
         .card { background: var(--surface); padding: 20px; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); margin-bottom: 15px; }
 
         /* Login */
@@ -66,6 +67,11 @@
         .type-opt { flex: 1; text-align: center; padding: 10px; border-radius: 8px; cursor: pointer; }
         .type-opt.active.inc { background: var(--primary); color: white; }
         .type-opt.active.exp { background: var(--danger); color: white; }
+        
+        /* Tabs para Cadastros */
+        .tab-menu { display: flex; gap: 10px; margin-bottom: 15px; overflow-x: auto; padding-bottom: 5px; }
+        .tab-btn { background: var(--bg-light); border: 1px solid var(--border); padding: 8px 15px; border-radius: 20px; white-space: nowrap; cursor: pointer; font-size: 0.9rem; }
+        .tab-btn.active { background: var(--text-main); color: white; border-color: var(--text-main); }
 
         /* Footer Styles */
         .app-footer { text-align: center; margin-top: 30px; margin-bottom: 20px; font-size: 0.8rem; color: var(--text-muted); padding: 10px; border-top: 1px solid var(--border); }
@@ -121,7 +127,7 @@
         </header>
 
         <main class="container" style="padding-top:20px;">
-            <!-- DASHBOARD -->
+            <!-- VIEW: DASHBOARD -->
             <div id="view-home">
                 <div class="card" style="background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white;">
                     <p style="opacity:0.9;">Saldo Atual</p>
@@ -131,6 +137,14 @@
                         <span><i class="fa-solid fa-arrow-down"></i> Despesa: <span id="dash-exp">0,00</span></span>
                     </div>
                 </div>
+
+                <!-- Atalho NF -->
+                <div id="nf-shortcut" class="hidden" style="margin-bottom: 15px;">
+                    <button class="btn btn-secondary" onclick="app.openNFLink()">
+                        <i class="fa-solid fa-file-invoice"></i> Emitir Nota Fiscal (Site Prefeitura)
+                    </button>
+                </div>
+
                 <h3>Histórico</h3>
                 <div id="list-recent"></div>
                 <div id="empty-state" class="hidden" style="text-align:center; padding:30px; color:var(--text-muted);">
@@ -138,7 +152,26 @@
                 </div>
             </div>
 
-            <!-- CONFIGURAÇÕES -->
+            <!-- VIEW: CADASTROS (NOVO) -->
+            <div id="view-registers" class="hidden">
+                <h2>Cadastros</h2>
+                <div class="tab-menu">
+                    <button class="tab-btn active" onclick="app.setRegTab('clients')">Clientes</button>
+                    <button class="tab-btn" onclick="app.setRegTab('suppliers')">Fornecedores</button>
+                    <button class="tab-btn" onclick="app.setRegTab('products')">Produtos</button>
+                </div>
+
+                <div class="flex justify-between" style="margin-bottom: 15px;">
+                    <h3 id="reg-title">Lista de Clientes</h3>
+                    <button class="btn-primary btn-sm" onclick="app.openRegModal()"><i class="fa-solid fa-plus"></i> Adicionar</button>
+                </div>
+
+                <div id="reg-list">
+                    <!-- Lista injetada via JS -->
+                </div>
+            </div>
+
+            <!-- VIEW: CONFIGURAÇÕES -->
             <div id="view-settings" class="hidden">
                 <h2>Configurações</h2>
                 
@@ -153,6 +186,23 @@
                     </button>
                     <button class="btn btn-outline" onclick="app.openPassModal()">
                         <i class="fa-solid fa-lock"></i> Alterar Senha
+                    </button>
+                </div>
+
+                <!-- Card Fiscal/Docs -->
+                <div class="card">
+                    <h3><i class="fa-solid fa-folder-open"></i> Fiscal & Docs</h3>
+                    
+                    <label class="form-label">Link do site da Prefeitura (NF):</label>
+                    <div class="flex" style="gap:5px;">
+                        <input type="text" id="conf-nf-link" class="auth-input" placeholder="https://..." style="margin:0;">
+                        <button class="btn-secondary btn-sm" onclick="app.saveNFLink()">Salvar</button>
+                    </div>
+
+                    <hr style="border:0; border-top:1px solid var(--border); margin:15px 0;">
+
+                    <button class="btn btn-outline" onclick="app.downloadManual()">
+                        <i class="fa-solid fa-file-pdf"></i> Baixar Manual/PDF
                     </button>
                 </div>
 
@@ -174,7 +224,7 @@
                     <button class="btn btn-danger" onclick="app.logout()">Sair</button>
                 </div>
 
-                <!-- RODAPÉ DE CONTATO E DOAÇÃO -->
+                <!-- RODAPÉ -->
                 <div class="app-footer">
                     <p>Desenvolvido por <a href="https://www.websitelog.com.br" target="_blank" class="website-link">Websitelog</a></p>
                     
@@ -197,7 +247,8 @@
 
         <nav class="bottom-nav">
             <button class="nav-item active" onclick="app.navTo('home', this)"><i class="fa-solid fa-chart-pie"></i>Início</button>
-            <button class="nav-item" onclick="app.navTo('settings', this)"><i class="fa-solid fa-user-gear"></i>Perfil</button>
+            <button class="nav-item" onclick="app.navTo('registers', this)"><i class="fa-solid fa-address-book"></i>Cadastros</button>
+            <button class="nav-item" onclick="app.navTo('settings', this)"><i class="fa-solid fa-user-gear"></i>Config</button>
         </nav>
     </section>
 
@@ -215,9 +266,7 @@
             <input type="number" id="tx-val" class="auth-input" step="0.01" style="font-size:1.4rem; font-weight:bold;">
             
             <label class="form-label">Categoria</label>
-            <select id="tx-cat" class="auth-input">
-                <!-- Preenchido via JS -->
-            </select>
+            <select id="tx-cat" class="auth-input"></select>
 
             <label class="form-label">Data</label>
             <input type="date" id="tx-date" class="auth-input">
@@ -226,6 +275,21 @@
             <input type="text" id="tx-desc" class="auth-input" placeholder="Detalhes">
             
             <button class="btn btn-primary" style="margin-top:15px;" onclick="app.saveTx()">Salvar</button>
+        </div>
+    </div>
+
+    <!-- MODAL: CADASTRO (GENÉRICO PARA CLI/FORN/PROD) -->
+    <div id="modal-reg" class="modal-overlay hidden" onclick="if(event.target===this) app.closeModal('modal-reg')">
+        <div class="modal-content">
+            <div class="flex justify-between"><h2 id="reg-modal-title">Novo Item</h2><i class="fa-solid fa-xmark" onclick="app.closeModal('modal-reg')"></i></div>
+            
+            <label class="form-label">Nome / Título</label>
+            <input type="text" id="reg-name" class="auth-input">
+
+            <!-- Campos Dinâmicos -->
+            <div id="reg-fields-extra"></div>
+
+            <button class="btn btn-primary" style="margin-top:15px;" onclick="app.saveRegister()">Salvar Cadastro</button>
         </div>
     </div>
 
@@ -251,13 +315,10 @@
     <div id="modal-pass" class="modal-overlay hidden" onclick="if(event.target===this) app.closeModal('modal-pass')">
         <div class="modal-content">
             <div class="flex justify-between"><h2>Alterar Senha</h2><i class="fa-solid fa-xmark" onclick="app.closeModal('modal-pass')"></i></div>
-            
             <label class="form-label">Nova Senha</label>
             <input type="password" id="new-pass" class="auth-input" placeholder="Mínimo 6 caracteres">
-            
             <label class="form-label">Confirmar Nova Senha</label>
             <input type="password" id="conf-pass" class="auth-input">
-
             <button class="btn btn-danger" onclick="app.changePassword()">Confirmar Troca</button>
         </div>
     </div>
@@ -268,28 +329,37 @@
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, updateProfile, updatePassword } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 
         // =======================================================
-        // COLE SUAS CHAVES AQUI
+        // ÁREA DE CONFIGURAÇÃO (EDITE AQUI)
         // =======================================================
-const firebaseConfig = {
-  apiKey: "AIzaSyCijldF4haJzh0nzu4fbPYGHJadyYuqTP4",
-  authDomain: "projmei.firebaseapp.com",
-  projectId: "projmei",
-  storageBucket: "projmei.firebasestorage.app",
-  messagingSenderId: "39066795540",
-  appId: "1:39066795540:web:edc72cedb442daee423101",
-  measurementId: "G-PE631DFGE0"
-};
+        const firebaseConfig = {
+            apiKey: "",
+            authDomain: "",
+            projectId: "",
+            storageBucket: "",
+            messagingSenderId: "",
+            appId: ""
+        };
+
+        // COLOQUE O LINK DO SEU PDF AQUI (Google Drive, Dropbox, etc.)
+        const SEU_LINK_PDF = "https://www.exemplo.com/seu-manual.pdf"; 
 
         class App {
             constructor() {
                 this.auth = null;
                 this.user = null;
+                
+                // Dados Locais
                 this.txs = [];
                 this.profile = {}; 
+                this.settings = { nfLink: '' };
+                this.clients = [];
+                this.suppliers = [];
+                this.products = [];
+
                 this.isRegister = false;
                 this.curType = 'income';
+                this.curRegTab = 'clients'; // clients | suppliers | products
 
-                // Categorias para preencher o Select
                 this.categories = {
                     income: ['Venda de Produto', 'Prestação de Serviço', 'Outras Receitas'],
                     expense: ['Compra de Mercadoria', 'Material de Uso', 'Aluguel', 'Água/Luz/Internet', 'Imposto (DAS)', 'Transporte', 'Retirada Pessoal', 'Outras Despesas']
@@ -353,19 +423,160 @@ const firebaseConfig = {
                 document.getElementById('conf-email').innerText = this.user.email;
 
                 // Carregar Dados Locais
-                const localData = localStorage.getItem(`mei_data_${this.user.uid}`);
-                this.txs = localData ? JSON.parse(localData) : [];
-
-                const localProfile = localStorage.getItem(`mei_profile_${this.user.uid}`);
-                this.profile = localProfile ? JSON.parse(localProfile) : { fantasy: '', doc: '' };
+                const uid = this.user.uid;
+                this.txs = JSON.parse(localStorage.getItem(`mei_data_${uid}`) || '[]');
+                this.profile = JSON.parse(localStorage.getItem(`mei_profile_${uid}`) || '{"fantasy":"","doc":""}');
+                this.settings = JSON.parse(localStorage.getItem(`mei_settings_${uid}`) || '{"nfLink":""}');
+                
+                this.clients = JSON.parse(localStorage.getItem(`mei_clients_${uid}`) || '[]');
+                this.suppliers = JSON.parse(localStorage.getItem(`mei_suppliers_${uid}`) || '[]');
+                this.products = JSON.parse(localStorage.getItem(`mei_products_${uid}`) || '[]');
 
                 this.render();
                 this.renderHeader();
+                this.checkNFLink();
             }
 
             renderHeader() {
                 document.getElementById('head-name').innerText = this.user.displayName || "Usuário";
                 document.getElementById('head-fantasy').innerText = this.profile.fantasy || "Minha Empresa";
+                document.getElementById('conf-nf-link').value = this.settings.nfLink || '';
+            }
+
+            // --- CADASTROS (NOVA FUNCIONALIDADE) ---
+            setRegTab(tab) {
+                this.curRegTab = tab;
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                // Simples highlight baseado na ordem (pode melhorar)
+                const btns = document.querySelectorAll('.tab-btn');
+                if(tab === 'clients') btns[0].classList.add('active');
+                if(tab === 'suppliers') btns[1].classList.add('active');
+                if(tab === 'products') btns[2].classList.add('active');
+
+                const titles = { clients: 'Clientes', suppliers: 'Fornecedores', products: 'Produtos' };
+                document.getElementById('reg-title').innerText = titles[tab];
+                this.renderRegList();
+            }
+
+            renderRegList() {
+                const list = document.getElementById('reg-list');
+                list.innerHTML = '';
+                let data = [];
+                if(this.curRegTab === 'clients') data = this.clients;
+                if(this.curRegTab === 'suppliers') data = this.suppliers;
+                if(this.curRegTab === 'products') data = this.products;
+
+                if(data.length === 0) {
+                    list.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding:20px;">Nenhum item cadastrado.</p>';
+                    return;
+                }
+
+                data.forEach((item, idx) => {
+                    let subInfo = '';
+                    if(this.curRegTab === 'products') subInfo = `R$ ${parseFloat(item.price).toFixed(2)}`;
+                    else subInfo = item.phone || item.doc || '-';
+
+                    list.innerHTML += `
+                    <div class="tx-item">
+                        <div>
+                            <strong>${item.name}</strong><br>
+                            <small style="color:var(--text-muted)">${subInfo}</small>
+                        </div>
+                        <button class="btn-outline btn-sm" onclick="app.deleteRegister(${idx})" style="border:none; color:var(--danger);"><i class="fa-solid fa-trash"></i></button>
+                    </div>`;
+                });
+            }
+
+            openRegModal() {
+                document.getElementById('reg-name').value = '';
+                const extra = document.getElementById('reg-fields-extra');
+                extra.innerHTML = '';
+
+                if(this.curRegTab === 'products') {
+                    document.getElementById('reg-modal-title').innerText = "Novo Produto";
+                    extra.innerHTML = `
+                        <label class="form-label">Preço de Venda (R$)</label>
+                        <input type="number" id="reg-price" class="auth-input" step="0.01">
+                        <label class="form-label">Custo (Opcional)</label>
+                        <input type="number" id="reg-cost" class="auth-input" step="0.01">
+                    `;
+                } else {
+                    document.getElementById('reg-modal-title').innerText = this.curRegTab === 'clients' ? "Novo Cliente" : "Novo Fornecedor";
+                    extra.innerHTML = `
+                        <label class="form-label">Telefone / WhatsApp</label>
+                        <input type="tel" id="reg-phone" class="auth-input">
+                        <label class="form-label">CPF / CNPJ</label>
+                        <input type="text" id="reg-doc" class="auth-input">
+                    `;
+                }
+                document.getElementById('modal-reg').classList.remove('hidden');
+            }
+
+            saveRegister() {
+                const name = document.getElementById('reg-name').value;
+                if(!name) return alert("Nome é obrigatório.");
+
+                let newItem = { name };
+
+                if(this.curRegTab === 'products') {
+                    newItem.price = document.getElementById('reg-price').value || 0;
+                    newItem.cost = document.getElementById('reg-cost').value || 0;
+                    this.products.push(newItem);
+                    localStorage.setItem(`mei_products_${this.user.uid}`, JSON.stringify(this.products));
+                } else {
+                    newItem.phone = document.getElementById('reg-phone').value || '';
+                    newItem.doc = document.getElementById('reg-doc').value || '';
+                    if(this.curRegTab === 'clients') {
+                        this.clients.push(newItem);
+                        localStorage.setItem(`mei_clients_${this.user.uid}`, JSON.stringify(this.clients));
+                    } else {
+                        this.suppliers.push(newItem);
+                        localStorage.setItem(`mei_suppliers_${this.user.uid}`, JSON.stringify(this.suppliers));
+                    }
+                }
+                this.closeModal('modal-reg');
+                this.renderRegList();
+            }
+
+            deleteRegister(idx) {
+                if(!confirm("Excluir item?")) return;
+                if(this.curRegTab === 'clients') {
+                    this.clients.splice(idx, 1);
+                    localStorage.setItem(`mei_clients_${this.user.uid}`, JSON.stringify(this.clients));
+                } else if (this.curRegTab === 'suppliers') {
+                    this.suppliers.splice(idx, 1);
+                    localStorage.setItem(`mei_suppliers_${this.user.uid}`, JSON.stringify(this.suppliers));
+                } else {
+                    this.products.splice(idx, 1);
+                    localStorage.setItem(`mei_products_${this.user.uid}`, JSON.stringify(this.products));
+                }
+                this.renderRegList();
+            }
+
+            // --- CONFIGS & FISCAL ---
+            saveNFLink() {
+                const link = document.getElementById('conf-nf-link').value;
+                this.settings.nfLink = link;
+                localStorage.setItem(`mei_settings_${this.user.uid}`, JSON.stringify(this.settings));
+                alert("Link salvo com sucesso!");
+                this.checkNFLink();
+            }
+
+            checkNFLink() {
+                if(this.settings.nfLink && this.settings.nfLink.length > 5) {
+                    document.getElementById('nf-shortcut').classList.remove('hidden');
+                } else {
+                    document.getElementById('nf-shortcut').classList.add('hidden');
+                }
+            }
+
+            openNFLink() {
+                if(this.settings.nfLink) window.open(this.settings.nfLink, '_blank');
+            }
+
+            downloadManual() {
+                if(!SEU_LINK_PDF) return alert("Link do PDF não configurado no código.");
+                window.open(SEU_LINK_PDF, '_blank');
             }
 
             // --- PERFIL & SENHA ---
@@ -432,7 +643,6 @@ const firebaseConfig = {
                 document.getElementById('opt-inc').classList.toggle('active', type === 'income');
                 document.getElementById('opt-exp').classList.toggle('active', type === 'expense');
                 
-                // POPULAR SELECT DE CATEGORIAS
                 const select = document.getElementById('tx-cat');
                 select.innerHTML = '';
                 this.categories[type].forEach(cat => {
@@ -494,25 +704,31 @@ const firebaseConfig = {
             closeModal(id) { document.getElementById(id).classList.add('hidden'); }
             
             navTo(viewId, btn) {
-                document.getElementById('view-home').classList.add('hidden');
-                document.getElementById('view-settings').classList.add('hidden');
+                ['home', 'registers', 'settings'].forEach(v => document.getElementById('view-'+v).classList.add('hidden'));
                 document.getElementById('view-'+viewId).classList.remove('hidden');
                 document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
+                
+                if(viewId === 'registers') this.renderRegList();
             }
 
-            // --- EXTRAS: BACKUP, RESTORE & PIX ---
+            // --- EXTRAS ---
             copyPix() {
                 const key = "jose.carlos.nogueira1@gmail.com";
                 navigator.clipboard.writeText(key).then(() => {
-                    alert("Chave Pix copiada para a área de transferência!");
-                }).catch(err => {
-                    alert("Erro ao copiar. Chave: " + key);
-                });
+                    alert("Chave Pix copiada!");
+                }).catch(err => alert("Erro ao copiar."));
             }
 
             backupData() {
-                const payload = { txs: this.txs, profile: this.profile };
+                const payload = { 
+                    txs: this.txs, 
+                    profile: this.profile, 
+                    settings: this.settings,
+                    clients: this.clients,
+                    suppliers: this.suppliers,
+                    products: this.products
+                };
                 const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(payload));
                 const a = document.createElement('a');
                 a.href = dataStr;
@@ -527,16 +743,30 @@ const firebaseConfig = {
                 reader.onload = (e) => {
                     try {
                         const json = JSON.parse(e.target.result);
-                        if(json.txs) this.txs = json.txs; 
-                        else if(Array.isArray(json)) this.txs = json; 
+                        
+                        // Restaurar Transações
+                        if(json.txs) this.txs = json.txs;
+                        else if(Array.isArray(json)) this.txs = json; // Legado
+                        
+                        // Restaurar Outros Dados
+                        if(json.profile) this.profile = json.profile;
+                        if(json.settings) this.settings = json.settings;
+                        if(json.clients) this.clients = json.clients;
+                        if(json.suppliers) this.suppliers = json.suppliers;
+                        if(json.products) this.products = json.products;
 
-                        if(json.profile) {
-                            this.profile = json.profile;
-                            localStorage.setItem(`mei_profile_${this.user.uid}`, JSON.stringify(this.profile));
-                        }
-                        localStorage.setItem(`mei_data_${this.user.uid}`, JSON.stringify(this.txs));
+                        // Salvar tudo no LocalStorage
+                        const uid = this.user.uid;
+                        localStorage.setItem(`mei_data_${uid}`, JSON.stringify(this.txs));
+                        localStorage.setItem(`mei_profile_${uid}`, JSON.stringify(this.profile));
+                        localStorage.setItem(`mei_settings_${uid}`, JSON.stringify(this.settings));
+                        localStorage.setItem(`mei_clients_${uid}`, JSON.stringify(this.clients));
+                        localStorage.setItem(`mei_suppliers_${uid}`, JSON.stringify(this.suppliers));
+                        localStorage.setItem(`mei_products_${uid}`, JSON.stringify(this.products));
+
                         this.render();
                         this.renderHeader();
+                        this.checkNFLink();
                         alert("Dados restaurados com sucesso!");
                     } catch(e) { alert("Arquivo inválido"); }
                 };
