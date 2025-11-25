@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MEI Simples - Gestão Inteligente</title>
+    <title>MEI Simples - Acesso</title>
     
-    <!-- Bibliotecas Externas (CDNs) -->
+    <!-- Bibliotecas Externas -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -13,393 +13,136 @@
 
     <style>
         :root {
-            /* Paleta de Cores MEI Simples */
-            --primary: #00bf63; /* Verde Empreendedor */
+            --primary: #00bf63;
             --primary-dark: #00914b;
-            --secondary: #5e17eb; /* Roxo Moderno */
+            --secondary: #5e17eb;
             --bg-light: #f4f6f8;
-            --surface-light: #ffffff;
+            --surface: #ffffff;
             --text-main: #1f2937;
             --text-muted: #6b7280;
             --danger: #ef4444;
-            --warning: #f59e0b;
             --border: #e5e7eb;
             --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            --radius: 16px;
-        }
-
-        /* Dark Mode Variables */
-        body.dark-mode {
-            --bg-light: #111827;
-            --surface-light: #1f2937;
-            --text-main: #f9fafb;
-            --text-muted: #9ca3af;
-            --border: #374151;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-        body { font-family: 'Poppins', sans-serif; background: var(--bg-light); color: var(--text-main); padding-bottom: 90px; transition: background 0.3s; }
+        body { font-family: 'Poppins', sans-serif; background: var(--bg-light); color: var(--text-main); height: 100vh; overflow-x: hidden; }
 
-        /* Utilitários */
-        .container { max-width: 600px; margin: 0 auto; padding: 0 20px; }
         .hidden { display: none !important; }
-        .flex { display: flex; align-items: center; }
-        .justify-between { justify-content: space-between; }
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .text-center { text-align: center; }
-        .btn { border: none; padding: 12px 20px; border-radius: 12px; font-weight: 600; cursor: pointer; transition: 0.2s; width: 100%; font-size: 1rem; display: flex; justify-content: center; align-items: center; gap: 8px; }
+        .btn { border: none; padding: 12px; border-radius: 10px; font-weight: 600; cursor: pointer; width: 100%; font-size: 1rem; margin-top: 10px; transition: 0.2s; }
         .btn-primary { background: var(--primary); color: white; }
-        .btn-secondary { background: var(--secondary); color: white; }
-        .btn-danger { background: var(--danger); color: white; }
-        .btn-outline { background: transparent; border: 2px solid var(--border); color: var(--text-main); }
-        .card { background: var(--surface-light); padding: 20px; border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 15px; }
-
-        /* 1. Login Screen */
-        #auth-screen { height: 100vh; display: flex; flex-direction: column; justify-content: center; text-align: center; background: var(--surface-light); padding: 30px; position: fixed; width: 100%; z-index: 1000; top: 0; }
-        .logo-large i { font-size: 4rem; color: var(--primary); margin-bottom: 15px; }
-        .auth-input { width: 100%; padding: 15px; margin-bottom: 15px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg-light); color: var(--text-main); font-size: 1rem; }
-
-        /* 2. Header & Nav */
-        header { background: var(--surface-light); padding: 15px 0; position: sticky; top: 0; z-index: 50; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-        .profile-pic { width: 40px; height: 40px; border-radius: 50%; background: var(--secondary); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-text { background: none; color: var(--secondary); font-size: 0.85rem; margin-top: 15px; width: auto; display: inline-block; }
         
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: var(--surface-light); border-top: 1px solid var(--border); padding: 10px 0; display: flex; justify-content: space-around; z-index: 100; padding-bottom: max(10px, env(safe-area-inset-bottom)); }
-        .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text-muted); font-size: 0.75rem; background: none; border: none; cursor: pointer; }
-        .nav-item i { font-size: 1.4rem; margin-bottom: 4px; }
-        .nav-item.active { color: var(--primary); font-weight: 600; }
-
-        /* 3. Dashboard */
-        .limit-bar-container { margin-bottom: 20px; }
-        .limit-label { font-size: 0.8rem; display: flex; justify-content: space-between; margin-bottom: 5px; }
-        .progress-bg { height: 10px; background: var(--border); border-radius: 5px; overflow: hidden; }
-        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--secondary)); width: 0%; transition: width 1s; }
+        /* AUTH SCREEN STYLES */
+        #auth-screen { 
+            height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; 
+            padding: 20px; background: var(--surface); 
+        }
+        .auth-card {
+            width: 100%; max-width: 400px; text-align: center;
+        }
+        .logo-area i { font-size: 3.5rem; color: var(--primary); margin-bottom: 10px; }
+        .auth-input { 
+            width: 100%; padding: 14px; margin-bottom: 12px; border-radius: 10px; 
+            border: 1px solid var(--border); background: var(--bg-light); font-size: 1rem; outline: none;
+            transition: border 0.3s;
+        }
+        .auth-input:focus { border-color: var(--primary); }
         
-        .stat-card { text-align: left; position: relative; overflow: hidden; }
-        .stat-card h3 { font-size: 0.9rem; color: var(--text-muted); font-weight: 400; }
-        .stat-card .value { font-size: 1.5rem; font-weight: 700; margin-top: 5px; }
-        .stat-icon { position: absolute; right: 15px; top: 15px; font-size: 2rem; opacity: 0.1; }
+        .auth-links { display: flex; justify-content: space-between; margin-top: 10px; font-size: 0.85rem; }
+        .auth-links span { cursor: pointer; color: var(--text-muted); }
+        .auth-links span:hover { color: var(--primary); text-decoration: underline; }
 
-        /* 4. Transactions List */
-        .tx-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); }
-        .tx-left { display: flex; gap: 12px; align-items: center; }
-        .tx-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
-        .bg-green-soft { background: #dcfce7; color: #166534; }
-        .bg-red-soft { background: #fee2e2; color: #991b1b; }
-        .tx-details h4 { font-size: 0.95rem; font-weight: 600; }
-        .tx-details p { font-size: 0.8rem; color: var(--text-muted); }
-        .amount { font-weight: 700; }
-        .text-green { color: var(--primary); }
-        .text-red { color: var(--danger); }
+        /* APP STYLES (Simplificado para o contexto) */
+        #app-screen { padding-bottom: 80px; }
+        header { background: var(--surface); padding: 15px 20px; box-shadow: var(--shadow); display: flex; justify-content: space-between; align-items: center; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .card { background: var(--surface); padding: 20px; border-radius: 16px; box-shadow: var(--shadow); margin-bottom: 15px; }
+        .logout-btn { color: var(--danger); font-size: 1.5rem; background: none; border: none; cursor: pointer; }
 
-        /* 5. DAS Section */
-        .das-status { text-align: center; padding: 30px 20px; }
-        .das-status i { font-size: 3rem; margin-bottom: 15px; }
-        .status-ok { color: var(--primary); }
-        .status-warn { color: var(--warning); }
-
-        /* 6. Tools & Forms */
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 6px; }
-        .form-input, .form-select { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg-light); color: var(--text-main); font-family: inherit; }
-        
-        /* Modal */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 200; display: flex; justify-content: center; align-items: flex-end; backdrop-filter: blur(3px); }
-        .modal-content { background: var(--surface-light); width: 100%; max-width: 600px; border-radius: 24px 24px 0 0; padding: 25px; animation: slideUp 0.3s ease; max-height: 90vh; overflow-y: auto; }
-        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-
-        /* Floating Button */
-        .fab-group { position: fixed; bottom: 85px; right: 20px; display: flex; flex-direction: column; gap: 10px; align-items: flex-end; z-index: 90; }
-        .fab { width: 56px; height: 56px; border-radius: 50%; border: none; color: white; box-shadow: 0 4px 15px rgba(0,0,0,0.2); font-size: 1.5rem; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.2s; }
-        .fab:active { transform: scale(0.95); }
-        .fab-label { background: var(--surface-light); padding: 5px 10px; border-radius: 8px; font-size: 0.8rem; box-shadow: var(--shadow); margin-right: 10px; color: var(--text-main); }
-        .fab-row { display: flex; align-items: center; }
-
-        /* Accordion Conselheiro */
-        .accordion-item { border-bottom: 1px solid var(--border); }
-        .accordion-header { padding: 15px 0; cursor: pointer; display: flex; justify-content: space-between; font-weight: 500; }
-        .accordion-body { display: none; padding-bottom: 15px; color: var(--text-muted); font-size: 0.9rem; line-height: 1.5; }
-        .accordion-body.active { display: block; }
     </style>
 </head>
 <body>
 
-    <!-- 1. TELA DE LOGIN -->
+    <!-- 1. TELA DE AUTENTICAÇÃO (LOGIN / CADASTRO / RECUPERAÇÃO) -->
     <section id="auth-screen">
-        <div class="logo-large">
-            <i class="fa-solid fa-store"></i>
-            <h1>MEI Simples</h1>
-            <p style="color: var(--text-muted)">Gestão completa para quem empreende</p>
-        </div>
-        <div style="margin-top: 40px;">
-            <input type="email" id="login-email" class="auth-input" placeholder="Seu e-mail">
-            <input type="password" id="login-pass" class="auth-input" placeholder="Sua senha">
-            <button class="btn btn-primary" onclick="app.login()">
-                <i class="fa-brands fa-google"></i> Entrar com Google / Email
-            </button>
-            <p style="margin-top: 20px; font-size: 0.8rem; color: var(--text-muted)">
-                *Modo Demonstração Ativo (Dados salvos no dispositivo)
+        <div class="auth-card">
+            <div class="logo-area">
+                <i class="fa-solid fa-store"></i>
+                <h1>MEI Simples</h1>
+                <p id="auth-subtitle" style="color: var(--text-muted); margin-bottom: 30px;">Gerencie seu negócio</p>
+            </div>
+
+            <form id="auth-form" onsubmit="event.preventDefault();">
+                <!-- Nome (Apenas Cadastro) -->
+                <input type="text" id="auth-name" class="auth-input hidden" placeholder="Seu Nome Completo">
+                
+                <!-- Email -->
+                <input type="email" id="auth-email" class="auth-input" placeholder="Seu E-mail" required>
+                
+                <!-- Senha -->
+                <input type="password" id="auth-pass" class="auth-input" placeholder="Senha" required>
+                
+                <!-- Confirmar Senha (Apenas Cadastro) -->
+                <input type="password" id="auth-confirm" class="auth-input hidden" placeholder="Confirme a senha">
+
+                <!-- Botão Principal -->
+                <button class="btn btn-primary" id="btn-auth-action" onclick="app.handleAuthAction()">
+                    Entrar
+                </button>
+            </form>
+
+            <!-- Links de Navegação -->
+            <div class="auth-links">
+                <span id="link-forgot" onclick="app.setAuthMode('reset')">Esqueci minha senha</span>
+                <span id="link-create" onclick="app.setAuthMode('register')">Criar nova conta</span>
+                <span id="link-login" class="hidden" onclick="app.setAuthMode('login')">Voltar para Login</span>
+            </div>
+            
+            <p style="margin-top: 30px; font-size: 0.75rem; color: var(--text-muted);">
+                *Modo Demo Offline Ativo (salva no navegador)
             </p>
         </div>
     </section>
 
-    <!-- 2. APP PRINCIPAL -->
+    <!-- 2. APP PRINCIPAL (DASHBOARD) -->
     <section id="app-screen" class="hidden">
         <header>
-            <div class="container flex justify-between">
-                <div class="flex" style="gap: 10px;">
-                    <div class="profile-pic" id="user-initials">MEI</div>
-                    <div>
-                        <h2 style="font-size: 1rem;">Olá, Empreendedor</h2>
-                        <p style="font-size: 0.75rem; color: var(--text-muted)" id="current-date">--/--/----</p>
-                    </div>
-                </div>
-                <button onclick="app.toggleTheme()" style="background:none; border:none; color: var(--text-main); font-size: 1.2rem;">
-                    <i class="fa-solid fa-moon"></i>
-                </button>
+            <div>
+                <h3 id="user-display-name">Olá, MEI</h3>
+                <small>Painel de Controle</small>
             </div>
+            <button class="logout-btn" onclick="app.logout()">
+                <i class="fa-solid fa-right-from-bracket"></i>
+            </button>
         </header>
 
-        <main class="container" style="padding-top: 20px;">
-            
-            <!-- VIEW: DASHBOARD -->
-            <div id="view-dashboard">
-                <!-- Limite MEI -->
-                <div class="card">
-                    <div class="limit-label">
-                        <span>Limite Anual MEI (R$ 81k)</span>
-                        <span id="limit-percent">0%</span>
-                    </div>
-                    <div class="progress-bg">
-                        <div class="progress-fill" id="limit-bar"></div>
-                    </div>
-                    <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 5px;">
-                        Acumulado: <strong id="acumulado-anual">R$ 0,00</strong>
-                    </p>
-                </div>
-
-                <div class="grid-2">
-                    <div class="card stat-card">
-                        <h3>Saldo do Mês</h3>
-                        <div class="value" id="dash-saldo">R$ 0,00</div>
-                        <i class="fa-solid fa-wallet stat-icon"></i>
-                    </div>
-                    <div class="card stat-card">
-                        <h3>Lucro Líquido</h3>
-                        <div class="value text-green" id="dash-lucro">R$ 0,00</div>
-                        <i class="fa-solid fa-chart-line stat-icon"></i>
-                    </div>
-                </div>
-
-                <!-- Gráfico Rápido -->
-                <div class="card">
-                    <h3 style="margin-bottom: 15px;">Fluxo Financeiro</h3>
-                    <canvas id="chart-finance" height="150"></canvas>
-                </div>
-
-                <div class="flex justify-between" style="margin-bottom: 10px; align-items: center;">
-                    <h3>Últimas Movimentações</h3>
-                    <button class="btn-outline" style="width: auto; padding: 5px 10px; font-size: 0.8rem;" onclick="app.navTo('finance')">Ver Tudo</button>
-                </div>
-                <div id="dash-tx-list">
-                    <!-- Lista injetada via JS -->
-                </div>
+        <div class="container">
+            <div class="card" style="text-align: center; padding: 40px;">
+                <i class="fa-solid fa-check-circle" style="font-size: 3rem; color: var(--primary); margin-bottom: 15px;"></i>
+                <h2>Bem-vindo!</h2>
+                <p style="color: var(--text-muted)">Você fez login com sucesso.</p>
+                <br>
+                <p>Aqui entraria o Dashboard completo (Gráficos, Entradas, Saídas, etc).</p>
             </div>
-
-            <!-- VIEW: FINANCEIRO -->
-            <div id="view-finance" class="hidden">
-                <div class="card bg-green-soft" style="margin-bottom: 20px; text-align: center;">
-                    <h3>Caixa Atual</h3>
-                    <h1 style="font-size: 2.5rem; color: var(--primary-dark);" id="fin-total">R$ 0,00</h1>
-                </div>
-                
-                <div class="flex justify-between" style="margin-bottom: 15px;">
-                    <h3>Histórico</h3>
-                    <button class="btn-outline" style="width: auto; padding: 8px;" onclick="app.exportPDF()">
-                        <i class="fa-solid fa-file-pdf"></i> PDF
-                    </button>
-                </div>
-
-                <div id="finance-list"></div>
-                <div style="height: 100px;"></div> <!-- Spacer for FAB -->
-            </div>
-
-            <!-- VIEW: DAS & IMPOSTOS -->
-            <div id="view-das" class="hidden">
-                <div class="card das-status">
-                    <i class="fa-solid fa-barcode status-ok"></i>
-                    <h2>DAS MEI</h2>
-                    <p style="color: var(--text-muted); margin-bottom: 20px;">
-                        Mantenha seu CNPJ regularizado pagando a guia mensal (~R$ 70,00).
-                    </p>
-                    <button class="btn btn-primary" onclick="window.open('https://www.gov.br/empresas-e-negocios/pt-br/empreendedor/servicos-para-mei/pagamento-de-contribuicao-mensal', '_blank')">
-                        <i class="fa-solid fa-external-link"></i> Gerar Boleto / PIX (Gov.br)
-                    </button>
-                </div>
-
-                <h3>Histórico de Pagamentos (Controle)</h3>
-                <div class="card">
-                    <div class="flex justify-between" style="padding: 10px 0; border-bottom: 1px solid var(--border);">
-                        <span>Novembro/2025</span>
-                        <span class="text-green"><i class="fa-solid fa-check-circle"></i> Pago</span>
-                    </div>
-                    <div class="flex justify-between" style="padding: 10px 0; border-bottom: 1px solid var(--border);">
-                        <span>Outubro/2025</span>
-                        <span class="text-green"><i class="fa-solid fa-check-circle"></i> Pago</span>
-                    </div>
-                    <div class="flex justify-between" style="padding: 10px 0;">
-                        <span>Setembro/2025</span>
-                        <span class="text-red"><i class="fa-solid fa-clock"></i> Atrasado</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- VIEW: FERRAMENTAS & CONSELHEIRO -->
-            <div id="view-tools" class="hidden">
-                
-                <!-- Conselheiro MEI -->
-                <h3><i class="fa-solid fa-lightbulb" style="color: var(--warning)"></i> Conselheiro MEI</h3>
-                <div class="card">
-                    <div class="accordion-item">
-                        <div class="accordion-header" onclick="app.toggleAccordion(this)">
-                            Como não estourar o limite? <i class="fa-solid fa-chevron-down"></i>
-                        </div>
-                        <div class="accordion-body">
-                            O limite atual é R$ 81.000,00/ano. Isso dá uma média de R$ 6.750,00 por mês. Se você passar até 20%, pagará uma multa sobre o excedente. Se passar de 20%, será desenquadrado do MEI. Acompanhe a barra na tela inicial!
-                        </div>
-                    </div>
-                    <div class="accordion-item">
-                        <div class="accordion-header" onclick="app.toggleAccordion(this)">
-                            Preciso emitir Nota Fiscal? <i class="fa-solid fa-chevron-down"></i>
-                        </div>
-                        <div class="accordion-body">
-                            Para vender para **empresas (PJ)**, SIM, é obrigatório. Para vender para **pessoa física**, NÃO é obrigatório, a menos que o cliente exija.
-                        </div>
-                    </div>
-                    <div class="accordion-item">
-                        <div class="accordion-header" onclick="app.toggleAccordion(this)">
-                            Separe as Contas! <i class="fa-solid fa-chevron-down"></i>
-                        </div>
-                        <div class="accordion-body">
-                            O erro nº 1 do MEI é misturar dinheiro pessoal com o da empresa. Defina um "prolabore" (salário) para você e deixe o resto no caixa da empresa para reinvestir.
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Calculadora -->
-                <h3><i class="fa-solid fa-calculator"></i> Calculadora de Preço</h3>
-                <div class="card">
-                    <div class="form-group">
-                        <label>Custo do Produto/Serviço (R$)</label>
-                        <input type="number" id="calc-cost" class="form-input" placeholder="0.00">
-                    </div>
-                    <div class="form-group">
-                        <label>Lucro Desejado (%)</label>
-                        <input type="number" id="calc-margin" class="form-input" placeholder="Ex: 30">
-                    </div>
-                    <div class="card bg-green-soft">
-                        <p style="font-size: 0.8rem;">Preço de Venda Sugerido:</p>
-                        <h2 style="color: var(--primary-dark)" id="calc-result">R$ 0,00</h2>
-                    </div>
-                    <button class="btn btn-secondary" style="margin-top: 10px;" onclick="app.calculatePrice()">Calcular</button>
-                </div>
-
-                <!-- Gerador de Recibo -->
-                <h3><i class="fa-solid fa-receipt"></i> Recibo Rápido</h3>
-                <div class="card">
-                    <input type="text" id="rec-name" class="form-input" placeholder="Nome do Cliente" style="margin-bottom: 10px;">
-                    <input type="number" id="rec-value" class="form-input" placeholder="Valor" style="margin-bottom: 10px;">
-                    <input type="text" id="rec-desc" class="form-input" placeholder="Serviço/Produto" style="margin-bottom: 10px;">
-                    <button class="btn btn-outline" onclick="app.generateReceipt()">
-                        <i class="fa-brands fa-whatsapp"></i> Gerar Recibo Texto
-                    </button>
-                </div>
-            </div>
-
-        </main>
-
-        <!-- Botões Flutuantes (FAB) -->
-        <div class="fab-group" id="fab-group">
-            <div class="fab-row hidden" id="fab-options">
-                <span class="fab-label">Nova Despesa</span>
-                <button class="fab btn-danger" onclick="app.openModal('expense')"><i class="fa-solid fa-minus"></i></button>
-            </div>
-            <div class="fab-row hidden" id="fab-options-2">
-                <span class="fab-label">Nova Receita</span>
-                <button class="fab btn-primary" onclick="app.openModal('income')"><i class="fa-solid fa-plus"></i></button>
-            </div>
-            <button class="fab btn-secondary" onclick="app.toggleFab()">
-                <i class="fa-solid fa-plus" id="fab-icon"></i>
-            </button>
         </div>
-
-        <!-- Navegação Inferior -->
-        <nav class="bottom-nav">
-            <button class="nav-item active" onclick="app.navTo('dashboard', this)">
-                <i class="fa-solid fa-chart-pie"></i>
-                <span>Início</span>
-            </button>
-            <button class="nav-item" onclick="app.navTo('finance', this)">
-                <i class="fa-solid fa-sack-dollar"></i>
-                <span>Caixa</span>
-            </button>
-            <button class="nav-item" onclick="app.navTo('das', this)">
-                <i class="fa-solid fa-barcode"></i>
-                <span>Impostos</span>
-            </button>
-            <button class="nav-item" onclick="app.navTo('tools', this)">
-                <i class="fa-solid fa-screwdriver-wrench"></i>
-                <span>Ferramentas</span>
-            </button>
-        </nav>
     </section>
-
-    <!-- 3. MODAL DE TRANSAÇÃO -->
-    <div id="tx-modal" class="modal-overlay hidden" onclick="if(event.target===this) app.closeModal()">
-        <div class="modal-content">
-            <div class="flex justify-between" style="margin-bottom: 20px;">
-                <h2 id="modal-title">Nova Transação</h2>
-                <i class="fa-solid fa-times" style="font-size: 1.5rem;" onclick="app.closeModal()"></i>
-            </div>
-            
-            <div class="form-group">
-                <label>Valor (R$)</label>
-                <input type="number" id="tx-amount" class="form-input" style="font-size: 1.5rem; font-weight: bold;" placeholder="0,00" step="0.01">
-            </div>
-
-            <div class="form-group">
-                <label>Descrição</label>
-                <input type="text" id="tx-desc" class="form-input" placeholder="Ex: Venda, Material...">
-            </div>
-
-            <div class="grid-2">
-                <div class="form-group">
-                    <label>Categoria</label>
-                    <select id="tx-cat" class="form-select">
-                        <option value="venda">Vendas</option>
-                        <option value="servico">Serviços</option>
-                        <option value="material">Materiais</option>
-                        <option value="contas">Contas Fixas</option>
-                        <option value="imposto">Imposto (DAS)</option>
-                        <option value="pessoal">Retirada Pessoal</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Data</label>
-                    <input type="date" id="tx-date" class="form-input">
-                </div>
-            </div>
-
-            <button class="btn btn-primary" id="btn-save-tx" onclick="app.saveTransaction()">Salvar</button>
-        </div>
-    </div>
 
     <script type="module">
         // ==========================================================
-        // CONFIGURAÇÃO DO FIREBASE (Opcional - Preencha para Cloud)
+        // CONFIGURAÇÃO FIREBASE (Preencha para usar Real)
         // ==========================================================
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, query, onSnapshot, orderBy } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+        import { 
+            getAuth, 
+            signInWithEmailAndPassword, 
+            createUserWithEmailAndPassword, 
+            sendPasswordResetEmail, 
+            updateProfile, 
+            signOut, 
+            onAuthStateChanged 
+        } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 
         // Deixe vazio para usar MODO OFFLINE (LocalStorage)
         const firebaseConfig = {
@@ -412,319 +155,202 @@
         };
 
         // ==========================================================
-        // APP CONTROLLER
+        // LÓGICA DO APP
         // ==========================================================
         
-        class MeiApp {
+        class AppController {
             constructor() {
-                this.transactions = [];
+                this.authMode = 'login'; // login | register | reset
                 this.user = null;
-                this.mode = 'local'; // 'local' or 'firebase'
-                this.currentType = 'income';
-                this.chartInstance = null;
-                
-                this.init();
-            }
+                this.isFirebase = false;
+                this.auth = null;
 
-            init() {
-                // Configuração inicial
-                document.getElementById('current-date').innerText = new Date().toLocaleDateString('pt-BR');
-                document.getElementById('tx-date').valueAsDate = new Date();
-                
-                // Detectar Firebase
+                // Inicializar Firebase se houver config
                 if (firebaseConfig.apiKey) {
                     try {
                         const app = initializeApp(firebaseConfig);
                         this.auth = getAuth(app);
-                        this.db = getFirestore(app);
-                        this.mode = 'firebase';
-                        console.log("Firebase Mode Active");
-                    } catch(e) { console.warn("Erro config Firebase, fallback local"); }
-                }
-
-                this.checkAuth();
-            }
-
-            // --- Auth ---
-            checkAuth() {
-                if (this.mode === 'firebase') {
-                    onAuthStateChanged(this.auth, (user) => {
-                        if (user) {
-                            this.user = user;
-                            this.showApp();
-                        }
-                    });
+                        this.isFirebase = true;
+                        this.initFirebaseListener();
+                    } catch(e) { console.warn("Fallback Local"); }
                 } else {
-                    const localUser = localStorage.getItem('mei_user');
-                    if (localUser) {
-                        this.user = JSON.parse(localUser);
-                        this.showApp();
-                    }
+                    this.checkLocalAuth();
                 }
             }
 
-            login() {
-                // Simulação simples para LocalStorage
-                const email = document.getElementById('login-email').value;
-                if (!email && this.mode === 'local') return alert("Digite um email para testar!");
+            // --- Gerenciamento de UI de Autenticação ---
+
+            setAuthMode(mode) {
+                this.authMode = mode;
                 
-                this.user = { email: email || 'usuario@teste.com', name: 'MEI Sucesso' };
-                localStorage.setItem('mei_user', JSON.stringify(this.user));
-                this.showApp();
+                // Elementos
+                const nameInput = document.getElementById('auth-name');
+                const passInput = document.getElementById('auth-pass');
+                const confInput = document.getElementById('auth-confirm');
+                const btnAction = document.getElementById('btn-auth-action');
+                const subtitle = document.getElementById('auth-subtitle');
+                
+                // Links
+                const linkForgot = document.getElementById('link-forgot');
+                const linkCreate = document.getElementById('link-create');
+                const linkLogin = document.getElementById('link-login');
+
+                // Reset de visibilidade
+                nameInput.classList.add('hidden');
+                confInput.classList.add('hidden');
+                passInput.classList.remove('hidden');
+                linkLogin.classList.remove('hidden');
+                linkForgot.classList.add('hidden');
+                linkCreate.classList.add('hidden');
+
+                // Lógica de cada modo
+                if (mode === 'login') {
+                    subtitle.innerText = "Acesse sua conta";
+                    btnAction.innerText = "Entrar";
+                    linkForgot.classList.remove('hidden');
+                    linkCreate.classList.remove('hidden');
+                    linkLogin.classList.add('hidden');
+                    passInput.required = true;
+                } 
+                else if (mode === 'register') {
+                    subtitle.innerText = "Crie sua conta grátis";
+                    btnAction.innerText = "Cadastrar";
+                    nameInput.classList.remove('hidden');
+                    confInput.classList.remove('hidden');
+                    passInput.required = true;
+                } 
+                else if (mode === 'reset') {
+                    subtitle.innerText = "Recuperar Senha";
+                    btnAction.innerText = "Enviar Link";
+                    passInput.classList.add('hidden'); // Não precisa de senha pra resetar
+                    passInput.required = false;
+                }
             }
 
-            showApp() {
+            async handleAuthAction() {
+                const email = document.getElementById('auth-email').value;
+                const pass = document.getElementById('auth-pass').value;
+                const name = document.getElementById('auth-name').value;
+                const confirm = document.getElementById('auth-confirm').value;
+
+                if (!email) return alert("Por favor, digite seu e-mail.");
+
+                try {
+                    // 1. LOGIN
+                    if (this.authMode === 'login') {
+                        if (this.isFirebase) {
+                            await signInWithEmailAndPassword(this.auth, email, pass);
+                        } else {
+                            // Mock Login
+                            const stored = JSON.parse(localStorage.getItem('mei_users') || '[]');
+                            const user = stored.find(u => u.email === email && u.pass === pass);
+                            if (user) {
+                                this.loginSuccess({ email: user.email, displayName: user.name });
+                            } else {
+                                alert("Usuário não encontrado ou senha incorreta (Modo Demo: Crie uma conta primeiro).");
+                            }
+                        }
+                    } 
+                    // 2. CADASTRO
+                    else if (this.authMode === 'register') {
+                        if (!pass || pass.length < 6) return alert("A senha deve ter pelo menos 6 caracteres.");
+                        if (pass !== confirm) return alert("As senhas não conferem.");
+                        if (!name) return alert("Digite seu nome.");
+
+                        if (this.isFirebase) {
+                            const cred = await createUserWithEmailAndPassword(this.auth, email, pass);
+                            await updateProfile(cred.user, { displayName: name });
+                            // O listener vai pegar o login automático
+                        } else {
+                            // Mock Register
+                            const users = JSON.parse(localStorage.getItem('mei_users') || '[]');
+                            if (users.find(u => u.email === email)) return alert("Email já cadastrado.");
+                            
+                            users.push({ email, pass, name });
+                            localStorage.setItem('mei_users', JSON.stringify(users));
+                            alert("Cadastro realizado! Faça login.");
+                            this.setAuthMode('login');
+                        }
+                    } 
+                    // 3. RECUPERAÇÃO DE SENHA
+                    else if (this.authMode === 'reset') {
+                        if (this.isFirebase) {
+                            await sendPasswordResetEmail(this.auth, email);
+                            alert("Email de recuperação enviado! Verifique sua caixa de entrada.");
+                            this.setAuthMode('login');
+                        } else {
+                            // Mock Reset
+                            alert(`[SIMULAÇÃO] Um link de recuperação foi enviado para ${email}.`);
+                            this.setAuthMode('login');
+                        }
+                    }
+
+                } catch (error) {
+                    this.handleError(error);
+                }
+            }
+
+            // --- Sessão e Navegação ---
+
+            loginSuccess(user) {
+                this.user = user;
+                if (!this.isFirebase) {
+                    localStorage.setItem('mei_session', JSON.stringify(user));
+                }
+                document.getElementById('user-display-name').innerText = `Olá, ${user.displayName || 'Empreendedor'}`;
                 document.getElementById('auth-screen').classList.add('hidden');
                 document.getElementById('app-screen').classList.remove('hidden');
-                this.loadData();
             }
 
-            // --- CRUD ---
-            loadData() {
-                if (this.mode === 'local') {
-                    const data = localStorage.getItem('mei_txs');
-                    this.transactions = data ? JSON.parse(data) : [
-                        // Dados Dummy para Demo
-                        { id: 1, type: 'income', amount: 1500, desc: 'Serviço Consultoria', category: 'servico', date: '2025-11-20' },
-                        { id: 2, type: 'expense', amount: 70, desc: 'DAS Mensal', category: 'imposto', date: '2025-11-21' },
-                        { id: 3, type: 'income', amount: 300, desc: 'Venda Produtos', category: 'venda', date: '2025-11-22' }
-                    ];
-                    this.renderAll();
+            logout() {
+                if (this.isFirebase) {
+                    signOut(this.auth);
                 } else {
-                    // Firebase Listener
-                    const q = query(collection(this.db, 'users', this.user.uid, 'transactions'), orderBy('date', 'desc'));
-                    onSnapshot(q, (snap) => {
-                        this.transactions = snap.docs.map(d => ({id: d.id, ...d.data()}));
-                        this.renderAll();
-                    });
+                    localStorage.removeItem('mei_session');
+                    this.user = null;
+                    window.location.reload();
                 }
             }
 
-            saveTransaction() {
-                const amount = parseFloat(document.getElementById('tx-amount').value);
-                const desc = document.getElementById('tx-desc').value;
-                const cat = document.getElementById('tx-cat').value;
-                const date = document.getElementById('tx-date').value;
+            // --- Listeners de Estado ---
 
-                if (!amount || !desc) return alert("Preencha o valor e a descrição");
-
-                const tx = {
-                    id: Date.now(),
-                    type: this.currentType,
-                    amount,
-                    desc,
-                    category: cat,
-                    date
-                };
-
-                if (this.mode === 'local') {
-                    this.transactions.unshift(tx);
-                    localStorage.setItem('mei_txs', JSON.stringify(this.transactions));
-                    this.renderAll();
-                } else {
-                    // Firebase Add logic would go here
-                }
-                
-                this.closeModal();
-                // Limpar
-                document.getElementById('tx-amount').value = '';
-                document.getElementById('tx-desc').value = '';
-            }
-
-            // --- Render Logic ---
-            renderAll() {
-                this.calculateTotals();
-                this.renderList();
-                this.renderChart();
-                this.updateLimitBar();
-            }
-
-            calculateTotals() {
-                let inc = 0, exp = 0, balance = 0, annual = 0;
-                const currentYear = new Date().getFullYear();
-
-                this.transactions.forEach(t => {
-                    const val = parseFloat(t.amount);
-                    if (t.type === 'income') {
-                        inc += val;
-                        if (new Date(t.date).getFullYear() === currentYear) annual += val;
+            initFirebaseListener() {
+                onAuthStateChanged(this.auth, (user) => {
+                    if (user) {
+                        this.loginSuccess(user);
                     } else {
-                        exp += val;
+                        this.showLogin();
                     }
                 });
-
-                balance = inc - exp;
-                this.totals = { inc, exp, balance, annual };
-
-                document.getElementById('dash-saldo').innerText = this.formatCurrency(balance);
-                document.getElementById('dash-lucro').innerText = this.formatCurrency(balance); // Simplificado
-                document.getElementById('fin-total').innerText = this.formatCurrency(balance);
-                
-                document.getElementById('acumulado-anual').innerText = this.formatCurrency(annual);
-                
-                // Barra de Limite (81k)
-                const limit = 81000;
-                const pct = Math.min((annual / limit) * 100, 100);
-                document.getElementById('limit-bar').style.width = `${pct}%`;
-                document.getElementById('limit-percent').innerText = `${pct.toFixed(1)}%`;
-                
-                if(pct > 80) document.getElementById('limit-bar').style.background = 'var(--danger)';
             }
 
-            renderList() {
-                const list = document.getElementById('dash-tx-list');
-                const fullList = document.getElementById('finance-list');
-                list.innerHTML = '';
-                fullList.innerHTML = '';
-
-                // Ordenar por data
-                const sorted = [...this.transactions].sort((a,b) => new Date(b.date) - new Date(a.date));
-
-                sorted.forEach((t, index) => {
-                    const isInc = t.type === 'income';
-                    const icon = isInc ? 'fa-arrow-up' : 'fa-arrow-down';
-                    const colorBg = isInc ? 'bg-green-soft' : 'bg-red-soft';
-                    const colorTxt = isInc ? 'text-green' : 'text-red';
-                    
-                    const html = `
-                        <div class="tx-item">
-                            <div class="tx-left">
-                                <div class="tx-icon ${colorBg} ${colorTxt}">
-                                    <i class="fa-solid ${icon}"></i>
-                                </div>
-                                <div class="tx-details">
-                                    <h4>${t.desc}</h4>
-                                    <p>${t.category.toUpperCase()} • ${new Date(t.date).toLocaleDateString('pt-BR')}</p>
-                                </div>
-                            </div>
-                            <div class="amount ${colorTxt}">
-                                ${isInc ? '+' : '-'} ${this.formatCurrency(t.amount)}
-                            </div>
-                        </div>
-                    `;
-                    
-                    if (index < 5) list.innerHTML += html; // Dashboard (limitado)
-                    fullList.innerHTML += html; // Lista completa
-                });
-            }
-
-            renderChart() {
-                const ctx = document.getElementById('chart-finance').getContext('2d');
-                if (this.chartInstance) this.chartInstance.destroy();
-
-                const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun']; // Simplificado para demo
-                // Lógica real agruparia dados por mês
-
-                this.chartInstance = new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: months,
-                        datasets: [{
-                            label: 'Receitas',
-                            data: [1000, 1500, 1200, 1800, 2000, this.totals.inc],
-                            borderColor: '#00bf63',
-                            tension: 0.4
-                        }, {
-                            label: 'Despesas',
-                            data: [200, 300, 250, 400, 300, this.totals.exp],
-                            borderColor: '#ef4444',
-                            tension: 0.4
-                        }]
-                    },
-                    options: { responsive: true, plugins: { legend: { display: false } } }
-                });
-            }
-
-            // --- UI Helpers ---
-            navTo(viewId, btnElement) {
-                ['dashboard', 'finance', 'das', 'tools'].forEach(id => {
-                    document.getElementById(`view-${id}`).classList.add('hidden');
-                });
-                document.getElementById(`view-${viewId}`).classList.remove('hidden');
-                
-                if(btnElement) {
-                    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-                    btnElement.classList.add('active');
+            checkLocalAuth() {
+                const session = localStorage.getItem('mei_session');
+                if (session) {
+                    this.loginSuccess(JSON.parse(session));
+                } else {
+                    this.showLogin();
                 }
             }
 
-            openModal(type) {
-                this.currentType = type;
-                document.getElementById('modal-title').innerText = type === 'income' ? 'Nova Receita' : 'Nova Despesa';
-                document.getElementById('tx-modal').classList.remove('hidden');
-                document.getElementById('btn-save-tx').className = type === 'income' ? 'btn btn-primary' : 'btn btn-danger';
-                this.toggleFab();
+            showLogin() {
+                document.getElementById('app-screen').classList.add('hidden');
+                document.getElementById('auth-screen').classList.remove('hidden');
             }
 
-            closeModal() {
-                document.getElementById('tx-modal').classList.add('hidden');
-            }
-
-            toggleFab() {
-                const opts = [document.getElementById('fab-options'), document.getElementById('fab-options-2')];
-                const icon = document.getElementById('fab-icon');
-                const isHidden = opts[0].classList.contains('hidden');
-                
-                opts.forEach(o => isHidden ? o.classList.remove('hidden') : o.classList.add('hidden'));
-                icon.className = isHidden ? 'fa-solid fa-xmark' : 'fa-solid fa-plus';
-            }
-
-            toggleTheme() {
-                document.body.classList.toggle('dark-mode');
-            }
-
-            toggleAccordion(header) {
-                const body = header.nextElementSibling;
-                body.classList.toggle('active');
-            }
-
-            // --- Ferramentas Extras ---
-            calculatePrice() {
-                const cost = parseFloat(document.getElementById('calc-cost').value);
-                const margin = parseFloat(document.getElementById('calc-margin').value);
-                
-                if(cost && margin) {
-                    // Fórmula simples: Custo / (1 - margem%)
-                    const price = cost + (cost * (margin / 100));
-                    document.getElementById('calc-result').innerText = this.formatCurrency(price);
-                }
-            }
-
-            generateReceipt() {
-                const name = document.getElementById('rec-name').value;
-                const val = document.getElementById('rec-value').value;
-                const desc = document.getElementById('rec-desc').value;
-
-                if(!name || !val) return alert("Preencha os dados do cliente");
-
-                const text = `🧾 *RECIBO MEI*\n\nRecebi de: ${name}\nValor: R$ ${val}\nReferente a: ${desc}\n\nData: ${new Date().toLocaleDateString()}`;
-                const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
-                window.open(url, '_blank');
-            }
-
-            exportPDF() {
-                const { jsPDF } = window.jspdf;
-                const doc = new jsPDF();
-                doc.text("Relatório MEI Simples", 10, 10);
-                doc.text(`Gerado em: ${new Date().toLocaleDateString()}`, 10, 20);
-                
-                let y = 30;
-                this.transactions.forEach(t => {
-                    const line = `${t.date} | ${t.type.toUpperCase()} | R$ ${t.amount} | ${t.desc}`;
-                    doc.text(line, 10, y);
-                    y += 10;
-                });
-                
-                doc.save("relatorio-mei.pdf");
-            }
-
-            formatCurrency(val) {
-                return val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            handleError(error) {
+                console.error(error);
+                let msg = error.message;
+                if (msg.includes("auth/wrong-password")) msg = "Senha incorreta.";
+                if (msg.includes("auth/user-not-found")) msg = "Usuário não encontrado.";
+                if (msg.includes("auth/email-already-in-use")) msg = "Este email já está em uso.";
+                if (msg.includes("auth/invalid-email")) msg = "Email inválido.";
+                alert(msg);
             }
         }
 
-        // Inicialização Global
-        window.app = new MeiApp();
+        // Inicializar
+        window.app = new AppController();
     </script>
 </body>
 </html>
