@@ -67,7 +67,7 @@
         .form-label { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 4px; display: block; margin-top: 10px; }
         
         .type-switch { display: flex; background: var(--bg-light); border-radius: 12px; padding: 4px; margin-bottom: 15px; }
-        .type-opt { flex: 1; text-align: center; padding: 10px; border-radius: 8px; cursor: pointer; }
+        .type-opt { flex: 1; text-align: center; padding: 10px; border-radius: 8px; cursor: pointer; transition: 0.2s; }
         .type-opt.active.inc { background: var(--primary); color: white; }
         .type-opt.active.exp { background: var(--danger); color: white; }
         
@@ -98,6 +98,11 @@
         .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
         input:checked + .slider { background-color: var(--primary); }
         input:checked + .slider:before { transform: translateX(16px); }
+
+        /* Radio Group Custom */
+        .radio-group { display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px; background: #fff; padding: 10px; border-radius: 10px; border: 1px solid var(--border); }
+        .radio-item { display: flex; align-items: center; gap: 10px; font-size: 0.9rem; cursor: pointer; }
+        .radio-item input { width: 18px; height: 18px; accent-color: var(--primary); }
     </style>
 </head>
 <body>
@@ -157,7 +162,7 @@
 
                 <div id="nf-shortcut" class="hidden" style="margin-bottom: 15px;">
                     <button class="btn btn-secondary" onclick="app.openNFLink()">
-                        <i class="fa-solid fa-file-invoice"></i> Emitir Nota Fiscal (Site Prefeitura)
+                        <i class="fa-solid fa-file-invoice"></i> Emitir Nota Fiscal (Emissor Nacional)
                     </button>
                 </div>
 
@@ -216,11 +221,12 @@
 
                 <div class="card">
                     <h3><i class="fa-solid fa-folder-open"></i> Fiscal & Docs</h3>
-                    <label class="form-label">Link Prefeitura (NF):</label>
+                    <label class="form-label">Link Emissor Nacional (NF):</label>
                     <div class="flex" style="gap:5px;">
-                        <input type="text" id="conf-nf-link" class="auth-input" placeholder="https://..." style="margin:0;">
+                        <input type="text" id="conf-nf-link" class="auth-input" placeholder="https://www.nfse.gov.br/EmissorNacional" style="margin:0;">
                         <button class="btn-secondary btn-sm" onclick="app.saveNFLink()">Salvar</button>
                     </div>
+                    <p style="font-size:0.75rem; color:var(--text-muted); margin-top:5px;">Link padrão sugerido para MEI Prestador de Serviço.</p>
                     <hr style="border:0; border-top:1px solid var(--border); margin:15px 0;">
                     <button class="btn btn-outline" onclick="app.downloadManual()"><i class="fa-solid fa-file-pdf"></i> Baixar Manual/PDF</button>
                 </div>
@@ -262,24 +268,36 @@
         </nav>
     </section>
 
-    <!-- MODAL: NOVA TRANSAÇÃO (FINANCEIRA + VENDA) -->
+    <!-- MODAL: NOVA TRANSAÇÃO (COM RADIOS) -->
     <div id="modal-tx" class="modal-overlay hidden" onclick="if(event.target===this) app.closeModal('modal-tx')">
         <div class="modal-content">
             <div class="flex justify-between"><h2>Novo Lançamento</h2><i class="fa-solid fa-xmark" onclick="app.closeModal('modal-tx')"></i></div>
             
+            <!-- Indicador de Tipo (Visual) -->
             <div class="type-switch">
                 <div class="type-opt active inc" id="opt-inc" onclick="app.setType('income')">Entrada</div>
                 <div class="type-opt" id="opt-exp" onclick="app.setType('expense')">Saída</div>
             </div>
 
-            <!-- Área de Venda de Produto (Só aparece se Modo Comerciante ON e for Entrada) -->
-            <div id="tx-prod-area" class="hidden" style="background: #f0fdf4; padding: 10px; border-radius: 10px; border: 1px dashed var(--primary); margin-bottom: 10px;">
-                <label style="display:flex; align-items:center; gap:8px; font-weight:600; cursor:pointer;">
-                    <input type="checkbox" id="tx-is-sale" onchange="app.toggleTxSale()">
-                    Venda de Produto (Baixar Estoque)
-                </label>
-                
-                <div id="tx-prod-details" class="hidden" style="margin-top:10px;">
+            <!-- Area de Opções para Comerciante -->
+            <div id="merchant-options" class="hidden">
+                <div class="radio-group">
+                    <label class="radio-item">
+                        <input type="radio" name="tx-action" value="sale" onclick="app.handleStockAction('sale')">
+                        <strong>Venda de Mercadoria</strong> (Baixar Estoque)
+                    </label>
+                    <label class="radio-item">
+                        <input type="radio" name="tx-action" value="buy" onclick="app.handleStockAction('buy')">
+                        <strong>Compra de Mercadoria</strong> (Adicionar Estoque)
+                    </label>
+                    <label class="radio-item">
+                        <input type="radio" name="tx-action" value="other" checked onclick="app.handleStockAction('other')">
+                        <strong>Outro</strong> (Conta, Serviço, etc.)
+                    </label>
+                </div>
+
+                <!-- Detalhes do Produto (Aparece na Venda/Compra) -->
+                <div id="tx-prod-details" class="hidden" style="margin-top:10px; padding:10px; background:#f8fafc; border-radius:10px; border:1px solid #e2e8f0;">
                     <label class="form-label">Produto</label>
                     <select id="tx-prod-select" class="auth-input" onchange="app.onTxProductChange()"></select>
                     
@@ -290,7 +308,7 @@
                         </div>
                         <div>
                             <label class="form-label">Preço Unit.</label>
-                            <input type="number" id="tx-prod-price" class="auth-input" readonly style="background:#eee;">
+                            <input type="number" id="tx-prod-price" class="auth-input" oninput="app.calcTxTotal()" style="background:#fff;">
                         </div>
                     </div>
                 </div>
@@ -387,8 +405,7 @@ const firebaseConfig = {
   appId: "1:39066795540:web:edc72cedb442daee423101",
   measurementId: "G-PE631DFGE0"
 };
-
-        const SEU_LINK_PDF = "https://drive.google.com/file/d/1gMocDMAey8q35-bcJsRip7Zm0v2mCrMS/view?usp=sharing"; 
+        const SEU_LINK_PDF = "https://www.exemplo.com/seu-manual.pdf"; 
 
         class App {
             constructor() {
@@ -398,7 +415,7 @@ const firebaseConfig = {
                 // Dados Locais
                 this.txs = [];
                 this.profile = {}; 
-                this.settings = { nfLink: '', merchantMode: false }; // merchantMode adicionado
+                this.settings = { nfLink: '', merchantMode: false }; 
                 this.clients = [];
                 this.suppliers = [];
                 this.products = [];
@@ -411,6 +428,7 @@ const firebaseConfig = {
                 this.editIdx = null; 
                 this.stockIdx = null; 
                 this.stockType = 'in'; 
+                this.txStockAction = 'other'; // 'sale', 'buy', 'other'
 
                 this.categories = {
                     income: ['Venda de Produto', 'Prestação de Serviço', 'Outras Receitas'],
@@ -474,9 +492,12 @@ const firebaseConfig = {
                 document.getElementById('conf-email').innerText = this.user.email;
 
                 const uid = this.user.uid;
+                // Carregar configurações primeiro para ver o link padrão
+                const defaultSettings = JSON.stringify({ nfLink: "https://www.nfse.gov.br/EmissorNacional", merchantMode: false });
+                this.settings = JSON.parse(localStorage.getItem(`mei_settings_${uid}`) || defaultSettings);
+
                 this.txs = JSON.parse(localStorage.getItem(`mei_data_${uid}`) || '[]');
                 this.profile = JSON.parse(localStorage.getItem(`mei_profile_${uid}`) || '{"fantasy":"","doc":""}');
-                this.settings = JSON.parse(localStorage.getItem(`mei_settings_${uid}`) || '{"nfLink":"","merchantMode":false}');
                 this.clients = JSON.parse(localStorage.getItem(`mei_clients_${uid}`) || '[]');
                 this.suppliers = JSON.parse(localStorage.getItem(`mei_suppliers_${uid}`) || '[]');
                 this.products = JSON.parse(localStorage.getItem(`mei_products_${uid}`) || '[]');
@@ -801,9 +822,10 @@ const firebaseConfig = {
                 document.getElementById('tx-val').value = '';
                 document.getElementById('tx-desc').value = '';
                 
-                // Reset da Venda de Produto
-                document.getElementById('tx-is-sale').checked = false;
-                this.toggleTxSale(); 
+                // Reset Radios
+                const radios = document.getElementsByName('tx-action');
+                radios.forEach(r => r.checked = (r.value === 'other'));
+                this.handleStockAction('other');
                 
                 this.setType('income'); 
                 document.getElementById('modal-tx').classList.remove('hidden');
@@ -818,30 +840,36 @@ const firebaseConfig = {
                 select.innerHTML = '';
                 this.categories[type].forEach(c => { select.innerHTML += `<option value="${c}">${c}</option>`; });
                 
-                // Área de Venda de Produto: Só aparece se for Entrada e Modo Comerciante ON
-                const prodArea = document.getElementById('tx-prod-area');
-                if(type === 'income' && this.settings.merchantMode) {
-                    prodArea.classList.remove('hidden');
-                    // Preencher Select de Produtos
+                // Show Radio Options only if Merchant Mode is ON
+                const merchantOpts = document.getElementById('merchant-options');
+                if(this.settings.merchantMode) {
+                    merchantOpts.classList.remove('hidden');
+                    // Populate Product Select
                     const prodSel = document.getElementById('tx-prod-select');
                     prodSel.innerHTML = '<option value="">Selecione...</option>';
                     this.products.forEach((p, idx) => {
                         prodSel.innerHTML += `<option value="${idx}">${p.name} (R$ ${p.price})</option>`;
                     });
                 } else {
-                    prodArea.classList.add('hidden');
+                    merchantOpts.classList.add('hidden');
                 }
             }
 
-            toggleTxSale() {
-                const isSale = document.getElementById('tx-is-sale').checked;
+            handleStockAction(action) {
+                this.txStockAction = action;
                 const details = document.getElementById('tx-prod-details');
                 const valInput = document.getElementById('tx-val');
-                
-                if(isSale) {
+
+                if(action === 'sale') {
+                    this.setType('income'); // Force Income
                     details.classList.remove('hidden');
-                    valInput.setAttribute('readonly', true); // Valor calculado automático
+                    valInput.setAttribute('readonly', true);
                     valInput.style.background = "#eee";
+                } else if (action === 'buy') {
+                    this.setType('expense'); // Force Expense
+                    details.classList.remove('hidden');
+                    valInput.removeAttribute('readonly'); // Cost can change
+                    valInput.style.background = "#fff";
                 } else {
                     details.classList.add('hidden');
                     valInput.removeAttribute('readonly');
@@ -858,10 +886,24 @@ const firebaseConfig = {
                 if(idx === "") return;
                 
                 const qty = parseInt(document.getElementById('tx-prod-qty').value || 1);
-                const price = parseFloat(this.products[idx].price || 0);
+                const prod = this.products[idx];
+                
+                // If Sale, use Sales Price. If Buy, try Cost Price (or 0)
+                let price = 0;
+                if(this.txStockAction === 'sale') price = parseFloat(prod.price || 0);
+                else price = parseFloat(prod.cost || 0);
                 
                 document.getElementById('tx-prod-price').value = price.toFixed(2);
-                document.getElementById('tx-val').value = (price * qty).toFixed(2);
+                
+                // If sale, auto-calc total. If buy, user might edit total manually so we suggest only
+                if(this.txStockAction === 'sale') {
+                    document.getElementById('tx-val').value = (price * qty).toFixed(2);
+                } else {
+                    // For buy, only suggest if field is empty to not overwrite user input
+                    if(document.getElementById('tx-val').value === "") {
+                        document.getElementById('tx-val').value = (price * qty).toFixed(2);
+                    }
+                }
             }
 
             saveTx() {
@@ -872,31 +914,44 @@ const firebaseConfig = {
 
                 if (!val || !date) return alert("Preencha valor e data");
 
-                // LÓGICA DE BAIXA DE ESTOQUE AUTOMÁTICA
-                const isSale = document.getElementById('tx-is-sale').checked;
-                if(this.curType === 'income' && this.settings.merchantMode && isSale) {
+                // STOCK LOGIC
+                if(this.settings.merchantMode && this.txStockAction !== 'other') {
                     const prodIdx = document.getElementById('tx-prod-select').value;
                     const qty = parseInt(document.getElementById('tx-prod-qty').value);
                     
                     if(prodIdx === "" || !qty) return alert("Selecione o produto e quantidade.");
                     
-                    // Baixar Estoque
                     const p = this.products[prodIdx];
-                    p.currentStock = Math.max(0, (parseInt(p.currentStock)||0) - qty);
-                    localStorage.setItem(`mei_products_${this.user.uid}`, JSON.stringify(this.products));
+                    const oldStock = parseInt(p.currentStock)||0;
                     
-                    // Registrar Movimentação
-                    this.stockMovements.push({
-                        date: new Date().toISOString(), product: p.name, type: 'out',
-                        qty: qty, reason: 'Venda Direta', newStock: p.currentStock
-                    });
-                    localStorage.setItem(`mei_stock_${this.user.uid}`, JSON.stringify(this.stockMovements));
+                    if(this.txStockAction === 'sale') {
+                        p.currentStock = Math.max(0, oldStock - qty);
+                        desc = `Venda: ${p.name} (x${qty}) - ${desc}`;
+                        
+                        // Log Stock Movement
+                        this.stockMovements.push({
+                            date: new Date().toISOString(), product: p.name, type: 'out',
+                            qty: qty, reason: 'Venda Direta', newStock: p.currentStock
+                        });
 
-                    // Adicionar info na descrição da transação
-                    desc = `${p.name} (x${qty}) - ${desc}`;
+                    } else if (this.txStockAction === 'buy') {
+                        p.currentStock = oldStock + qty;
+                        desc = `Compra: ${p.name} (x${qty}) - ${desc}`;
+                        
+                        // Update Cost Price if changed? Optional. Let's keep simple.
+                        
+                        // Log Stock Movement
+                        this.stockMovements.push({
+                            date: new Date().toISOString(), product: p.name, type: 'in',
+                            qty: qty, reason: 'Reposição', newStock: p.currentStock
+                        });
+                    }
+                    
+                    localStorage.setItem(`mei_products_${this.user.uid}`, JSON.stringify(this.products));
+                    localStorage.setItem(`mei_stock_${this.user.uid}`, JSON.stringify(this.stockMovements));
                 }
 
-                // Salvar Financeiro
+                // Financial Record
                 this.txs.push({ 
                     id: Date.now(), type: this.curType, val, date, cat, desc 
                 });
@@ -904,7 +959,6 @@ const firebaseConfig = {
                 
                 this.closeModal('modal-tx');
                 this.render();
-                // Se foi venda, atualiza lista de produtos também (para mostrar novo estoque se estiver na aba)
                 if(this.curRegTab === 'products') this.renderRegList();
             }
 
