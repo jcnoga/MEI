@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MEI Simples - Híbrido</title>
+    <title>MEI Simples - Perfil Completo</title>
     
     <!-- Bibliotecas -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -30,11 +30,12 @@
         .justify-between { justify-content: space-between; }
         .container { max-width: 600px; margin: 0 auto; padding: 0 20px; }
         
-        .btn { border: none; padding: 12px; border-radius: 12px; font-weight: 600; cursor: pointer; width: 100%; font-size: 1rem; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; }
+        .btn { border: none; padding: 12px; border-radius: 12px; font-weight: 600; cursor: pointer; width: 100%; font-size: 1rem; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; margin-bottom: 10px; }
         .btn-primary { background: var(--primary); color: white; }
         .btn-secondary { background: var(--secondary); color: white; }
         .btn-danger { background: var(--danger); color: white; }
         .btn-dark { background: var(--text-main); color: white; }
+        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-main); }
         
         .card { background: var(--surface); padding: 20px; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); margin-bottom: 15px; }
 
@@ -44,7 +45,7 @@
 
         /* App */
         #app-screen { padding-bottom: 90px; }
-        header { background: var(--surface); padding: 15px 0; position: sticky; top: 0; z-index: 50; }
+        header { background: var(--surface); padding: 15px 0; position: sticky; top: 0; z-index: 50; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
         
         .tx-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); }
         .text-green { color: var(--primary); }
@@ -55,9 +56,11 @@
         .nav-item.active { color: var(--primary); font-weight: 600; }
 
         /* Modal */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 200; display: flex; justify-content: center; align-items: flex-end; }
-        .modal-content { background: var(--surface); width: 100%; max-width: 600px; border-radius: 24px 24px 0 0; padding: 25px; max-height: 90vh; overflow-y: auto; }
-        .form-input, .form-select { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg-light); font-size: 1rem; margin-top: 5px; margin-bottom: 10px; display: block; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 200; display: flex; justify-content: center; align-items: flex-end; backdrop-filter: blur(2px); }
+        .modal-content { background: var(--surface); width: 100%; max-width: 600px; border-radius: 24px 24px 0 0; padding: 25px; max-height: 90vh; overflow-y: auto; animation: slideUp 0.3s ease; }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+        .form-label { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 4px; display: block; margin-top: 10px; }
         
         .type-switch { display: flex; background: var(--bg-light); border-radius: 12px; padding: 4px; margin-bottom: 15px; }
         .type-opt { flex: 1; text-align: center; padding: 10px; border-radius: 8px; cursor: pointer; }
@@ -67,21 +70,17 @@
 </head>
 <body>
 
-    <!-- 1. TELA DE LOGIN (Conectada ao Firebase) -->
+    <!-- 1. TELA DE LOGIN -->
     <section id="auth-screen">
         <div style="text-align:center; max-width:400px; width:100%;">
-            <i class="fa-solid fa-cloud" style="font-size:3.5rem; color:var(--primary); margin-bottom:10px;"></i>
-            <h1>MEI Híbrido</h1>
-            <p style="color:var(--text-muted); margin-bottom:20px; font-size: 0.9rem;">
-                Login na Nuvem <br> Dados no Aparelho
-            </p>
+            <i class="fa-solid fa-user-shield" style="font-size:3.5rem; color:var(--primary); margin-bottom:10px;"></i>
+            <h1>MEI Seguro</h1>
+            <p style="color:var(--text-muted); margin-bottom:20px;">Login Nuvem + Dados Locais</p>
             
             <form onsubmit="event.preventDefault(); app.handleAuth();">
-                <!-- Cadastro -->
                 <div id="reg-fields" class="hidden">
                     <input type="text" id="auth-name" class="auth-input" placeholder="Seu Nome">
                 </div>
-                <!-- Login -->
                 <input type="email" id="auth-email" class="auth-input" placeholder="Email" required>
                 <input type="password" id="auth-pass" class="auth-input" placeholder="Senha" required>
                 
@@ -89,12 +88,12 @@
             </form>
             
             <div style="margin-top:20px; cursor:pointer; color:var(--secondary);" onclick="app.toggleAuthMode()">
-                <span id="link-toggle">Não tem conta? Cadastre-se</span>
+                <span id="link-toggle">Criar nova conta</span>
             </div>
-            
-            <!-- Aviso Config -->
-            <div id="config-warning" style="margin-top:30px; padding:10px; background:#fee2e2; color:#991b1b; border-radius:8px; font-size:0.8rem;" class="hidden">
-                <strong>ATENÇÃO:</strong> Configure as chaves do Firebase no código para o login funcionar.
+
+            <!-- Aviso -->
+            <div id="config-warning" class="hidden" style="margin-top:20px; padding:10px; background:#fee2e2; color:#991b1b; border-radius:8px; font-size:0.8rem;">
+                ⚠ Configure as chaves do Firebase no código!
             </div>
         </div>
     </section>
@@ -104,10 +103,10 @@
         <header>
             <div class="container flex justify-between">
                 <div>
-                    <h2 style="font-size:1rem;">Meu Negócio</h2>
-                    <p style="font-size:0.75rem; color:var(--text-muted);" id="head-user">...</p>
+                    <h2 style="font-size:1rem;" id="head-fantasy">Minha Empresa</h2>
+                    <p style="font-size:0.75rem; color:var(--text-muted);" id="head-name">Usuário</p>
                 </div>
-                <button onclick="app.openModal('income')" class="btn-primary" style="width:auto; padding:8px 15px; font-size:0.8rem; border-radius:20px;">
+                <button onclick="app.openTxModal()" class="btn-primary" style="width:auto; padding:8px 15px; font-size:0.8rem; border-radius:20px;">
                     <i class="fa-solid fa-plus"></i> Novo
                 </button>
             </div>
@@ -117,38 +116,48 @@
             <!-- DASHBOARD -->
             <div id="view-home">
                 <div class="card" style="background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white;">
-                    <p style="opacity:0.9;">Saldo em Caixa</p>
+                    <p style="opacity:0.9;">Saldo Atual</p>
                     <h1 style="font-size:2.5rem;" id="dash-bal">R$ 0,00</h1>
                 </div>
-
-                <h3>Movimentações (Locais)</h3>
+                <h3>Últimos Lançamentos</h3>
                 <div id="list-recent"></div>
                 <div id="empty-state" class="hidden" style="text-align:center; padding:30px; color:var(--text-muted);">
-                    <i class="fa-regular fa-folder-open" style="font-size:2rem; margin-bottom:10px;"></i>
-                    <p>Nenhum dado neste aparelho.</p>
+                    <p>Sem dados neste dispositivo.</p>
                 </div>
             </div>
 
-            <!-- CONFIG / BACKUP -->
+            <!-- CONFIGURAÇÕES -->
             <div id="view-settings" class="hidden">
-                <h2>Ajustes</h2>
+                <h2>Configurações</h2>
+                
+                <!-- Card Perfil -->
                 <div class="card">
-                    <h3>Backup & Restore</h3>
-                    <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:15px;">
-                        Como seus dados ficam salvos neste aparelho, use isso para transferir para outro.
+                    <h3><i class="fa-solid fa-id-card"></i> Meus Dados</h3>
+                    <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:10px;">
+                        Nome, CNPJ e Nome Fantasia.
                     </p>
+                    <button class="btn btn-outline" onclick="app.openProfileModal()">
+                        <i class="fa-solid fa-pen"></i> Editar Dados
+                    </button>
+                    <button class="btn btn-outline" onclick="app.openPassModal()">
+                        <i class="fa-solid fa-lock"></i> Alterar Senha
+                    </button>
+                </div>
+
+                <!-- Card Backup -->
+                <div class="card">
+                    <h3><i class="fa-solid fa-cloud-arrow-down"></i> Backup</h3>
                     <button class="btn btn-dark" onclick="app.backupData()">
                         <i class="fa-solid fa-download"></i> Baixar Backup
                     </button>
-                    <br>
-                    <button class="btn btn-outline" onclick="document.getElementById('file-input').click()">
-                        <i class="fa-solid fa-upload"></i> Restaurar Arquivo
+                    <button class="btn btn-secondary" onclick="document.getElementById('file-input').click()">
+                        <i class="fa-solid fa-upload"></i> Restaurar
                     </button>
                     <input type="file" id="file-input" accept=".json" class="hidden" onchange="app.restoreData(this)">
                 </div>
 
                 <div class="card">
-                    <p id="conf-email" style="color:var(--text-muted); margin-bottom:10px;">...</p>
+                    <p id="conf-email" style="text-align:center; margin-bottom:10px; color:var(--text-muted);">email@user.com</p>
                     <button class="btn btn-danger" onclick="app.logout()">Sair</button>
                 </div>
             </div>
@@ -156,46 +165,71 @@
 
         <nav class="bottom-nav">
             <button class="nav-item active" onclick="app.navTo('home', this)"><i class="fa-solid fa-chart-pie"></i>Início</button>
-            <button class="nav-item" onclick="app.navTo('settings', this)"><i class="fa-solid fa-gear"></i>Ajustes</button>
+            <button class="nav-item" onclick="app.navTo('settings', this)"><i class="fa-solid fa-user-gear"></i>Perfil</button>
         </nav>
     </section>
 
-    <!-- MODAL -->
-    <div id="modal-tx" class="modal-overlay hidden" onclick="if(event.target===this) app.closeModal()">
+    <!-- MODAL: NOVA TRANSAÇÃO -->
+    <div id="modal-tx" class="modal-overlay hidden" onclick="if(event.target===this) app.closeModal('modal-tx')">
         <div class="modal-content">
-            <div class="flex justify-between">
-                <h2>Novo Lançamento</h2>
-                <i class="fa-solid fa-xmark" onclick="app.closeModal()" style="font-size:1.5rem; padding:10px;"></i>
-            </div>
-            
+            <div class="flex justify-between"><h2>Novo Lançamento</h2><i class="fa-solid fa-xmark" onclick="app.closeModal('modal-tx')"></i></div>
             <div class="type-switch">
                 <div class="type-opt active inc" id="opt-inc" onclick="app.setType('income')">Entrada</div>
                 <div class="type-opt" id="opt-exp" onclick="app.setType('expense')">Saída</div>
             </div>
-
-            <label>Valor</label>
-            <input type="number" id="tx-val" class="form-input" style="font-size:1.5rem;" step="0.01">
-            
-            <label>Data</label>
-            <input type="date" id="tx-date" class="form-input">
-            
-            <label>Descrição</label>
-            <input type="text" id="tx-desc" class="form-input" placeholder="Ex: Venda Balcão">
-
-            <button class="btn btn-primary" onclick="app.saveTx()">Salvar no Aparelho</button>
+            <label class="form-label">Valor (R$)</label>
+            <input type="number" id="tx-val" class="auth-input" step="0.01">
+            <label class="form-label">Data</label>
+            <input type="date" id="tx-date" class="auth-input">
+            <label class="form-label">Descrição</label>
+            <input type="text" id="tx-desc" class="auth-input">
+            <button class="btn btn-primary" onclick="app.saveTx()">Salvar</button>
         </div>
     </div>
 
-    <!-- SCRIPT TYPE MODULE PARA FIREBASE -->
+    <!-- MODAL: EDITAR PERFIL -->
+    <div id="modal-profile" class="modal-overlay hidden" onclick="if(event.target===this) app.closeModal('modal-profile')">
+        <div class="modal-content">
+            <div class="flex justify-between"><h2>Editar Dados</h2><i class="fa-solid fa-xmark" onclick="app.closeModal('modal-profile')"></i></div>
+            
+            <label class="form-label">Nome Completo</label>
+            <input type="text" id="edit-name" class="auth-input">
+            
+            <label class="form-label">Nome Fantasia (Empresa)</label>
+            <input type="text" id="edit-fantasy" class="auth-input" placeholder="Ex: Doces da Ana">
+            
+            <label class="form-label">CPF ou CNPJ</label>
+            <input type="tel" id="edit-doc" class="auth-input" placeholder="Somente números">
+
+            <button class="btn btn-primary" onclick="app.saveProfile()">Atualizar Dados</button>
+        </div>
+    </div>
+
+    <!-- MODAL: ALTERAR SENHA -->
+    <div id="modal-pass" class="modal-overlay hidden" onclick="if(event.target===this) app.closeModal('modal-pass')">
+        <div class="modal-content">
+            <div class="flex justify-between"><h2>Alterar Senha</h2><i class="fa-solid fa-xmark" onclick="app.closeModal('modal-pass')"></i></div>
+            
+            <label class="form-label">Nova Senha</label>
+            <input type="password" id="new-pass" class="auth-input" placeholder="Mínimo 6 caracteres">
+            
+            <label class="form-label">Confirmar Nova Senha</label>
+            <input type="password" id="conf-pass" class="auth-input">
+
+            <button class="btn btn-danger" onclick="app.changePassword()">Confirmar Troca</button>
+            <p style="font-size:0.75rem; color:var(--text-muted); margin-top:10px;">
+                Nota: Se você não fez login recentemente, será necessário sair e entrar novamente para mudar a senha.
+            </p>
+        </div>
+    </div>
+
+    <!-- FIREBASE & LOGIC -->
     <script type="module">
-        // =======================================================
-        // 1. IMPORTANDO FIREBASE (Versão Modular)
-        // =======================================================
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, updateProfile, updatePassword } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 
         // =======================================================
-        // 2. CONFIGURAÇÃO (COLE SUAS CHAVES AQUI)
+        // COLE SUAS CHAVES AQUI
         // =======================================================
 const firebaseConfig = {
   apiKey: "AIzaSyCijldF4haJzh0nzu4fbPYGHJadyYuqTP4",
@@ -206,15 +240,12 @@ const firebaseConfig = {
   appId: "1:39066795540:web:edc72cedb442daee423101",
   measurementId: "G-PE631DFGE0"
 };
-
-        // =======================================================
-        // 3. LÓGICA DO APP
-        // =======================================================
-        class HybridApp {
+        class App {
             constructor() {
                 this.auth = null;
-                this.user = null; // Usuário Firebase
-                this.txs = [];    // Dados Locais
+                this.user = null;
+                this.txs = [];
+                this.profile = {}; // Dados locais do perfil (CNPJ, Fantasia)
                 this.isRegister = false;
                 this.curType = 'income';
 
@@ -226,11 +257,8 @@ const firebaseConfig = {
                     document.getElementById('config-warning').classList.remove('hidden');
                     return;
                 }
-
                 const app = initializeApp(firebaseConfig);
                 this.auth = getAuth(app);
-
-                // Listener: Monitora se logou ou saiu
                 onAuthStateChanged(this.auth, (user) => {
                     if (user) {
                         this.user = user;
@@ -242,7 +270,7 @@ const firebaseConfig = {
                 });
             }
 
-            // --- Autenticação (Firebase) ---
+            // --- AUTH ---
             async handleAuth() {
                 const email = document.getElementById('auth-email').value;
                 const pass = document.getElementById('auth-pass').value;
@@ -256,109 +284,150 @@ const firebaseConfig = {
                     } else {
                         await signInWithEmailAndPassword(this.auth, email, pass);
                     }
-                } catch (error) {
-                    alert("Erro no Firebase: " + error.message);
-                }
+                } catch (e) { alert("Erro: " + e.message); }
             }
 
             toggleAuthMode() {
                 this.isRegister = !this.isRegister;
                 document.getElementById('reg-fields').classList.toggle('hidden');
                 document.getElementById('btn-auth').innerText = this.isRegister ? "Cadastrar" : "Entrar";
-                document.getElementById('link-toggle').innerText = this.isRegister ? "Já tenho conta" : "Não tem conta? Cadastre-se";
+                document.getElementById('link-toggle').innerText = this.isRegister ? "Já tenho conta" : "Criar nova conta";
             }
 
-            logout() {
-                signOut(this.auth);
-            }
-
+            logout() { signOut(this.auth); }
             showAuth() {
                 document.getElementById('auth-screen').classList.remove('hidden');
                 document.getElementById('app-screen').classList.add('hidden');
             }
 
-            // --- Dados (LocalStorage) ---
+            // --- DATA LOAD ---
             onLoginSuccess() {
                 document.getElementById('auth-screen').classList.add('hidden');
                 document.getElementById('app-screen').classList.remove('hidden');
-                
-                // Exibir Info do Usuário
-                document.getElementById('head-user').innerText = this.user.displayName || this.user.email;
                 document.getElementById('conf-email').innerText = this.user.email;
 
-                // CARREGAR DADOS LOCAIS USANDO O ID DO FIREBASE
-                // Isso garante que se duas pessoas usarem o mesmo celular, os dados não se misturam
+                // Carregar Transações Locais
                 const localData = localStorage.getItem(`mei_data_${this.user.uid}`);
                 this.txs = localData ? JSON.parse(localData) : [];
-                
+
+                // Carregar Perfil Local (Fantasia/Doc)
+                const localProfile = localStorage.getItem(`mei_profile_${this.user.uid}`);
+                this.profile = localProfile ? JSON.parse(localProfile) : { fantasy: '', doc: '' };
+
                 this.render();
+                this.renderHeader();
             }
 
+            renderHeader() {
+                document.getElementById('head-name').innerText = this.user.displayName || "Usuário";
+                document.getElementById('head-fantasy').innerText = this.profile.fantasy || "Minha Empresa";
+            }
+
+            // --- PERFIL & SENHA (UPDATE) ---
+            openProfileModal() {
+                // Preencher com dados atuais
+                document.getElementById('edit-name').value = this.user.displayName || '';
+                document.getElementById('edit-fantasy').value = this.profile.fantasy || '';
+                document.getElementById('edit-doc').value = this.profile.doc || '';
+                
+                document.getElementById('modal-profile').classList.remove('hidden');
+            }
+
+            async saveProfile() {
+                const newName = document.getElementById('edit-name').value;
+                const newFantasy = document.getElementById('edit-fantasy').value;
+                const newDoc = document.getElementById('edit-doc').value;
+
+                if(!newName) return alert("O nome é obrigatório.");
+
+                try {
+                    // 1. Atualizar Nome no Firebase
+                    if(newName !== this.user.displayName) {
+                        await updateProfile(this.user, { displayName: newName });
+                    }
+
+                    // 2. Atualizar Dados Locais (Fantasia/CNPJ)
+                    this.profile = { fantasy: newFantasy, doc: newDoc };
+                    localStorage.setItem(`mei_profile_${this.user.uid}`, JSON.stringify(this.profile));
+
+                    alert("Perfil atualizado com sucesso!");
+                    this.closeModal('modal-profile');
+                    this.renderHeader();
+                } catch(e) {
+                    alert("Erro ao atualizar: " + e.message);
+                }
+            }
+
+            openPassModal() {
+                document.getElementById('new-pass').value = '';
+                document.getElementById('conf-pass').value = '';
+                document.getElementById('modal-pass').classList.remove('hidden');
+            }
+
+            async changePassword() {
+                const p1 = document.getElementById('new-pass').value;
+                const p2 = document.getElementById('conf-pass').value;
+
+                if(p1.length < 6) return alert("A senha deve ter pelo menos 6 caracteres.");
+                if(p1 !== p2) return alert("As senhas não conferem.");
+
+                try {
+                    await updatePassword(this.user, p1);
+                    alert("Senha alterada! Por favor, entre novamente.");
+                    this.logout();
+                } catch(e) {
+                    if(e.code === 'auth/requires-recent-login') {
+                        alert("Por segurança, faça logout e login novamente antes de trocar a senha.");
+                    } else {
+                        alert("Erro: " + e.message);
+                    }
+                }
+            }
+
+            // --- TRANSACTION LOGIC ---
             saveTx() {
                 const val = parseFloat(document.getElementById('tx-val').value);
                 const date = document.getElementById('tx-date').value;
                 const desc = document.getElementById('tx-desc').value;
-
                 if (!val || !date) return alert("Preencha valor e data");
 
-                const tx = {
-                    id: Date.now(),
-                    type: this.curType,
-                    val, date, desc
-                };
-
-                this.txs.push(tx);
-                this.persist();
-                this.closeModal();
-                this.render();
-            }
-
-            persist() {
-                // Salva no LocalStorage com a chave única do usuário logado
+                this.txs.push({ id: Date.now(), type: this.curType, val, date, desc });
                 localStorage.setItem(`mei_data_${this.user.uid}`, JSON.stringify(this.txs));
+                
+                this.closeModal('modal-tx');
+                this.render();
             }
 
             render() {
                 const list = document.getElementById('list-recent');
                 list.innerHTML = '';
-                
                 let bal = 0;
-                
+
                 if (this.txs.length === 0) {
                     document.getElementById('empty-state').classList.remove('hidden');
                 } else {
                     document.getElementById('empty-state').classList.add('hidden');
-                    
-                    // Ordenar
                     this.txs.sort((a,b) => new Date(b.date) - new Date(a.date));
-
+                    
                     this.txs.forEach(tx => {
                         if(tx.type === 'income') bal += tx.val; else bal -= tx.val;
-                        
                         list.innerHTML += `
                         <div class="tx-item">
-                            <div>
-                                <strong>${tx.desc || 'Sem descrição'}</strong><br>
-                                <small style="color:var(--text-muted)">${new Date(tx.date).toLocaleDateString()}</small>
-                            </div>
-                            <span class="${tx.type==='income'?'text-green':'text-red'}">
-                                ${tx.type==='income'?'+':'-'} R$ ${tx.val.toFixed(2)}
-                            </span>
+                            <div><strong>${tx.desc || '---'}</strong><br><small style="color:var(--text-muted)">${new Date(tx.date).toLocaleDateString()}</small></div>
+                            <span class="${tx.type==='income'?'text-green':'text-red'}">${tx.type==='income'?'+':'-'} R$ ${tx.val.toFixed(2)}</span>
                         </div>`;
                     });
                 }
-                
                 document.getElementById('dash-bal').innerText = `R$ ${bal.toFixed(2)}`;
             }
 
-            // --- UI Aux ---
-            openModal(type) {
-                this.setType(type);
+            // --- UI HELPERS ---
+            openTxModal() {
                 document.getElementById('tx-date').value = new Date().toISOString().split('T')[0];
                 document.getElementById('tx-val').value = '';
                 document.getElementById('modal-tx').classList.remove('hidden');
             }
-            closeModal() { document.getElementById('modal-tx').classList.add('hidden'); }
+            closeModal(id) { document.getElementById(id).classList.add('hidden'); }
             
             setType(type) {
                 this.curType = type;
@@ -370,14 +439,14 @@ const firebaseConfig = {
                 document.getElementById('view-home').classList.add('hidden');
                 document.getElementById('view-settings').classList.add('hidden');
                 document.getElementById('view-'+viewId).classList.remove('hidden');
-                
                 document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
             }
 
-            // --- Backup & Restore ---
+            // --- BACKUP ---
             backupData() {
-                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(this.txs));
+                const payload = { txs: this.txs, profile: this.profile };
+                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(payload));
                 const a = document.createElement('a');
                 a.href = dataStr;
                 a.download = `backup_mei_${new Date().toISOString().slice(0,10)}.json`;
@@ -391,20 +460,26 @@ const firebaseConfig = {
                 reader.onload = (e) => {
                     try {
                         const json = JSON.parse(e.target.result);
-                        if(Array.isArray(json)) {
-                            this.txs = json;
-                            this.persist();
-                            this.render();
-                            alert("Dados restaurados!");
-                        } else { alert("Arquivo inválido"); }
-                    } catch(e) { alert("Erro ao ler arquivo"); }
+                        // Suporte a backup antigo (só array) ou novo (objeto completo)
+                        if(Array.isArray(json)) this.txs = json;
+                        else {
+                            if(json.txs) this.txs = json.txs;
+                            if(json.profile) {
+                                this.profile = json.profile;
+                                localStorage.setItem(`mei_profile_${this.user.uid}`, JSON.stringify(this.profile));
+                            }
+                        }
+                        localStorage.setItem(`mei_data_${this.user.uid}`, JSON.stringify(this.txs));
+                        this.render();
+                        this.renderHeader();
+                        alert("Dados restaurados!");
+                    } catch(e) { alert("Arquivo inválido"); }
                 };
                 reader.readAsText(file);
             }
         }
 
-        // Inicializar e expor globalmente
-        window.app = new HybridApp();
+        window.app = new App();
     </script>
 </body>
 </html>
