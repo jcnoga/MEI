@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MEI Simples - Perfil Completo</title>
+    <title>MEI Controle Total</title>
     
     <!-- Bibliotecas -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -73,9 +73,9 @@
     <!-- 1. TELA DE LOGIN -->
     <section id="auth-screen">
         <div style="text-align:center; max-width:400px; width:100%;">
-            <i class="fa-solid fa-user-shield" style="font-size:3.5rem; color:var(--primary); margin-bottom:10px;"></i>
-            <h1>MEI Seguro</h1>
-            <p style="color:var(--text-muted); margin-bottom:20px;">Login Nuvem + Dados Locais</p>
+            <i class="fa-solid fa-chart-line" style="font-size:3.5rem; color:var(--primary); margin-bottom:10px;"></i>
+            <h1>MEI Controle</h1>
+            <p style="color:var(--text-muted); margin-bottom:20px;">Seu negócio em dia</p>
             
             <form onsubmit="event.preventDefault(); app.handleAuth();">
                 <div id="reg-fields" class="hidden">
@@ -91,7 +91,6 @@
                 <span id="link-toggle">Criar nova conta</span>
             </div>
 
-            <!-- Aviso -->
             <div id="config-warning" class="hidden" style="margin-top:20px; padding:10px; background:#fee2e2; color:#991b1b; border-radius:8px; font-size:0.8rem;">
                 ⚠ Configure as chaves do Firebase no código!
             </div>
@@ -118,8 +117,12 @@
                 <div class="card" style="background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white;">
                     <p style="opacity:0.9;">Saldo Atual</p>
                     <h1 style="font-size:2.5rem;" id="dash-bal">R$ 0,00</h1>
+                    <div class="flex justify-between" style="font-size:0.85rem; margin-top:10px; background:rgba(0,0,0,0.1); padding:10px; border-radius:10px;">
+                        <span><i class="fa-solid fa-arrow-up"></i> Receita: <span id="dash-inc">0,00</span></span>
+                        <span><i class="fa-solid fa-arrow-down"></i> Despesa: <span id="dash-exp">0,00</span></span>
+                    </div>
                 </div>
-                <h3>Últimos Lançamentos</h3>
+                <h3>Histórico</h3>
                 <div id="list-recent"></div>
                 <div id="empty-state" class="hidden" style="text-align:center; padding:30px; color:var(--text-muted);">
                     <p>Sem dados neste dispositivo.</p>
@@ -132,7 +135,7 @@
                 
                 <!-- Card Perfil -->
                 <div class="card">
-                    <h3><i class="fa-solid fa-id-card"></i> Meus Dados</h3>
+                    <h3><i class="fa-solid fa-id-card"></i> Dados da Empresa</h3>
                     <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:10px;">
                         Nome, CNPJ e Nome Fantasia.
                     </p>
@@ -146,7 +149,8 @@
 
                 <!-- Card Backup -->
                 <div class="card">
-                    <h3><i class="fa-solid fa-cloud-arrow-down"></i> Backup</h3>
+                    <h3><i class="fa-solid fa-cloud-arrow-down"></i> Segurança</h3>
+                    <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:10px;">Salve seus dados para transferir de aparelho.</p>
                     <button class="btn btn-dark" onclick="app.backupData()">
                         <i class="fa-solid fa-download"></i> Baixar Backup
                     </button>
@@ -157,7 +161,7 @@
                 </div>
 
                 <div class="card">
-                    <p id="conf-email" style="text-align:center; margin-bottom:10px; color:var(--text-muted);">email@user.com</p>
+                    <p id="conf-email" style="text-align:center; margin-bottom:10px; color:var(--text-muted);">...</p>
                     <button class="btn btn-danger" onclick="app.logout()">Sair</button>
                 </div>
             </div>
@@ -169,21 +173,31 @@
         </nav>
     </section>
 
-    <!-- MODAL: NOVA TRANSAÇÃO -->
+    <!-- MODAL: NOVA TRANSAÇÃO (CATEGORIAS VOLTARAM!) -->
     <div id="modal-tx" class="modal-overlay hidden" onclick="if(event.target===this) app.closeModal('modal-tx')">
         <div class="modal-content">
             <div class="flex justify-between"><h2>Novo Lançamento</h2><i class="fa-solid fa-xmark" onclick="app.closeModal('modal-tx')"></i></div>
+            
             <div class="type-switch">
                 <div class="type-opt active inc" id="opt-inc" onclick="app.setType('income')">Entrada</div>
                 <div class="type-opt" id="opt-exp" onclick="app.setType('expense')">Saída</div>
             </div>
+
             <label class="form-label">Valor (R$)</label>
-            <input type="number" id="tx-val" class="auth-input" step="0.01">
+            <input type="number" id="tx-val" class="auth-input" step="0.01" style="font-size:1.4rem; font-weight:bold;">
+            
+            <label class="form-label">Categoria</label>
+            <select id="tx-cat" class="auth-input">
+                <!-- Preenchido via JS -->
+            </select>
+
             <label class="form-label">Data</label>
             <input type="date" id="tx-date" class="auth-input">
-            <label class="form-label">Descrição</label>
-            <input type="text" id="tx-desc" class="auth-input">
-            <button class="btn btn-primary" onclick="app.saveTx()">Salvar</button>
+            
+            <label class="form-label">Descrição (Opcional)</label>
+            <input type="text" id="tx-desc" class="auth-input" placeholder="Detalhes">
+            
+            <button class="btn btn-primary" style="margin-top:15px;" onclick="app.saveTx()">Salvar</button>
         </div>
     </div>
 
@@ -201,7 +215,7 @@
             <label class="form-label">CPF ou CNPJ</label>
             <input type="tel" id="edit-doc" class="auth-input" placeholder="Somente números">
 
-            <button class="btn btn-primary" onclick="app.saveProfile()">Atualizar Dados</button>
+            <button class="btn btn-primary" onclick="app.saveProfile()">Atualizar</button>
         </div>
     </div>
 
@@ -217,13 +231,10 @@
             <input type="password" id="conf-pass" class="auth-input">
 
             <button class="btn btn-danger" onclick="app.changePassword()">Confirmar Troca</button>
-            <p style="font-size:0.75rem; color:var(--text-muted); margin-top:10px;">
-                Nota: Se você não fez login recentemente, será necessário sair e entrar novamente para mudar a senha.
-            </p>
         </div>
     </div>
 
-    <!-- FIREBASE & LOGIC -->
+    <!-- SCRIPT -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, updateProfile, updatePassword } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
@@ -245,9 +256,15 @@ const firebaseConfig = {
                 this.auth = null;
                 this.user = null;
                 this.txs = [];
-                this.profile = {}; // Dados locais do perfil (CNPJ, Fantasia)
+                this.profile = {}; 
                 this.isRegister = false;
                 this.curType = 'income';
+
+                // Categorias para preencher o Select
+                this.categories = {
+                    income: ['Venda de Produto', 'Prestação de Serviço', 'Outras Receitas'],
+                    expense: ['Compra de Mercadoria', 'Material de Uso', 'Aluguel', 'Água/Luz/Internet', 'Imposto (DAS)', 'Transporte', 'Retirada Pessoal', 'Outras Despesas']
+                };
 
                 this.initFirebase();
             }
@@ -306,11 +323,10 @@ const firebaseConfig = {
                 document.getElementById('app-screen').classList.remove('hidden');
                 document.getElementById('conf-email').innerText = this.user.email;
 
-                // Carregar Transações Locais
+                // Carregar Dados Locais
                 const localData = localStorage.getItem(`mei_data_${this.user.uid}`);
                 this.txs = localData ? JSON.parse(localData) : [];
 
-                // Carregar Perfil Local (Fantasia/Doc)
                 const localProfile = localStorage.getItem(`mei_profile_${this.user.uid}`);
                 this.profile = localProfile ? JSON.parse(localProfile) : { fantasy: '', doc: '' };
 
@@ -323,13 +339,11 @@ const firebaseConfig = {
                 document.getElementById('head-fantasy').innerText = this.profile.fantasy || "Minha Empresa";
             }
 
-            // --- PERFIL & SENHA (UPDATE) ---
+            // --- PERFIL & SENHA ---
             openProfileModal() {
-                // Preencher com dados atuais
                 document.getElementById('edit-name').value = this.user.displayName || '';
                 document.getElementById('edit-fantasy').value = this.profile.fantasy || '';
                 document.getElementById('edit-doc').value = this.profile.doc || '';
-                
                 document.getElementById('modal-profile').classList.remove('hidden');
             }
 
@@ -338,24 +352,19 @@ const firebaseConfig = {
                 const newFantasy = document.getElementById('edit-fantasy').value;
                 const newDoc = document.getElementById('edit-doc').value;
 
-                if(!newName) return alert("O nome é obrigatório.");
+                if(!newName) return alert("Nome é obrigatório.");
 
                 try {
-                    // 1. Atualizar Nome no Firebase
                     if(newName !== this.user.displayName) {
                         await updateProfile(this.user, { displayName: newName });
                     }
-
-                    // 2. Atualizar Dados Locais (Fantasia/CNPJ)
                     this.profile = { fantasy: newFantasy, doc: newDoc };
                     localStorage.setItem(`mei_profile_${this.user.uid}`, JSON.stringify(this.profile));
 
-                    alert("Perfil atualizado com sucesso!");
+                    alert("Perfil atualizado!");
                     this.closeModal('modal-profile');
                     this.renderHeader();
-                } catch(e) {
-                    alert("Erro ao atualizar: " + e.message);
-                }
+                } catch(e) { alert("Erro: " + e.message); }
             }
 
             openPassModal() {
@@ -367,31 +376,53 @@ const firebaseConfig = {
             async changePassword() {
                 const p1 = document.getElementById('new-pass').value;
                 const p2 = document.getElementById('conf-pass').value;
-
-                if(p1.length < 6) return alert("A senha deve ter pelo menos 6 caracteres.");
-                if(p1 !== p2) return alert("As senhas não conferem.");
+                if(p1.length < 6) return alert("Mínimo 6 caracteres.");
+                if(p1 !== p2) return alert("Senhas não conferem.");
 
                 try {
                     await updatePassword(this.user, p1);
-                    alert("Senha alterada! Por favor, entre novamente.");
+                    alert("Senha alterada! Faça login novamente.");
                     this.logout();
                 } catch(e) {
-                    if(e.code === 'auth/requires-recent-login') {
-                        alert("Por segurança, faça logout e login novamente antes de trocar a senha.");
-                    } else {
-                        alert("Erro: " + e.message);
-                    }
+                    if(e.code === 'auth/requires-recent-login') alert("Faça logout e login para mudar a senha.");
+                    else alert("Erro: " + e.message);
                 }
             }
 
-            // --- TRANSACTION LOGIC ---
+            // --- TRANSAÇÕES (LOGIC) ---
+            openTxModal() {
+                document.getElementById('tx-date').value = new Date().toISOString().split('T')[0];
+                document.getElementById('tx-val').value = '';
+                document.getElementById('tx-desc').value = '';
+                this.setType('income'); // Reset e popula categorias
+                document.getElementById('modal-tx').classList.remove('hidden');
+            }
+
+            setType(type) {
+                this.curType = type;
+                document.getElementById('opt-inc').classList.toggle('active', type === 'income');
+                document.getElementById('opt-exp').classList.toggle('active', type === 'expense');
+                
+                // POPULAR SELECT DE CATEGORIAS
+                const select = document.getElementById('tx-cat');
+                select.innerHTML = '';
+                this.categories[type].forEach(cat => {
+                    const opt = document.createElement('option');
+                    opt.value = cat;
+                    opt.innerText = cat;
+                    select.appendChild(opt);
+                });
+            }
+
             saveTx() {
                 const val = parseFloat(document.getElementById('tx-val').value);
                 const date = document.getElementById('tx-date').value;
                 const desc = document.getElementById('tx-desc').value;
-                if (!val || !date) return alert("Preencha valor e data");
+                const cat = document.getElementById('tx-cat').value; // Pegar categoria
 
-                this.txs.push({ id: Date.now(), type: this.curType, val, date, desc });
+                if (!val || !date) return alert("Valor e Data são obrigatórios");
+
+                this.txs.push({ id: Date.now(), type: this.curType, val, date, cat, desc });
                 localStorage.setItem(`mei_data_${this.user.uid}`, JSON.stringify(this.txs));
                 
                 this.closeModal('modal-tx');
@@ -401,7 +432,7 @@ const firebaseConfig = {
             render() {
                 const list = document.getElementById('list-recent');
                 list.innerHTML = '';
-                let bal = 0;
+                let bal = 0, incTotal = 0, expTotal = 0;
 
                 if (this.txs.length === 0) {
                     document.getElementById('empty-state').classList.remove('hidden');
@@ -410,30 +441,28 @@ const firebaseConfig = {
                     this.txs.sort((a,b) => new Date(b.date) - new Date(a.date));
                     
                     this.txs.forEach(tx => {
-                        if(tx.type === 'income') bal += tx.val; else bal -= tx.val;
+                        if(tx.type === 'income') { bal += tx.val; incTotal += tx.val; } 
+                        else { bal -= tx.val; expTotal += tx.val; }
+                        
                         list.innerHTML += `
                         <div class="tx-item">
-                            <div><strong>${tx.desc || '---'}</strong><br><small style="color:var(--text-muted)">${new Date(tx.date).toLocaleDateString()}</small></div>
-                            <span class="${tx.type==='income'?'text-green':'text-red'}">${tx.type==='income'?'+':'-'} R$ ${tx.val.toFixed(2)}</span>
+                            <div>
+                                <strong style="font-size:0.95rem;">${tx.cat || 'Geral'}</strong>
+                                <br>
+                                <small style="color:var(--text-muted)">${new Date(tx.date).toLocaleDateString()} ${tx.desc ? '• '+tx.desc : ''}</small>
+                            </div>
+                            <span class="${tx.type==='income'?'text-green':'text-red'}">
+                                ${tx.type==='income'?'+':'-'} R$ ${tx.val.toFixed(2)}
+                            </span>
                         </div>`;
                     });
                 }
                 document.getElementById('dash-bal').innerText = `R$ ${bal.toFixed(2)}`;
+                document.getElementById('dash-inc').innerText = incTotal.toFixed(2);
+                document.getElementById('dash-exp').innerText = expTotal.toFixed(2);
             }
 
-            // --- UI HELPERS ---
-            openTxModal() {
-                document.getElementById('tx-date').value = new Date().toISOString().split('T')[0];
-                document.getElementById('tx-val').value = '';
-                document.getElementById('modal-tx').classList.remove('hidden');
-            }
             closeModal(id) { document.getElementById(id).classList.add('hidden'); }
-            
-            setType(type) {
-                this.curType = type;
-                document.getElementById('opt-inc').classList.toggle('active', type === 'income');
-                document.getElementById('opt-exp').classList.toggle('active', type === 'expense');
-            }
             
             navTo(viewId, btn) {
                 document.getElementById('view-home').classList.add('hidden');
@@ -460,14 +489,12 @@ const firebaseConfig = {
                 reader.onload = (e) => {
                     try {
                         const json = JSON.parse(e.target.result);
-                        // Suporte a backup antigo (só array) ou novo (objeto completo)
-                        if(Array.isArray(json)) this.txs = json;
-                        else {
-                            if(json.txs) this.txs = json.txs;
-                            if(json.profile) {
-                                this.profile = json.profile;
-                                localStorage.setItem(`mei_profile_${this.user.uid}`, JSON.stringify(this.profile));
-                            }
+                        if(json.txs) this.txs = json.txs; 
+                        else if(Array.isArray(json)) this.txs = json; // Compatibilidade antiga
+
+                        if(json.profile) {
+                            this.profile = json.profile;
+                            localStorage.setItem(`mei_profile_${this.user.uid}`, JSON.stringify(this.profile));
                         }
                         localStorage.setItem(`mei_data_${this.user.uid}`, JSON.stringify(this.txs));
                         this.render();
