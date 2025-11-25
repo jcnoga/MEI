@@ -82,8 +82,10 @@
         .contact-links a { color: var(--text-main); transition: 0.2s; }
         .contact-links a:hover { color: var(--primary); }
         .website-link { color: var(--primary); text-decoration: none; font-weight: 600; }
-        .donation-box { background: rgba(0,0,0,0.03); padding: 10px; border-radius: 10px; margin-top: 15px; font-size: 0.75rem; border: 1px dashed var(--border); }
-        .copy-btn { background: none; border: none; color: var(--primary); cursor: pointer; margin-left: 5px; font-size: 0.9rem; }
+        
+        /* Nova Caixa de Doação */
+        .donation-box { background: #f0fdf4; padding: 15px; border-radius: 12px; margin-top: 20px; font-size: 0.8rem; border: 1px dashed var(--primary); }
+        .donation-box p { margin-bottom: 10px; line-height: 1.4; color: var(--text-main); }
 
         /* Badge Estoque */
         .badge-stock { background: #eee; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
@@ -249,13 +251,14 @@
                         <a href="mailto:websitelogx@gmail.com"><i class="fa-solid fa-envelope"></i></a>
                         <a href="https://wa.me/5534997824990" target="_blank" style="color:#25D366"><i class="fa-brands fa-whatsapp"></i></a>
                     </div>
+                    
                     <div class="donation-box">
-                        <p style="margin-bottom:5px;">Gostou do App? Aceitamos café ☕</p>
-                        <div class="flex" style="justify-content:center; gap:5px; color:var(--text-main);">
-                            <i class="fa-brands fa-pix"></i>
-                            <span id="pix-key">jose.carlos.nogueira1@gmail.com</span>
-                            <button class="copy-btn" onclick="app.copyPix()"><i class="fa-regular fa-copy"></i></button>
-                        </div>
+                        <p>
+                            Este app é gratuito e sem anúncios. Se quiser apoiar a manutenção, contribua via PIX. Simples, claro e honesto.
+                        </p>
+                        <button class="btn btn-primary" onclick="app.copyPix()" style="width:auto; margin:0 auto; font-size:0.9rem; padding:8px 20px;">
+                            <i class="fa-brands fa-pix"></i> Apoiar / Copiar Chave
+                        </button>
                     </div>
                 </div>
             </div>
