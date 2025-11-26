@@ -105,6 +105,32 @@
         .radio-group { display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px; background: #fff; padding: 10px; border-radius: 10px; border: 1px solid var(--border); }
         .radio-item { display: flex; align-items: center; gap: 10px; font-size: 0.9rem; cursor: pointer; }
         .radio-item input { width: 18px; height: 18px; accent-color: var(--primary); }
+
+        /* Estilo do Alerta DAS */
+        .alert-das {
+            padding: 12px; 
+            border-radius: 12px; 
+            margin-bottom: 15px; 
+            font-size: 0.9rem; 
+            text-align: center;
+            font-weight: 600;
+        }
+        .das-warning {
+            background: #fff3cd; 
+            color: #856404; 
+            border: 1px solid #ffeeba; 
+        }
+        .das-urgent {
+            background: #fee2e2; 
+            color: #991b1b; 
+            border: 1px solid #fecaca;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.8; }
+            100% { opacity: 1; }
+        }
     </style>
 </head>
 <body>
@@ -153,6 +179,10 @@
         <main class="container" style="padding-top:20px;">
             <!-- VIEW: DASHBOARD -->
             <div id="view-home">
+                
+                <!-- ALERTA DAS (VISIVEL DINAMICAMENTE) -->
+                <div id="das-alert" class="alert-das hidden"></div>
+
                 <div class="card" style="background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white;">
                     <p style="opacity:0.9;">Saldo Atual</p>
                     <h1 style="font-size:2.5rem;" id="dash-bal">R$ 0,00</h1>
@@ -169,7 +199,7 @@
                     </button>
                 </div>
 
-                <!-- NOVO: Botão DAS -->
+                <!-- Botão DAS -->
                 <div id="das-shortcut" class="hidden" style="margin-bottom: 15px;">
                     <button class="btn btn-warning" onclick="app.openDASLink()">
                         <i class="fa-solid fa-barcode"></i> Pagar DAS (MEI)
@@ -239,7 +269,7 @@
                         <button class="btn-secondary btn-sm" onclick="app.saveNFLink()">Salvar</button>
                     </div>
                     
-                    <!-- NOVO: Link Pagamento DAS -->
+                    <!-- Link Pagamento DAS -->
                     <label class="form-label">Link Pagamento DAS:</label>
                     <div class="flex" style="gap:5px;">
                         <input type="text" id="conf-das-link" class="auth-input" placeholder="https://www8.receita.fazenda.gov.br..." style="margin:0;">
@@ -540,6 +570,7 @@
                 this.renderHeader();
                 this.checkNFLink();
                 this.checkDASLink();
+                this.checkDASAlert(); // NOVO: Verifica datas para alerta
             }
 
             renderHeader() {
@@ -547,6 +578,39 @@
                 document.getElementById('head-fantasy').innerText = this.profile.fantasy || "Minha Empresa";
                 document.getElementById('conf-nf-link').value = this.settings.nfLink || '';
                 document.getElementById('conf-das-link').value = this.settings.dasLink || '';
+            }
+
+            // --- Lógica de Alerta DAS e "Email" Simulado ---
+            checkDASAlert() {
+                const today = new Date().getDate();
+                const el = document.getElementById('das-alert');
+                
+                // 1. Alert Box no Topo (Entre 15 e 20)
+                if (today >= 15 && today <= 19) {
+                    el.className = 'alert-das das-warning';
+                    el.innerText = 'Não esqueça: 📅 Lembrete MEI: O DAS vence dia 20!';
+                    el.classList.remove('hidden');
+                } else if (today === 20) {
+                    el.className = 'alert-das das-urgent';
+                    el.innerText = '🚨 Seu DAS vence hoje!';
+                    el.classList.remove('hidden');
+                } else {
+                    el.classList.add('hidden');
+                }
+
+                // 2. Simulação de "Email" no dia 17
+                if (today === 17) {
+                    const emailKey = `das_email_alert_${new Date().toDateString()}_${this.user.uid}`;
+                    const alreadySent = localStorage.getItem(emailKey);
+                    
+                    if (!alreadySent) {
+                        const companyName = this.profile.fantasy || "Sua Empresa";
+                        // Exibe um alerta simulando o email
+                        alert(`${companyName}, lembrete: dia 20 é o último dia para pagar o DAS`);
+                        // Marca como enviado hoje para não repetir
+                        localStorage.setItem(emailKey, 'true');
+                    }
+                }
             }
 
             // --- CONFIGS: MERCHANT MODE ---
