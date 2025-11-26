@@ -310,12 +310,28 @@
                     </div>
                 </div>
             </div>
+
+            <!-- VIEW: APOIO (NOVA) -->
+            <div id="view-support" class="hidden" style="text-align: center; padding: 40px 20px;">
+                <i class="fa-solid fa-hand-holding-heart" style="font-size: 4rem; color: var(--primary); margin-bottom: 20px;"></i>
+                <h2 style="margin-bottom: 15px;">Apoie o Projeto</h2>
+                <p style="color: var(--text-main); line-height: 1.6; margin-bottom: 30px;">
+                    Este app é gratuito e existe graças ao apoio de MEIs como você.<br><br>
+                    Sua colaboração ajuda a manter o projeto vivo e fortalece toda a comunidade de microempreendedores.
+                </p>
+                <div class="card" style="margin-top:20px;">
+                    <button class="btn btn-primary" onclick="app.copyPixSupport()" style="font-size:1.1rem; padding:15px;">
+                        <i class="fa-brands fa-pix"></i> Apoiar
+                    </button>
+                </div>
+            </div>
         </main>
 
         <nav class="bottom-nav">
             <button class="nav-item active" onclick="app.navTo('home', this)"><i class="fa-solid fa-chart-pie"></i>Início</button>
             <button class="nav-item" onclick="app.navTo('registers', this)"><i class="fa-solid fa-address-book"></i>Cadastros</button>
             <button class="nav-item" onclick="app.navTo('settings', this)"><i class="fa-solid fa-user-gear"></i>Config</button>
+            <button class="nav-item" onclick="app.navTo('support', this)"><i class="fa-solid fa-heart"></i>Apoio</button>
         </nav>
     </section>
 
@@ -1093,7 +1109,7 @@
 
             closeModal(id) { document.getElementById(id).classList.add('hidden'); }
             navTo(viewId, btn) {
-                ['home', 'registers', 'settings'].forEach(v => document.getElementById('view-'+v).classList.add('hidden'));
+                ['home', 'registers', 'settings', 'support'].forEach(v => document.getElementById('view-'+v).classList.add('hidden'));
                 document.getElementById('view-'+viewId).classList.remove('hidden');
                 document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
@@ -1101,6 +1117,13 @@
             }
 
             copyPix() { navigator.clipboard.writeText("b4648948-d0a8-4402-81f4-8a4047fcf4e5").then(()=>alert("Pix copiado — agora é só colar e pagar.")); }
+            
+            // Função específica para o botão de Apoio com a nova mensagem
+            copyPixSupport() { 
+                navigator.clipboard.writeText("b4648948-d0a8-4402-81f4-8a4047fcf4e5").then(() => {
+                    alert("Pix copiado! Agora é só colar no seu app bancário para colaborar.");
+                }); 
+            }
             
             backupData() {
                 const payload = { 
