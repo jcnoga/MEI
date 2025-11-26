@@ -162,9 +162,17 @@
                     </div>
                 </div>
 
+                <!-- Botão Nota Fiscal -->
                 <div id="nf-shortcut" class="hidden" style="margin-bottom: 15px;">
                     <button class="btn btn-secondary" onclick="app.openNFLink()">
                         <i class="fa-solid fa-file-invoice"></i> Emitir Nota Fiscal (Emissor Nacional)
+                    </button>
+                </div>
+
+                <!-- NOVO: Botão DAS -->
+                <div id="das-shortcut" class="hidden" style="margin-bottom: 15px;">
+                    <button class="btn btn-warning" onclick="app.openDASLink()">
+                        <i class="fa-solid fa-barcode"></i> Pagar DAS (MEI)
                     </button>
                 </div>
 
@@ -223,12 +231,22 @@
 
                 <div class="card">
                     <h3><i class="fa-solid fa-folder-open"></i> Fiscal & Docs</h3>
+                    
+                    <!-- Link Emissor NF -->
                     <label class="form-label">Link Emissor Nacional (NF):</label>
                     <div class="flex" style="gap:5px;">
                         <input type="text" id="conf-nf-link" class="auth-input" placeholder="https://www.nfse.gov.br/EmissorNacional" style="margin:0;">
                         <button class="btn-secondary btn-sm" onclick="app.saveNFLink()">Salvar</button>
                     </div>
-                    <p style="font-size:0.75rem; color:var(--text-muted); margin-top:5px;">Link padrão sugerido para MEI Prestador de Serviço.</p>
+                    
+                    <!-- NOVO: Link Pagamento DAS -->
+                    <label class="form-label">Link Pagamento DAS:</label>
+                    <div class="flex" style="gap:5px;">
+                        <input type="text" id="conf-das-link" class="auth-input" placeholder="https://www8.receita.fazenda.gov.br..." style="margin:0;">
+                        <button class="btn-secondary btn-sm" onclick="app.saveDASLink()">Salvar</button>
+                    </div>
+
+                    <p style="font-size:0.75rem; color:var(--text-muted); margin-top:5px;">Links rápidos para acesso ao governo.</p>
                     <hr style="border:0; border-top:1px solid var(--border); margin:15px 0;">
                     <button class="btn btn-outline" onclick="app.downloadManual()"><i class="fa-solid fa-file-pdf"></i> Baixar Manual/PDF</button>
                 </div>
@@ -409,6 +427,7 @@
             measurementId: "G-PE631DFGE0"
         };
         const SEU_LINK_PDF = "https://drive.google.com/file/d/1gMocDMAey8q35-bcJsRip7Zm0v2mCrMS/view?usp=sharing"; 
+        const DEFAULT_DAS_LINK = "https://www8.receita.fazenda.gov.br/SimplesNacional/Aplicacoes/ATSPO/pgmei.app/Identificacao";
 
         class App {
             constructor() {
@@ -418,7 +437,7 @@
                 // Dados Locais
                 this.txs = [];
                 this.profile = {}; 
-                this.settings = { nfLink: '', merchantMode: false }; 
+                this.settings = { nfLink: '', dasLink: '', merchantMode: false }; 
                 this.clients = [];
                 this.suppliers = [];
                 this.products = [];
@@ -496,8 +515,15 @@
 
                 const uid = this.user.uid;
                 // Carregar configurações primeiro para ver o link padrão
-                const defaultSettings = JSON.stringify({ nfLink: "https://www.nfse.gov.br/EmissorNacional", merchantMode: false });
+                const defaultSettings = JSON.stringify({ 
+                    nfLink: "https://www.nfse.gov.br/EmissorNacional", 
+                    dasLink: DEFAULT_DAS_LINK,
+                    merchantMode: false 
+                });
+                
                 this.settings = JSON.parse(localStorage.getItem(`mei_settings_${uid}`) || defaultSettings);
+                // Garantir que dasLink exista se for um usuário antigo
+                if(!this.settings.dasLink) this.settings.dasLink = DEFAULT_DAS_LINK;
 
                 this.txs = JSON.parse(localStorage.getItem(`mei_data_${uid}`) || '[]');
                 this.profile = JSON.parse(localStorage.getItem(`mei_profile_${uid}`) || '{"fantasy":"","doc":""}');
@@ -513,12 +539,14 @@
                 this.render();
                 this.renderHeader();
                 this.checkNFLink();
+                this.checkDASLink();
             }
 
             renderHeader() {
                 document.getElementById('head-name').innerText = this.user.displayName || "Usuário";
                 document.getElementById('head-fantasy').innerText = this.profile.fantasy || "Minha Empresa";
                 document.getElementById('conf-nf-link').value = this.settings.nfLink || '';
+                document.getElementById('conf-das-link').value = this.settings.dasLink || '';
             }
 
             // --- CONFIGS: MERCHANT MODE ---
@@ -782,15 +810,30 @@
             saveNFLink() {
                 this.settings.nfLink = document.getElementById('conf-nf-link').value;
                 localStorage.setItem(`mei_settings_${this.user.uid}`, JSON.stringify(this.settings));
-                alert("Salvo!");
+                alert("Link NF Salvo!");
                 this.checkNFLink();
             }
+            saveDASLink() {
+                this.settings.dasLink = document.getElementById('conf-das-link').value;
+                localStorage.setItem(`mei_settings_${this.user.uid}`, JSON.stringify(this.settings));
+                alert("Link DAS Salvo!");
+                this.checkDASLink();
+            }
+            
             checkNFLink() {
                 const el = document.getElementById('nf-shortcut');
                 if(this.settings.nfLink && this.settings.nfLink.length > 5) el.classList.remove('hidden');
                 else el.classList.add('hidden');
             }
+            checkDASLink() {
+                const el = document.getElementById('das-shortcut');
+                if(this.settings.dasLink && this.settings.dasLink.length > 5) el.classList.remove('hidden');
+                else el.classList.add('hidden');
+            }
+
             openNFLink() { if(this.settings.nfLink) window.open(this.settings.nfLink, '_blank'); }
+            openDASLink() { if(this.settings.dasLink) window.open(this.settings.dasLink, '_blank'); }
+
             downloadManual() { if(!SEU_LINK_PDF) return alert("Configure o PDF"); window.open(SEU_LINK_PDF, '_blank'); }
 
             openProfileModal() {
@@ -1033,7 +1076,7 @@
                         localStorage.setItem(`mei_services_${uid}`, JSON.stringify(this.services));
                         localStorage.setItem(`mei_stock_${uid}`, JSON.stringify(this.stockMovements));
 
-                        this.render(); this.renderHeader(); this.checkNFLink();
+                        this.render(); this.renderHeader(); this.checkNFLink(); this.checkDASLink();
                         alert("Restaurado!");
                     } catch(e) { alert("Arquivo inválido"); }
                 };
