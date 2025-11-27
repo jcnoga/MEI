@@ -8,6 +8,10 @@
     <!-- Bibliotecas -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Bibliotecas para PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 
     <style>
         :root {
@@ -227,6 +231,10 @@
                 <div class="flex justify-between" style="margin-bottom: 15px;">
                     <h3 id="reg-title">Lista</h3>
                     <div class="flex" style="gap:5px;">
+                        <!-- Botão PDF -->
+                        <button class="btn-dark btn-sm" onclick="app.downloadRegPDF()" title="Baixar PDF">
+                            <i class="fa-solid fa-file-pdf"></i>
+                        </button>
                         <!-- Botão Lista de Compras (Só aparece em Produtos) -->
                         <button id="btn-shopping-list" class="btn-warning btn-sm hidden" onclick="app.openShoppingList()">
                             <i class="fa-solid fa-cart-shopping"></i> Lista Compras
@@ -698,6 +706,43 @@
                         </div>
                     </div>`;
                 });
+            }
+
+            // FUNÇÃO PDF
+            async downloadRegPDF() {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                
+                let title = '';
+                let head = [];
+                let body = [];
+                
+                if (this.curRegTab === 'clients') {
+                    title = 'Lista de Clientes';
+                    head = [['Nome', 'Telefone', 'Documento']];
+                    body = this.clients.map(i => [i.name, i.phone, i.doc]);
+                } else if (this.curRegTab === 'suppliers') {
+                    title = 'Lista de Fornecedores';
+                    head = [['Nome', 'Telefone', 'Documento']];
+                    body = this.suppliers.map(i => [i.name, i.phone, i.doc]);
+                } else if (this.curRegTab === 'products') {
+                    title = 'Lista de Produtos';
+                    head = [['Produto', 'Preço (R$)', 'Custo (R$)', 'Estoque', 'Fornecedor']];
+                    body = this.products.map(i => [i.name, parseFloat(i.price).toFixed(2), parseFloat(i.cost).toFixed(2), i.currentStock, i.supplier]);
+                } else if (this.curRegTab === 'services') {
+                    title = 'Lista de Serviços';
+                    head = [['Serviço', 'Preço (R$)', 'Custo (R$)']];
+                    body = this.services.map(i => [i.name, parseFloat(i.price).toFixed(2), parseFloat(i.cost).toFixed(2)]);
+                }
+
+                doc.text(title, 14, 10);
+                doc.autoTable({
+                    head: head,
+                    body: body,
+                    startY: 20
+                });
+                
+                doc.save(`${this.curRegTab}_${new Date().toISOString().slice(0,10)}.pdf`);
             }
 
             openRegModal(idx = null) {
