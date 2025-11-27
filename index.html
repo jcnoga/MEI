@@ -111,30 +111,17 @@
         .radio-item input { width: 18px; height: 18px; accent-color: var(--primary); }
 
         /* Estilo do Alerta DAS */
-        .alert-das {
-            padding: 12px; 
-            border-radius: 12px; 
-            margin-bottom: 15px; 
-            font-size: 0.9rem; 
-            text-align: center;
-            font-weight: 600;
-        }
-        .das-warning {
-            background: #fff3cd; 
-            color: #856404; 
-            border: 1px solid #ffeeba; 
-        }
-        .das-urgent {
-            background: #fee2e2; 
-            color: #991b1b; 
-            border: 1px solid #fecaca;
-            animation: pulse 2s infinite;
-        }
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.8; }
-            100% { opacity: 1; }
-        }
+        .alert-das { padding: 12px; border-radius: 12px; margin-bottom: 15px; font-size: 0.9rem; text-align: center; font-weight: 600; }
+        .das-warning { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+        .das-urgent { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.8; } 100% { opacity: 1; } }
+
+        /* NOVO: GRADE DE BOTÕES PIX */
+        .pix-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
+        .btn-pix { padding: 15px; border: 2px solid var(--primary); background: white; border-radius: 12px; cursor: pointer; font-weight: 600; color: var(--text-main); transition: 0.2s; font-size: 1rem; }
+        .btn-pix:active { background: var(--primary); color: white; transform: scale(0.98); }
+        .pix-feedback { margin-top: 15px; padding: 12px; background: #dcfce7; color: var(--primary-dark); border-radius: 8px; font-size: 0.9rem; font-weight: 600; display: none; border: 1px solid #86efac; }
+        .pix-display-area { background: #f9f9f9; padding: 10px; border-radius: 8px; font-family: monospace; font-size: 0.75rem; color: #555; margin-top: 10px; word-break: break-all; display: none; user-select: all; border: 1px solid #ddd; }
     </style>
 </head>
 <body>
@@ -308,30 +295,44 @@
                         <a href="https://wa.me/5534997824990" target="_blank" style="color:#25D366"><i class="fa-brands fa-whatsapp"></i></a>
                     </div>
                     
+                    <!-- Box de Doação - Atalho para aba Apoio -->
                     <div class="donation-box">
-                        <p>
-                            Este app é gratuito e sem anúncios. Se quiser apoiar a manutenção, contribua via PIX. Simples, claro e honesto.
-                        </p>
-                        <button class="btn btn-primary" onclick="app.copyPix()" style="width:auto; margin:0 auto; font-size:0.9rem; padding:8px 20px;">
-                            <i class="fa-brands fa-pix"></i> Apoiar / Copiar Chave
+                        <p>Este app é gratuito. Apoie o desenvolvimento.</p>
+                        <button class="btn btn-primary" onclick="app.navTo('support', document.querySelector('.nav-item:last-child'))" style="width:auto; margin:0 auto; font-size:0.9rem; padding:8px 20px;">
+                            <i class="fa-brands fa-pix"></i> Apoiar Projeto
                         </button>
                     </div>
                 </div>
             </div>
 
-            <!-- VIEW: APOIO (NOVA) -->
+            <!-- VIEW: APOIO (ATUALIZADA) -->
             <div id="view-support" class="hidden" style="text-align: center; padding: 40px 20px;">
                 <i class="fa-solid fa-hand-holding-heart" style="font-size: 4rem; color: var(--primary); margin-bottom: 20px;"></i>
-                <h2 style="margin-bottom: 15px;">Apoie o Projeto</h2>
-                <p style="color: var(--text-main); line-height: 1.6; margin-bottom: 30px;">
-                    Este app é gratuito e existe graças ao apoio de MEIs como você.<br><br>
-                    Sua colaboração ajuda a manter o projeto vivo e fortalece toda a comunidade de microempreendedores.
+                <h2 style="margin-bottom: 15px;">Apoie o Projeto ☕</h2>
+                <p style="color: var(--text-main); line-height: 1.6; margin-bottom: 20px;">
+                    Este app é gratuito. Se ele te ajuda, considere fazer um Pix para manter o projeto vivo.
                 </p>
-                <div class="card" style="margin-top:20px;">
-                    <button class="btn btn-primary" onclick="app.copyPixSupport()" style="font-size:1.1rem; padding:15px;">
-                        <i class="fa-brands fa-pix"></i> Apoiar
-                    </button>
+                
+                <p style="font-weight:600; color:var(--text-muted);">Selecione um valor para gerar o Copia e Cola:</p>
+                
+                <div class="pix-grid">
+                    <button class="btn-pix" onclick="app.generatePixCopyPaste(5)">R$ 5,00</button>
+                    <button class="btn-pix" onclick="app.generatePixCopyPaste(9)">R$ 9,00</button>
+                    <button class="btn-pix" onclick="app.generatePixCopyPaste(12)">R$ 12,00</button>
+                    <button class="btn-pix" onclick="app.copyPixKeyOnly()">Outro</button>
                 </div>
+
+                <!-- Mensagem de Feedback -->
+                <div id="pix-feedback-msg" class="pix-feedback">
+                    ✅ Código Pix Copiado com Sucesso!
+                </div>
+
+                <!-- Exibição do código (opcional, caso o copy falhe) -->
+                <div id="pix-display-area" class="pix-display-area"></div>
+                
+                <p style="margin-top:30px; font-size:0.8rem; color:var(--text-muted);">
+                    Pagamento seguro via seu banco. Chave: b4648948-d0a8-4402-81f4-8a4047fcf4e5
+                </p>
             </div>
         </main>
 
@@ -482,6 +483,7 @@
         };
         const SEU_LINK_PDF = "https://drive.google.com/file/d/1gMocDMAey8q35-bcJsRip7Zm0v2mCrMS/view?usp=sharing"; 
         const DEFAULT_DAS_LINK = "https://www8.receita.fazenda.gov.br/SimplesNacional/Aplicacoes/ATSPO/pgmei.app/Identificacao";
+        const PIX_KEY = "b4648948-d0a8-4402-81f4-8a4047fcf4e5";
 
         class App {
             constructor() {
@@ -504,7 +506,7 @@
                 this.editIdx = null; 
                 this.stockIdx = null; 
                 this.stockType = 'in'; 
-                this.txStockAction = 'other'; // 'sale', 'buy', 'other'
+                this.txStockAction = 'other'; 
 
                 this.categories = {
                     income: ['Venda de Produto', 'Prestação de Serviço', 'Outras Receitas'],
@@ -587,14 +589,13 @@
                 this.services = JSON.parse(localStorage.getItem(`mei_services_${uid}`) || '[]');
                 this.stockMovements = JSON.parse(localStorage.getItem(`mei_stock_${uid}`) || '[]');
 
-                // Atualizar switch do Merchant Mode
                 document.getElementById('conf-merchant-mode').checked = this.settings.merchantMode || false;
 
                 this.render();
                 this.renderHeader();
                 this.checkNFLink();
                 this.checkDASLink();
-                this.checkDASAlert(); // NOVO: Verifica datas para alerta
+                this.checkDASAlert();
             }
 
             renderHeader() {
@@ -604,12 +605,10 @@
                 document.getElementById('conf-das-link').value = this.settings.dasLink || '';
             }
 
-            // --- Lógica de Alerta DAS e "Email" Simulado ---
             checkDASAlert() {
                 const today = new Date().getDate();
                 const el = document.getElementById('das-alert');
                 
-                // 1. Alert Box no Topo (Entre 15 e 20)
                 if (today >= 15 && today <= 19) {
                     el.className = 'alert-das das-warning';
                     el.innerText = '📅 Lembrete MEI: O DAS vence dia 20!';
@@ -621,30 +620,14 @@
                 } else {
                     el.classList.add('hidden');
                 }
-
-                // 2. Simulação de "Email" no dia 17
-                if (today === 17) {
-                    const emailKey = `das_email_alert_${new Date().toDateString()}_${this.user.uid}`;
-                    const alreadySent = localStorage.getItem(emailKey);
-                    
-                    if (!alreadySent) {
-                        const companyName = this.profile.fantasy || "Sua Empresa";
-                        // Exibe um alerta simulando o email
-                        alert(`${companyName}, lembrete: dia 20 é o último dia para pagar o DAS`);
-                        // Marca como enviado hoje para não repetir
-                        localStorage.setItem(emailKey, 'true');
-                    }
-                }
             }
 
-            // --- CONFIGS: MERCHANT MODE ---
             toggleMerchantMode() {
                 this.settings.merchantMode = document.getElementById('conf-merchant-mode').checked;
                 localStorage.setItem(`mei_settings_${this.user.uid}`, JSON.stringify(this.settings));
                 alert(this.settings.merchantMode ? "Modo Comerciante Ativado!" : "Modo Simples Ativado.");
             }
 
-            // --- CADASTROS ---
             setRegTab(tab) {
                 this.curRegTab = tab;
                 document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -708,7 +691,6 @@
                 });
             }
 
-            // FUNÇÃO PDF
             async downloadRegPDF() {
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF();
@@ -861,7 +843,6 @@
                 this.renderRegList();
             }
 
-            // --- ESTOQUE ---
             openStockModal(idx) {
                 this.stockIdx = idx;
                 const p = this.products[idx];
@@ -910,7 +891,6 @@
                 this.renderRegList();
             }
 
-            // --- LISTA DE COMPRAS ---
             openShoppingList() {
                 const listDiv = document.getElementById('shopping-list-content');
                 listDiv.innerHTML = '';
@@ -931,7 +911,6 @@
                 document.getElementById('modal-shopping').classList.remove('hidden');
             }
 
-            // --- CONFIGS & EXTRAS ---
             saveNFLink() {
                 this.settings.nfLink = document.getElementById('conf-nf-link').value;
                 localStorage.setItem(`mei_settings_${this.user.uid}`, JSON.stringify(this.settings));
@@ -987,17 +966,13 @@
                 catch(e) { alert("Erro: " + e.message); }
             }
 
-            // --- TRANSACTION (FINANCIAL + STOCK) ---
             openTxModal() {
                 document.getElementById('tx-date').value = new Date().toISOString().split('T')[0];
                 document.getElementById('tx-val').value = '';
                 document.getElementById('tx-desc').value = '';
-                
-                // Reset Radios
                 const radios = document.getElementsByName('tx-action');
                 radios.forEach(r => r.checked = (r.value === 'other'));
                 this.handleStockAction('other');
-                
                 this.setType('income'); 
                 document.getElementById('modal-tx').classList.remove('hidden');
             }
@@ -1011,11 +986,9 @@
                 select.innerHTML = '';
                 this.categories[type].forEach(c => { select.innerHTML += `<option value="${c}">${c}</option>`; });
                 
-                // Show Radio Options only if Merchant Mode is ON
                 const merchantOpts = document.getElementById('merchant-options');
                 if(this.settings.merchantMode) {
                     merchantOpts.classList.remove('hidden');
-                    // Populate Product Select
                     const prodSel = document.getElementById('tx-prod-select');
                     prodSel.innerHTML = '<option value="">Selecione...</option>';
                     this.products.forEach((p, idx) => {
@@ -1032,14 +1005,14 @@
                 const valInput = document.getElementById('tx-val');
 
                 if(action === 'sale') {
-                    this.setType('income'); // Force Income
+                    this.setType('income'); 
                     details.classList.remove('hidden');
                     valInput.setAttribute('readonly', true);
                     valInput.style.background = "#eee";
                 } else if (action === 'buy') {
-                    this.setType('expense'); // Force Expense
+                    this.setType('expense');
                     details.classList.remove('hidden');
-                    valInput.removeAttribute('readonly'); // Cost can change
+                    valInput.removeAttribute('readonly');
                     valInput.style.background = "#fff";
                 } else {
                     details.classList.add('hidden');
@@ -1059,18 +1032,15 @@
                 const qty = parseInt(document.getElementById('tx-prod-qty').value || 1);
                 const prod = this.products[idx];
                 
-                // If Sale, use Sales Price. If Buy, try Cost Price (or 0)
                 let price = 0;
                 if(this.txStockAction === 'sale') price = parseFloat(prod.price || 0);
                 else price = parseFloat(prod.cost || 0);
                 
                 document.getElementById('tx-prod-price').value = price.toFixed(2);
                 
-                // If sale, auto-calc total. If buy, user might edit total manually so we suggest only
                 if(this.txStockAction === 'sale') {
                     document.getElementById('tx-val').value = (price * qty).toFixed(2);
                 } else {
-                    // For buy, only suggest if field is empty to not overwrite user input
                     if(document.getElementById('tx-val').value === "") {
                         document.getElementById('tx-val').value = (price * qty).toFixed(2);
                     }
@@ -1085,7 +1055,6 @@
 
                 if (!val || !date) return alert("Preencha valor e data");
 
-                // STOCK LOGIC
                 if(this.settings.merchantMode && this.txStockAction !== 'other') {
                     const prodIdx = document.getElementById('tx-prod-select').value;
                     const qty = parseInt(document.getElementById('tx-prod-qty').value);
@@ -1098,8 +1067,6 @@
                     if(this.txStockAction === 'sale') {
                         p.currentStock = Math.max(0, oldStock - qty);
                         desc = `Venda: ${p.name} (x${qty}) - ${desc}`;
-                        
-                        // Log Stock Movement
                         this.stockMovements.push({
                             date: new Date().toISOString(), product: p.name, type: 'out',
                             qty: qty, reason: 'Venda Direta', newStock: p.currentStock
@@ -1108,10 +1075,6 @@
                     } else if (this.txStockAction === 'buy') {
                         p.currentStock = oldStock + qty;
                         desc = `Compra: ${p.name} (x${qty}) - ${desc}`;
-                        
-                        // Update Cost Price if changed? Optional. Let's keep simple.
-                        
-                        // Log Stock Movement
                         this.stockMovements.push({
                             date: new Date().toISOString(), product: p.name, type: 'in',
                             qty: qty, reason: 'Reposição', newStock: p.currentStock
@@ -1122,10 +1085,7 @@
                     localStorage.setItem(`mei_stock_${this.user.uid}`, JSON.stringify(this.stockMovements));
                 }
 
-                // Financial Record
-                this.txs.push({ 
-                    id: Date.now(), type: this.curType, val, date, cat, desc 
-                });
+                this.txs.push({ id: Date.now(), type: this.curType, val, date, cat, desc });
                 localStorage.setItem(`mei_data_${this.user.uid}`, JSON.stringify(this.txs));
                 
                 this.closeModal('modal-tx');
@@ -1161,13 +1121,74 @@
                 if(viewId === 'registers') this.renderRegList();
             }
 
-            copyPix() { navigator.clipboard.writeText("b4648948-d0a8-4402-81f4-8a4047fcf4e5").then(()=>alert("Pix copiado — agora é só colar e pagar.")); }
+            // --- FUNÇÕES DE PIX (COPIA E COLA) ---
             
-            // Função específica para o botão de Apoio com a nova mensagem
-            copyPixSupport() { 
-                navigator.clipboard.writeText("b4648948-d0a8-4402-81f4-8a4047fcf4e5").then(() => {
-                    alert("Pix copiado! Agora é só colar no seu app bancário para colaborar.");
-                }); 
+            // 1. Calcula CRC16 (Padrão CCITT-FALSE para BR Code)
+            crc16(str) {
+                let crc = 0xFFFF;
+                for (let i = 0; i < str.length; i++) {
+                    crc ^= str.charCodeAt(i) << 8;
+                    for (let j = 0; j < 8; j++) {
+                        if ((crc & 0x8000) !== 0) crc = (crc << 1) ^ 0x1021;
+                        else crc = crc << 1;
+                    }
+                }
+                return (crc & 0xFFFF).toString(16).toUpperCase().padStart(4, '0');
+            }
+
+            // 2. Monta o Payload EMVCo
+            generatePixPayload(amount) {
+                const format = (id, val) => id + val.length.toString().padStart(2, '0') + val;
+                
+                // Merchant Account Info
+                const merchantInfo = format('00', 'BR.GOV.BCB.PIX') + format('01', PIX_KEY);
+                
+                let payload = 
+                    format('00', '01') +                          // Format
+                    format('26', merchantInfo) +                  // Merchant Info
+                    format('52', '0000') +                        // Category Code
+                    format('53', '986');                          // Currency BRL
+
+                if (amount > 0) {
+                    payload += format('54', amount.toFixed(2));   // Amount
+                }
+
+                payload += format('58', 'BR') +                   // Country
+                           format('59', 'MEI CONTROLE') +         // Merchant Name (Genérico)
+                           format('60', 'BRASIL') +               // City
+                           format('62', format('05', '***'));     // TxID
+
+                payload += '6304'; // Inicio CRC
+                payload += this.crc16(payload); // Fim CRC
+                return payload;
+            }
+
+            // 3. Ação do Botão
+            generatePixCopyPaste(amount) {
+                const code = this.generatePixPayload(amount);
+                this.copyToClipboard(code, `Pix Copia e Cola de R$ ${amount},00 gerado!`);
+                
+                // Mostra o código visualmente se necessário
+                const disp = document.getElementById('pix-display-area');
+                disp.style.display = 'block';
+                disp.innerText = code;
+            }
+
+            // 4. Copia apenas a chave (Botão Outro)
+            copyPixKeyOnly() {
+                this.copyToClipboard(PIX_KEY, "Chave Pix copiada! Digite o valor no seu banco.");
+                const disp = document.getElementById('pix-display-area');
+                disp.style.display = 'block';
+                disp.innerText = PIX_KEY;
+            }
+
+            copyToClipboard(text, msg) {
+                navigator.clipboard.writeText(text).then(() => {
+                    const fb = document.getElementById('pix-feedback-msg');
+                    fb.innerText = "✅ " + msg;
+                    fb.style.display = 'block';
+                    setTimeout(() => fb.style.display = 'none', 5000);
+                }).catch(err => alert("Erro ao copiar: " + text));
             }
             
             backupData() {
