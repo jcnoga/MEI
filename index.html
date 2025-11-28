@@ -206,6 +206,13 @@
                         <i class="fa-solid fa-barcode"></i> Pagar DAS (MEI)
                     </button>
                 </div>
+                
+                <!-- Botão RPA (Movido das Configurações para cá) -->
+                <div id="rpa-shortcut" style="margin-bottom: 15px;">
+                    <button class="btn btn-primary" onclick="app.openRPAModal()">
+                        <i class="fa-solid fa-file-contract"></i> Gerar Recibo RPA
+                    </button>
+                </div>
 
                 <h3>Histórico</h3>
                 <div id="list-recent"></div>
@@ -258,11 +265,7 @@
                     </div>
                 </div>
                 
-                <div class="card">
-                     <h3><i class="fa-solid fa-file-contract"></i> Recibos</h3>
-                     <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:10px;">Gerar Recibo de Pagamento a Autônomo</p>
-                     <button class="btn btn-primary" onclick="app.openRPAModal()">Gerar Recibo RPA</button>
-                </div>
+                <!-- Card de RPA removido daqui e passado para o Início como botão -->
 
                 <!-- NOVO CARD: CONFIGURAÇÃO IRRF -->
                 <div class="card">
