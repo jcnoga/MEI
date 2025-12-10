@@ -2,1735 +2,624 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MEI Controle Total</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SRA Milho Profissional - Sistema Completo</title>
     
-    <!-- Bibliotecas -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Biblioteca para DOCX (Word) -->
+    <script src="https://unpkg.com/html-docx-js/dist/html-docx.js"></script>
     
-    <!-- Bibliotecas para PDF -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
-
     <style>
         :root {
-            --primary: #00bf63;
-            --primary-dark: #00914b;
-            --secondary: #5e17eb;
-            --bg-light: #f3f4f6;
-            --surface: #ffffff;
-            --text-main: #1f2937;
-            --text-muted: #6b7280;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --border: #e5e7eb;
+            --primary-green: #2e7d32;
+            --dark-green: #1b5e20;
+            --light-green: #e8f5e9;
+            --accent-color: #43a047;
+            --soil-brown: #795548;
+        }
+        body { background-color: #f0f2f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #333; }
+        
+        /* Layout Principal */
+        .header-app {
+            background: linear-gradient(135deg, var(--dark-green) 0%, var(--primary-green) 100%);
+            color: white; padding: 15px 0; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        /* Estilo do Formulário */
+        .form-section-title {
+            font-size: 1.1rem; font-weight: 700; color: #1b5e20;
+            margin-bottom: 15px; border-bottom: 2px solid #e0e0e0; padding-bottom: 5px;
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .card-custom {
+            border: 1px solid #e0e0e0; border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 20px;
+            background: white; padding: 25px;
+        }
+        
+        /* Inputs Compactos */
+        .form-label { font-weight: 600; font-size: 0.85rem; color: #444; margin-bottom: 3px; }
+        .form-control, .form-select { 
+            border: 1px solid #ccc; padding: 8px 10px; font-size: 0.95rem; border-radius: 4px; background-color: #fff;
+        }
+        .form-control:focus, .form-select:focus { 
+            border-color: #2e7d32; box-shadow: 0 0 0 2px rgba(46, 125, 50, 0.2); 
+        }
+        .bg-readonly { background-color: #f2f2f2; font-weight: bold; color: #1b5e20; }
+        .demo-locked { pointer-events: none; background-color: #e9ecef !important; color: #6c757d; }
+
+        /* Botões */
+        .btn-fill-purple { background-color: #6c5ce7; color: white; font-size: 0.9rem; font-weight: bold; border: none; }
+        .btn-fill-purple:hover { background-color: #5b4cc4; }
+        .btn-save-green { background-color: #2e7d32; color: white; font-weight: bold; border-radius: 4px; padding: 12px 30px; border: none; font-size: 1rem; }
+        .btn-save-green:hover { background-color: #1b5e20; }
+        .btn-clean { background-color: #fff; color: #666; border: 1px solid #ccc; font-weight: bold; border-radius: 4px; padding: 12px 30px; }
+
+        /* Auth & Modais */
+        .auth-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(240, 242, 245, 0.98); z-index: 9999;
+            display: flex; align-items: center; justify-content: center; overflow-y: auto;
+        }
+        .auth-card {
+            background: white; padding: 2.5rem; border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1); width: 100%; max-width: 480px;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; outline: none; -webkit-tap-highlight-color: transparent; }
-        body { font-family: 'Poppins', sans-serif; background: var(--bg-light); color: var(--text-main); height: 100vh; overflow-x: hidden; }
+        /* Relatórios Tela */
+        .report-box {
+            font-family: 'Segoe UI', sans-serif; white-space: pre-wrap; background: #fff;
+            border: 1px solid #ced4da; padding: 30px; border-radius: 8px;
+            font-size: 0.95rem; line-height: 1.6; color: #212529;
+        }
+        .table-tech th { background-color: var(--light-green); color: var(--dark-green); }
 
-        .hidden { display: none !important; }
-        .flex { display: flex; align-items: center; }
-        .justify-between { justify-content: space-between; }
-        .container { max-width: 600px; margin: 0 auto; padding: 0 20px; }
-        
-        .btn { border: none; padding: 12px; border-radius: 12px; font-weight: 600; cursor: pointer; width: 100%; font-size: 1rem; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; margin-bottom: 10px; }
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-secondary { background: var(--secondary); color: white; }
-        .btn-danger { background: var(--danger); color: white; }
-        .btn-dark { background: var(--text-main); color: white; }
-        .btn-warning { background: var(--warning); color: white; }
-        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-main); }
-        .btn-sm { padding: 6px 10px; font-size: 0.85rem; width: auto; margin: 0; }
-
-        .card { background: var(--surface); padding: 20px; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); margin-bottom: 15px; }
-
-        /* Login */
-        #auth-screen { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; background: var(--surface); position: fixed; top: 0; width: 100%; z-index: 9999; }
-        .auth-input { width: 100%; padding: 14px; margin-bottom: 10px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg-light); font-size: 1rem; }
-
-        /* App */
-        #app-screen { padding-bottom: 90px; }
-        header { background: var(--surface); padding: 15px 0; position: sticky; top: 0; z-index: 50; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-        
-        .tx-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); }
-        .text-green { color: var(--primary); }
-        .text-red { color: var(--danger); }
-        .text-warn { color: var(--warning); }
-
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: var(--surface); border-top: 1px solid var(--border); padding: 10px 0; display: flex; justify-content: space-around; z-index: 100; padding-bottom: max(10px, env(safe-area-inset-bottom)); }
-        .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text-muted); font-size: 0.7rem; background: none; border: none; cursor: pointer; }
-        .nav-item.active { color: var(--primary); font-weight: 600; }
-
-        /* Modal */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 200; display: flex; justify-content: center; align-items: flex-end; backdrop-filter: blur(2px); }
-        .modal-content { background: var(--surface); width: 100%; max-width: 600px; border-radius: 24px 24px 0 0; padding: 25px; max-height: 90vh; overflow-y: auto; animation: slideUp 0.3s ease; }
-        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-
-        .form-label { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 4px; display: block; margin-top: 10px; }
-        
-        .type-switch { display: flex; background: var(--bg-light); border-radius: 12px; padding: 4px; margin-bottom: 15px; }
-        .type-opt { flex: 1; text-align: center; padding: 10px; border-radius: 8px; cursor: pointer; transition: 0.2s; }
-        .type-opt.active.inc { background: var(--primary); color: white; }
-        .type-opt.active.exp { background: var(--danger); color: white; }
-        
-        /* Tabs para Cadastros */
-        .tab-menu { display: flex; gap: 10px; margin-bottom: 15px; overflow-x: auto; padding-bottom: 5px; }
-        .tab-btn { background: var(--bg-light); border: 1px solid var(--border); padding: 8px 15px; border-radius: 20px; white-space: nowrap; cursor: pointer; font-size: 0.9rem; }
-        .tab-btn.active { background: var(--text-main); color: white; border-color: var(--text-main); }
-
-        /* Footer Styles */
-        .app-footer { text-align: center; margin-top: 30px; margin-bottom: 20px; font-size: 0.8rem; color: var(--text-muted); padding: 10px; border-top: 1px solid var(--border); }
-        .contact-links { display: flex; justify-content: center; gap: 20px; margin: 15px 0; font-size: 1.2rem; }
-        .contact-links a { color: var(--text-main); transition: 0.2s; }
-        .contact-links a:hover { color: var(--primary); }
-        .website-link { color: var(--primary); text-decoration: none; font-weight: 600; }
-        
-        /* Nova Caixa de Doação */
-        .donation-box { background: #f0fdf4; padding: 15px; border-radius: 12px; margin-top: 20px; font-size: 0.8rem; border: 1px dashed var(--primary); }
-        .donation-box p { margin-bottom: 10px; line-height: 1.4; color: var(--text-main); }
-
-        /* Badge Estoque */
-        .badge-stock { background: #eee; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
-        .stock-ok { color: var(--primary-dark); background: #dcfce7; }
-        .stock-low { color: #b45309; background: #fef3c7; }
-        .stock-crit { color: #991b1b; background: #fee2e2; }
-
-        /* Switch Toggle */
-        .switch { position: relative; display: inline-block; width: 40px; height: 24px; }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 24px; }
-        .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
-        input:checked + .slider { background-color: var(--primary); }
-        input:checked + .slider:before { transform: translateX(16px); }
-
-        /* Radio Group Custom */
-        .radio-group { display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px; background: #fff; padding: 10px; border-radius: 10px; border: 1px solid var(--border); }
-        .radio-item { display: flex; align-items: center; gap: 10px; font-size: 0.9rem; cursor: pointer; }
-        .radio-item input { width: 18px; height: 18px; accent-color: var(--primary); }
-
-        /* Estilo do Alerta DAS */
-        .alert-das { padding: 12px; border-radius: 12px; margin-bottom: 15px; font-size: 0.9rem; text-align: center; font-weight: 600; }
-        .das-warning { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
-        .das-urgent { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.8; } 100% { opacity: 1; } }
-
-        /* NOVO: GRADE DE BOTÕES PIX */
-        .pix-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
-        .btn-pix { padding: 15px; border: 2px solid var(--primary); background: white; border-radius: 12px; cursor: pointer; font-weight: 600; color: var(--text-main); transition: 0.2s; font-size: 1rem; }
-        .btn-pix:active { background: var(--primary); color: white; transform: scale(0.98); }
-        .pix-feedback { margin-top: 15px; padding: 12px; background: #dcfce7; color: var(--primary-dark); border-radius: 8px; font-size: 0.9rem; font-weight: 600; display: none; border: 1px solid #86efac; }
-        .pix-display-area { background: #f9f9f9; padding: 10px; border-radius: 8px; font-family: monospace; font-size: 0.75rem; color: #555; margin-top: 10px; word-break: break-all; display: none; user-select: all; border: 1px solid #ddd; }
-        
-        /* Resultados RPA */
-        .rpa-results { background: #f8fafc; padding: 10px; border-radius: 10px; margin-top: 10px; border: 1px solid var(--border); }
-        .rpa-line { display: flex; justify-content: space-between; padding: 5px 0; font-size: 0.9rem; border-bottom: 1px dashed #eee; }
-
-        /* Tabela IRRF Config */
-        .irrf-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
-        .irrf-table th { text-align: left; padding: 5px; background: #eee; }
-        .irrf-table td { padding: 5px; border-bottom: 1px solid #eee; }
-        .irrf-input { width: 100%; padding: 5px; border: 1px solid #ccc; border-radius: 4px; }
+        /* --- ESTILOS DO DOCUMENTO EXPORTADO (WORD) --- */
+        #exportContent { display: none; }
+        .doc-header { border-bottom: 3px solid #1b5e20; margin-bottom: 20px; padding-bottom: 10px; }
+        .doc-title { font-size: 22px; font-weight: bold; color: #1b5e20; margin: 0; }
+        .doc-subtitle { font-size: 11px; color: #555; }
+        .doc-section-title { 
+            background-color: #e8f5e9; color: #1b5e20; padding: 5px; 
+            font-weight: bold; font-size: 12px; margin-top: 15px; border-left: 5px solid #1b5e20; 
+        }
+        .doc-text { font-size: 11px; text-align: justify; margin-top: 5px; line-height: 1.4; white-space: pre-wrap; }
+        .doc-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 10px; }
+        .doc-table th { background-color: #e8f5e9; border: 1px solid #ccc; padding: 5px; }
+        .doc-table td { border: 1px solid #ccc; padding: 5px; text-align: center; }
+        .doc-footer { margin-top: 40px; border-top: 1px solid #ccc; padding-top: 5px; text-align: center; font-size: 9px; color: #777; }
     </style>
 </head>
 <body>
 
-    <!-- 1. TELA DE LOGIN -->
-    <section id="auth-screen">
-        <div style="text-align:center; max-width:400px; width:100%;">
-            <i class="fa-solid fa-store" style="font-size:3.5rem; color:var(--primary); margin-bottom:10px;"></i>
-            <h1>MEI Controle</h1>
-            <p style="color:var(--text-muted); margin-bottom:20px;">Gestão de Comércio & Serviço</p>
-            
-            <form onsubmit="event.preventDefault(); app.handleAuth();">
-                <div id="reg-fields" class="hidden">
-                    <input type="text" id="auth-name" class="auth-input" placeholder="Seu Nome">
-                </div>
-                <input type="email" id="auth-email" class="auth-input" placeholder="Email" required>
-                <input type="password" id="auth-pass" class="auth-input" placeholder="Senha" required>
-                
-                <button class="btn btn-primary" id="btn-auth">Entrar</button>
-            </form>
-            
-            <div style="margin-top:20px; cursor:pointer; color:var(--secondary);" onclick="app.toggleAuthMode()">
-                <span id="link-toggle">Criar nova conta</span>
+    <!-- TELA DE AUTENTICAÇÃO -->
+    <div id="authScreen" class="auth-overlay">
+        <!-- Login -->
+        <div id="loginForm" class="auth-card">
+            <div class="text-center mb-4">
+                <i class="fas fa-leaf text-success fa-4x"></i>
+                <h3 class="fw-bold mt-3">SRA Milho</h3>
+                <p class="text-muted">Acesso Profissional</p>
             </div>
-            
-            <div id="config-warning" class="hidden" style="margin-top:20px; padding:10px; background:#fee2e2; color:#991b1b; border-radius:8px; font-size:0.8rem;">
-                ⚠ Configure as chaves do Firebase no código!
+            <div class="mb-3"><label class="form-label">E-mail</label><input type="email" id="loginEmail" class="form-control"></div>
+            <div class="mb-4"><label class="form-label">Senha</label><input type="password" id="loginPass" class="form-control"></div>
+            <div class="d-grid gap-2">
+                <button class="btn btn-success btn-lg fw-bold" id="btnLoginAction">ENTRAR</button>
+                <button class="btn btn-outline-dark" id="btnGoogleAction"><i class="fab fa-google me-2"></i> Google</button>
+            </div>
+            <div class="text-center mt-4">
+                <a href="#" class="text-decoration-none me-3" onclick="toggleAuth('register')">Criar Conta</a>
+                <a href="#" class="text-decoration-none ms-3 text-muted" onclick="toggleAuth('forgot')">Recuperar Senha</a>
             </div>
         </div>
-    </section>
+        
+        <!-- Cadastro -->
+        <div id="registerForm" class="auth-card" style="display:none;">
+            <h4 class="text-center fw-bold mb-4">Nova Conta</h4>
+            <div class="mb-3"><label>Nome Completo</label><input type="text" id="regName" class="form-control"></div>
+            <div class="mb-3"><label>E-mail</label><input type="email" id="regEmail" class="form-control"></div>
+            <div class="mb-4"><label>Senha</label><input type="password" id="regPass" class="form-control"></div>
+            <div class="d-grid gap-2">
+                <button class="btn btn-primary fw-bold" id="btnRegAction">CADASTRAR</button>
+                <button class="btn btn-link" onclick="toggleAuth('login')">Voltar</button>
+            </div>
+        </div>
 
-    <!-- 2. APP PRINCIPAL -->
-    <section id="app-screen" class="hidden">
-        <header>
-            <div class="container flex justify-between">
-                <div>
-                    <h2 style="font-size:1rem;" id="head-fantasy">Minha Empresa</h2>
-                    <p style="font-size:0.75rem; color:var(--text-muted);" id="head-name">Usuário</p>
+        <!-- Recuperar Senha -->
+        <div id="forgotForm" class="auth-card" style="display:none;">
+            <h4 class="text-center fw-bold mb-3">Recuperar Senha</h4>
+            <div class="mb-4"><label>E-mail</label><input type="email" id="forgotEmail" class="form-control"></div>
+            <div class="d-grid gap-2"><button class="btn btn-warning text-white fw-bold" id="btnForgotAction">ENVIAR EMAIL</button><button class="btn btn-link" onclick="toggleAuth('login')">Voltar</button></div>
+        </div>
+
+        <!-- Token -->
+        <div id="tokenForm" class="auth-card" style="display:none;">
+            <h4 class="text-center fw-bold text-primary mb-2">Créditos</h4>
+            <div class="bg-light p-3 rounded text-center mb-4 border"><h1 class="text-dark m-0" id="displayAuthCode">----</h1></div>
+            <div class="mb-3"><input type="text" id="inputToken" class="form-control text-center form-control-lg" placeholder="Senha"></div>
+            <div class="d-grid gap-2"><button class="btn btn-success fw-bold" id="btnTokenAction">VALIDAR</button><button class="btn btn-link text-danger" onclick="startUnauthorized()">Modo Demonstração</button></div>
+        </div>
+    </div>
+
+    <!-- APP PRINCIPAL -->
+    <div id="appContainer" style="display: none;">
+        
+        <header class="header-app sticky-top">
+            <div class="container d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-file-signature fa-lg me-2"></i>
+                    <div><h5 class="m-0 fw-bold">Amostras de Solo</h5><small class="text-white-50">Cadastro e Interpretação</small></div>
                 </div>
-                <button onclick="app.openTxModal()" class="btn-primary" style="width:auto; padding:8px 15px; font-size:0.8rem; border-radius:20px;">
-                    <i class="fa-solid fa-plus"></i> Novo
-                </button>
+                <div class="d-flex align-items-center">
+                    <span class="badge bg-white text-success p-2 shadow-sm me-3"><i class="fas fa-coins"></i> <span id="creditCounter">...</span></span>
+                    <button class="btn btn-outline-light btn-sm me-2 fw-bold" onclick="openHistoryModal()"><i class="fas fa-history"></i></button>
+                    <div class="dropdown me-2">
+                        <button class="btn btn-sm btn-light dropdown-toggle fw-bold" type="button" data-bs-toggle="dropdown"><i class="fas fa-user-circle"></i> <span id="userNameDisplay">User</span></button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="#" onclick="showTokenScreen()">Adicionar Créditos</a></li>
+                        </ul>
+                    </div>
+                    <button class="btn btn-sm btn-danger fw-bold" onclick="handleLogout()"><i class="fas fa-sign-out-alt"></i></button>
+                </div>
             </div>
         </header>
 
-        <main class="container" style="padding-top:20px;">
-            <!-- VIEW: DASHBOARD -->
-            <div id="view-home">
-                
-                <!-- ALERTA DAS (VISIVEL DINAMICAMENTE) -->
-                <div id="das-alert" class="alert-das hidden"></div>
-
-                <div class="card" style="background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white;">
-                    <p style="opacity:0.9;">Saldo Atual</p>
-                    <h1 style="font-size:2.5rem;" id="dash-bal">R$ 0,00</h1>
-                    <div class="flex justify-between" style="font-size:0.85rem; margin-top:10px; background:rgba(0,0,0,0.1); padding:10px; border-radius:10px;">
-                        <span><i class="fa-solid fa-arrow-up"></i> Receita: <span id="dash-inc">0,00</span></span>
-                        <span><i class="fa-solid fa-arrow-down"></i> Despesa: <span id="dash-exp">0,00</span></span>
-                    </div>
-                </div>
-
-                <!-- Botão Nota Fiscal -->
-                <div id="nf-shortcut" class="hidden" style="margin-bottom: 15px;">
-                    <button class="btn btn-secondary" onclick="app.openNFLink()">
-                        <i class="fa-solid fa-file-invoice"></i> Emitir Nota Fiscal (Emissor Nacional)
-                    </button>
-                </div>
-
-                <!-- Botão DAS -->
-                <div id="das-shortcut" class="hidden" style="margin-bottom: 15px;">
-                    <button class="btn btn-warning" onclick="app.openDASLink()">
-                        <i class="fa-solid fa-barcode"></i> Pagar DAS (MEI)
-                    </button>
-                </div>
-                
-                <!-- Botão RPA (Movido das Configurações para cá) -->
-                <div id="rpa-shortcut" style="margin-bottom: 15px;">
-                    <button class="btn btn-primary" onclick="app.openRPAModal()">
-                        <i class="fa-solid fa-file-contract"></i> Gerar Recibo RPA
-                    </button>
-                </div>
-
-                <h3>Histórico</h3>
-                <div id="list-recent"></div>
-                <div id="empty-state" class="hidden" style="text-align:center; padding:30px; color:var(--text-muted);">
-                    <p>Sem dados neste dispositivo.</p>
+        <div class="container mt-4 pb-5">
+            <!-- Barra de Status -->
+            <div id="statusAlert" class="alert shadow-sm border-2" style="display: none;">
+                <div class="d-flex align-items-center">
+                    <div class="fs-2 me-3" id="statusIcon"></div>
+                    <div><h6 class="fw-bold m-0" id="statusTitle"></h6><p class="m-0 small" id="statusMsg"></p></div>
+                    <div class="ms-auto" id="returnBtnContainer" style="display:none;"><button class="btn btn-danger btn-sm fw-bold" onclick="resetToRealMode()">Cancelar</button></div>
                 </div>
             </div>
 
-            <!-- VIEW: CADASTROS -->
-            <div id="view-registers" class="hidden">
-                <h2>Cadastros</h2>
-                <div class="tab-menu">
-                    <button class="tab-btn active" onclick="app.setRegTab('clients')">Clientes</button>
-                    <button class="tab-btn" onclick="app.setRegTab('suppliers')">Fornecedores</button>
-                    <button class="tab-btn" onclick="app.setRegTab('products')">Produtos</button>
-                    <button class="tab-btn" onclick="app.setRegTab('services')">Serviços</button>
+            <!-- Formulário Completo -->
+            <div class="card-custom">
+                <div class="d-flex justify-content-end mb-3">
+                    <button type="button" class="btn btn-fill-purple btn-sm" onclick="triggerExampleData()"><i class="fas fa-magic me-1"></i> Preencher Teste</button>
                 </div>
 
-                <!-- Botões Específicos da Aba -->
-                <div class="flex justify-between" style="margin-bottom: 15px;">
-                    <h3 id="reg-title">Lista</h3>
-                    <div class="flex" style="gap:5px;">
-                        <!-- Botão PDF -->
-                        <button class="btn-dark btn-sm" onclick="app.downloadRegPDF()" title="Baixar PDF">
-                            <i class="fa-solid fa-file-pdf"></i>
-                        </button>
-                        <!-- Botão Lista de Compras (Só aparece em Produtos) -->
-                        <button id="btn-shopping-list" class="btn-warning btn-sm hidden" onclick="app.openShoppingList()">
-                            <i class="fa-solid fa-cart-shopping"></i> Lista Compras
-                        </button>
-                        <button class="btn-primary btn-sm" onclick="app.openRegModal()"><i class="fa-solid fa-plus"></i> Adicionar</button>
-                    </div>
-                </div>
-
-                <div id="reg-list"></div>
-            </div>
-
-            <!-- VIEW: CONFIGURAÇÕES -->
-            <div id="view-settings" class="hidden">
-                <h2>Configurações</h2>
-                
-                <div class="card">
-                    <h3><i class="fa-solid fa-shop"></i> Modo Comerciante</h3>
-                    <div class="flex justify-between" style="margin-top:10px;">
-                        <span style="font-size:0.9rem; color:var(--text-muted);">Sou Comerciante (Vendo Produtos)</span>
-                        <label class="switch">
-                            <input type="checkbox" id="conf-merchant-mode" onchange="app.toggleMerchantMode()">
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-                </div>
-                
-                <!-- Card de RPA removido daqui e passado para o Início como botão -->
-
-                <!-- NOVO CARD: CONFIGURAÇÃO IRRF -->
-                <div class="card">
-                    <h3><i class="fa-solid fa-table"></i> Tabela IRRF (Configuração)</h3>
-                    <p style="font-size:0.75rem; color:var(--text-muted); margin-bottom:10px;">Edite as faixas e alíquotas para cálculo automático.</p>
-                    
-                    <table class="irrf-table">
-                        <thead>
-                            <tr>
-                                <th>Até R$ (Limite)</th>
-                                <th>Alíq. %</th>
-                                <th>Dedução R$</th>
-                            </tr>
-                        </thead>
-                        <tbody id="irrf-config-body">
-                            <!-- Preenchido via JS -->
-                        </tbody>
-                    </table>
-                    <button class="btn btn-secondary btn-sm" style="margin-top:10px;" onclick="app.saveIRRFConfig()">Salvar Tabela</button>
-                </div>
-
-                <div class="card">
-                    <h3><i class="fa-solid fa-id-card"></i> Dados da Empresa</h3>
-                    <button class="btn btn-outline" onclick="app.openProfileModal()"><i class="fa-solid fa-pen"></i> Editar Dados</button>
-                    <button class="btn btn-outline" onclick="app.openPassModal()"><i class="fa-solid fa-lock"></i> Alterar Senha</button>
-                </div>
-
-                <div class="card">
-                    <h3><i class="fa-solid fa-folder-open"></i> Fiscal & Docs</h3>
-                    
-                    <!-- Link Emissor NF -->
-                    <label class="form-label">Link Emissor Nacional (NF):</label>
-                    <div class="flex" style="gap:5px;">
-                        <input type="text" id="conf-nf-link" class="auth-input" placeholder="https://www.nfse.gov.br/EmissorNacional" style="margin:0;">
-                        <button class="btn-secondary btn-sm" onclick="app.saveNFLink()">Salvar</button>
-                    </div>
-                    
-                    <!-- Link Pagamento DAS -->
-                    <label class="form-label">Link Pagamento DAS:</label>
-                    <div class="flex" style="gap:5px;">
-                        <input type="text" id="conf-das-link" class="auth-input" placeholder="https://www8.receita.fazenda.gov.br..." style="margin:0;">
-                        <button class="btn-secondary btn-sm" onclick="app.saveDASLink()">Salvar</button>
-                    </div>
-
-                    <p style="font-size:0.75rem; color:var(--text-muted); margin-top:5px;">Links rápidos para acesso ao governo.</p>
-                    <hr style="border:0; border-top:1px solid var(--border); margin:15px 0;">
-                    <button class="btn btn-outline" onclick="app.downloadManual()"><i class="fa-solid fa-file-pdf"></i> Baixar Manual/PDF</button>
-                </div>
-
-                <div class="card">
-                    <h3><i class="fa-solid fa-cloud-arrow-down"></i> Segurança</h3>
-                    <button class="btn btn-dark" onclick="app.backupData()"><i class="fa-solid fa-download"></i> Baixar Backup</button>
-                    <button class="btn btn-secondary" onclick="document.getElementById('file-input').click()"><i class="fa-solid fa-upload"></i> Restaurar</button>
-                    <input type="file" id="file-input" accept=".json" class="hidden" onchange="app.restoreData(this)">
-                </div>
-
-                <div class="card">
-                    <p id="conf-email" style="text-align:center; margin-bottom:10px; color:var(--text-muted);">...</p>
-                    <button class="btn btn-danger" onclick="app.logout()">Sair</button>
-                </div>
-
-                <div class="app-footer">
-                    <p>Desenvolvido por <a href="https://www.websitelog.com.br" target="_blank" class="website-link">Websitelog</a></p>
-                    <div class="contact-links">
-                        <a href="mailto:websitelogx@gmail.com"><i class="fa-solid fa-envelope"></i></a>
-                        <a href="https://wa.me/5534997824990" target="_blank" style="color:#25D366"><i class="fa-brands fa-whatsapp"></i></a>
-                    </div>
-                    
-                    <!-- Box de Doação - Atalho para aba Apoio -->
-                    <div class="donation-box">
-                        <p>Este app é gratuito. Apoie o desenvolvimento.</p>
-                        <button class="btn btn-primary" onclick="app.navTo('support', document.querySelector('.nav-item:last-child'))" style="width:auto; margin:0 auto; font-size:0.9rem; padding:8px 20px;">
-                            <i class="fa-brands fa-pix"></i> Apoiar Projeto
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- VIEW: APOIO (ATUALIZADA) -->
-            <div id="view-support" class="hidden" style="text-align: center; padding: 40px 20px;">
-                <i class="fa-solid fa-hand-holding-heart" style="font-size: 4rem; color: var(--primary); margin-bottom: 20px;"></i>
-                <h2 style="margin-bottom: 15px;">Apoie o Projeto ☕</h2>
-                <p style="color: var(--text-main); line-height: 1.6; margin-bottom: 20px;">
-                    Este app é gratuito. Se ele te ajuda, considere fazer um Pix para manter o projeto vivo.
-                </p>
-                
-                <p style="font-weight:600; color:var(--text-muted);">Selecione um valor para gerar o Copia e Cola:</p>
-                
-                <div class="pix-grid">
-                    <button class="btn-pix" onclick="app.generatePixCopyPaste(5)">R$ 5,00</button>
-                    <button class="btn-pix" onclick="app.generatePixCopyPaste(9)">R$ 9,00</button>
-                    <button class="btn-pix" onclick="app.generatePixCopyPaste(12)">R$ 12,00</button>
-                    <button class="btn-pix" onclick="app.copyPixKeyOnly()">Outro</button>
-                </div>
-
-                <!-- Mensagem de Feedback -->
-                <div id="pix-feedback-msg" class="pix-feedback">
-                    ✅ Código Pix Copiado com Sucesso!
-                </div>
-
-                <!-- Exibição do código (opcional, caso o copy falhe) -->
-                <div id="pix-display-area" class="pix-display-area"></div>
-                
-                <p style="margin-top:30px; font-size:0.8rem; color:var(--text-muted);">
-                    Pagamento seguro via seu banco. Chave: b4648948-d0a8-4402-81f4-8a4047fcf4e5
-                </p>
-            </div>
-        </main>
-
-        <nav class="bottom-nav">
-            <button class="nav-item active" onclick="app.navTo('home', this)"><i class="fa-solid fa-chart-pie"></i>Início</button>
-            <button class="nav-item" onclick="app.navTo('registers', this)"><i class="fa-solid fa-address-book"></i>Cadastros</button>
-            <button class="nav-item" onclick="app.navTo('settings', this)"><i class="fa-solid fa-user-gear"></i>Config</button>
-            <button class="nav-item" onclick="app.navTo('support', this)"><i class="fa-solid fa-heart"></i>Apoio</button>
-        </nav>
-    </section>
-
-    <!-- MODAL: NOVA TRANSAÇÃO (COM RADIOS) -->
-    <div id="modal-tx" class="modal-overlay hidden" onclick="if(event.target===this) app.closeModal('modal-tx')">
-        <div class="modal-content">
-            <div class="flex justify-between"><h2>Novo Lançamento</h2><i class="fa-solid fa-xmark" onclick="app.closeModal('modal-tx')"></i></div>
-            
-            <!-- Indicador de Tipo (Visual) -->
-            <div class="type-switch">
-                <div class="type-opt active inc" id="opt-inc" onclick="app.setType('income')">Entrada</div>
-                <div class="type-opt" id="opt-exp" onclick="app.setType('expense')">Saída</div>
-            </div>
-
-            <!-- Area de Opções para Comerciante -->
-            <div id="merchant-options" class="hidden">
-                <div class="radio-group">
-                    <label class="radio-item">
-                        <input type="radio" name="tx-action" value="sale" onclick="app.handleStockAction('sale')">
-                        <strong>Venda de Mercadoria</strong> (Baixar Estoque)
-                    </label>
-                    <label class="radio-item">
-                        <input type="radio" name="tx-action" value="buy" onclick="app.handleStockAction('buy')">
-                        <strong>Compra de Mercadoria</strong> (Adicionar Estoque)
-                    </label>
-                    <label class="radio-item">
-                        <input type="radio" name="tx-action" value="other" checked onclick="app.handleStockAction('other')">
-                        <strong>Outro</strong> (Conta, Serviço, etc.)
-                    </label>
-                </div>
-
-                <!-- Detalhes do Produto (Aparece na Venda/Compra) -->
-                <div id="tx-prod-details" class="hidden" style="margin-top:10px; padding:10px; background:#f8fafc; border-radius:10px; border:1px solid #e2e8f0;">
-                    <label class="form-label">Produto</label>
-                    <select id="tx-prod-select" class="auth-input" onchange="app.onTxProductChange()"></select>
-                    
-                    <div class="flex" style="gap:10px;">
-                        <div>
-                            <label class="form-label">Qtd</label>
-                            <input type="number" id="tx-prod-qty" class="auth-input" value="1" min="1" oninput="app.calcTxTotal()">
+                <form id="agronomicForm">
+                    <!-- 1. Dados Gerais -->
+                    <div class="mb-4">
+                        <h5 class="form-section-title">1. Dados Gerais</h5>
+                        <div class="row g-2">
+                            <div class="col-md-6"><label class="form-label">Produtor</label><input type="text" class="form-control" id="ownerName"></div>
+                            <div class="col-md-6"><label class="form-label">Propriedade</label><input type="text" class="form-control" id="propName"></div>
+                            <div class="col-md-6"><label class="form-label">Município/UF</label><input type="text" class="form-control" id="cityState"></div>
+                            <div class="col-md-6"><label class="form-label">Resp. Técnico</label><input type="text" class="form-control" id="techResp"></div>
+                            <div class="col-md-12"><label class="form-label">Cultivo Anterior</label><select class="form-select" id="prevCulture"><option value="milho">Milho</option><option value="graminea">Gramínea</option><option value="leguminosa">Leguminosa</option></select></div>
                         </div>
-                        <div>
-                            <label class="form-label">Preço Unit.</label>
-                            <input type="number" id="tx-prod-price" class="auth-input" oninput="app.calcTxTotal()" style="background:#fff;">
+                    </div>
+
+                    <!-- 2. Identificação e Cultura -->
+                    <div class="mb-4">
+                        <h5 class="form-section-title">2. Cultura e Meta</h5>
+                        <div class="row g-2">
+                            <div class="col-md-3"><label class="form-label">Protocolo</label><input type="text" class="form-control" id="protocolId"></div>
+                            <div class="col-md-3"><label class="form-label">Talhão</label><input type="text" class="form-control" id="plotId"></div>
+                            <div class="col-md-3"><label class="form-label">Profundidade</label><input type="text" class="form-control" value="0-20"></div>
+                            <div class="col-md-3"><label class="form-label">Data</label><input type="date" class="form-control" id="sampleDate"></div>
+                            
+                            <div class="col-md-3"><label class="form-label">Cultura Atual</label><select class="form-select" id="cropSeason"><option value="verao">Milho Verão</option><option value="safrinha">Milho Safrinha</option></select></div>
+                            <div class="col-md-3"><label class="form-label">Meta (sc/ha)</label><input type="number" class="form-control" id="targetYield"></div>
+                            <div class="col-md-3"><label class="form-label">Esp. Linha (m)</label><input type="number" class="form-control" id="rowSpacing" step="0.01"></div>
+                            <div class="col-md-3"><label class="form-label">Esp. Cova (m)</label><input type="number" class="form-control" id="plantSpacing" step="0.01"></div>
+                            <div class="col-md-12"><label class="form-label">Sistema</label><select class="form-select" id="systemType"><option value="spd_consolidado">Plantio Direto</option><option value="conv">Convencional</option></select></div>
+                        </div>
+                    </div>
+
+                    <!-- 3. Análise Química -->
+                    <div class="mb-4">
+                        <h5 class="form-section-title">3. Análise Química (0-20 cm)</h5>
+                        <div class="row g-2">
+                            <div class="col-md-3"><label class="form-label">pH (H₂O)</label><input type="number" class="form-control" id="soilPH" step="0.1"></div>
+                            <div class="col-md-3"><label class="form-label">M.O. (%)</label><input type="number" class="form-control" id="soilMO" step="0.1"></div>
+                            <div class="col-md-3"><label class="form-label">P-resina (mg/dm³)</label><input type="number" class="form-control" id="soilP" step="0.1"></div>
+                            <div class="col-md-3"><label class="form-label">S (mg/dm³)</label><input type="number" class="form-control" id="soilS" step="0.1"></div>
+                            
+                            <div class="col-md-3"><label class="form-label">K (mmolc/dm³)</label><input type="number" class="form-control" id="soilK" step="0.1" oninput="calculateComplex()"></div>
+                            <div class="col-md-3"><label class="form-label">Ca (mmolc/dm³)</label><input type="number" class="form-control" id="soilCa" step="0.1" oninput="calculateComplex()"></div>
+                            <div class="col-md-3"><label class="form-label">Mg (mmolc/dm³)</label><input type="number" class="form-control" id="soilMg" step="0.1" oninput="calculateComplex()"></div>
+                            <div class="col-md-3"><label class="form-label">H+Al (mmolc/dm³)</label><input type="number" class="form-control" id="soilHAl" step="0.1" oninput="calculateComplex()"></div>
+                            
+                            <div class="col-md-3"><label class="form-label">Al (mmolc/dm³)</label><input type="number" class="form-control" id="soilAl" step="0.1"></div>
+                            <div class="col-md-3"><label class="form-label bg-readonly">CTC (Calc)</label><input type="number" class="form-control bg-readonly" id="soilCTC" readonly></div>
+                            <div class="col-md-3"><label class="form-label bg-readonly">V% (Calc)</label><input type="number" class="form-control bg-readonly" id="soilV" readonly></div>
+                            <div class="col-md-3"><label class="form-label">PRNT Calcário</label><input type="number" class="form-control" id="limePRNT" value="80"></div>
+                        </div>
+                        <div class="form-text small text-muted">* Insira K, Ca, Mg, H+Al em mmolc/dm³ (se sua análise for em cmolc, multiplique por 10).</div>
+                    </div>
+
+                    <!-- 4. Física -->
+                    <div class="mb-4">
+                        <h5 class="form-section-title">4. Física e Micronutrientes</h5>
+                        <div class="row g-2">
+                            <div class="col-md-3"><label class="form-label">Argila (%)</label><input type="number" class="form-control" id="soilClay" step="0.1"></div>
+                            <div class="col-md-3"><label class="form-label">Areia (%)</label><input type="number" class="form-control" id="soilSand" step="0.1"></div>
+                            <div class="col-md-3"><label class="form-label">Zn (mg/dm³)</label><input type="number" class="form-control" id="soilZn" step="0.1"></div>
+                            <div class="col-md-3"><label class="form-label">B (mg/dm³)</label><input type="number" class="form-control" id="soilB" step="0.1"></div>
+                            <div class="col-md-3"><label class="form-label">Mn (mg/dm³)</label><input type="number" class="form-control" id="soilMn" step="0.1"></div>
+                            <div class="col-md-3"><label class="form-label">Cu (mg/dm³)</label><input type="number" class="form-control" id="soilCu" step="0.1"></div>
+                            <div class="col-md-3"><label class="form-label">Fe (mg/dm³)</label><input type="number" class="form-control" id="soilFe" step="0.1"></div>
+                            <div class="col-md-3"><label class="form-label">Mo (mg/dm³)</label><input type="number" class="form-control" id="soilMo" step="0.01"></div>
+                        </div>
+                    </div>
+
+                    <!-- Opções Híbridas -->
+                    <div class="d-flex gap-3 mb-3 small text-muted bg-light p-2 rounded justify-content-center">
+                        <div class="form-check form-switch"><input class="form-check-input" type="checkbox" id="checkSaveCloud" checked><label class="form-check-label">Salvar Nuvem (Firebase)</label></div>
+                        <div class="form-check form-switch"><input class="form-check-input" type="checkbox" id="checkSaveLocal" checked><label class="form-check-label">Salvar Local (Offline)</label></div>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="button" id="btnCalculate" class="btn-save-green" onclick="generateRecommendation()">Salvar Amostra e Gerar Laudo</button>
+                        <button type="button" class="btn-clean" onclick="resetToRealMode()">Limpar</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- RESULTADOS -->
+            <div id="resultsSection" style="display: none;">
+                <div class="card card-custom border-top border-3 border-success">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold text-success m-0">Laudo Técnico Gerado</h5>
+                    </div>
+                    <ul class="nav nav-pills mb-3" id="pills-tab">
+                        <li class="nav-item"><button class="nav-link active" data-bs-toggle="pill" data-bs-target="#pills-laudo">Recomendação</button></li>
+                        <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#pills-tabela">Tabela</button></li>
+                    </ul>
+                    <div class="tab-content">
+                        <div class="tab-pane fade show active" id="pills-laudo">
+                            <textarea id="finalReportText" class="form-control report-box shadow-sm mb-3" rows="20" readonly></textarea>
+                            <div class="row g-2">
+                                <div class="col-md-6"><button class="btn btn-success w-100 fw-bold" onclick="shareWhatsapp()"><i class="fab fa-whatsapp me-2"></i> WhatsApp</button></div>
+                                <div class="col-md-6"><button class="btn btn-primary w-100 fw-bold" onclick="downloadWord()"><i class="fas fa-file-word"></i> Baixar Word (.doc)</button></div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="pills-tabela">
+                            <table class="table table-bordered table-striped text-center table-tech"><thead class="table-success"><tr><th>Item</th><th>Valor</th><th>Unidade</th></tr></thead><tbody id="techTableBody"></tbody></table>
                         </div>
                     </div>
                 </div>
             </div>
-
-            <label class="form-label">Valor Total (R$)</label>
-            <input type="number" id="tx-val" class="auth-input" step="0.01" style="font-size:1.4rem; font-weight:bold;">
-            
-            <label class="form-label">Categoria</label>
-            <select id="tx-cat" class="auth-input"></select>
-            
-            <label class="form-label">Data</label>
-            <input type="date" id="tx-date" class="auth-input">
-            
-            <label class="form-label">Descrição (Opcional)</label>
-            <input type="text" id="tx-desc" class="auth-input" placeholder="Detalhes">
-            
-            <button class="btn btn-primary" style="margin-top:15px;" onclick="app.saveTx()">Salvar</button>
         </div>
     </div>
 
-    <!-- MODAL: CADASTRO GENÉRICO -->
-    <div id="modal-reg" class="modal-overlay hidden" onclick="if(event.target===this) app.closeModal('modal-reg')">
-        <div class="modal-content">
-            <div class="flex justify-between"><h2 id="reg-modal-title">Novo Item</h2><i class="fa-solid fa-xmark" onclick="app.closeModal('modal-reg')"></i></div>
-            
-            <!-- Rótulo do campo Nome alterado para ter ID -->
-            <label class="form-label" id="reg-name-label">Nome</label>
-            <input type="text" id="reg-name" class="auth-input">
-            
-            <div id="reg-fields-extra"></div>
-            <button class="btn btn-primary" style="margin-top:15px;" onclick="app.saveRegister()">Salvar Cadastro</button>
+    <!-- Modais -->
+    <div class="modal fade" id="historyModal" tabindex="-1"><div class="modal-dialog modal-lg"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Histórico Local</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div id="localHistoryList" class="list-group"></div></div><div class="modal-footer"><button class="btn btn-outline-danger btn-sm" onclick="clearLocalHistory()">Limpar</button></div></div></div></div>
+
+    <!-- TEMPLATE EXPORTAÇÃO DOC -->
+    <div id="exportContent">
+        <div class="doc-header"><h1 class="doc-title">LAUDO TÉCNICO DE RECOMENDAÇÃO AGRONÔMICA</h1><p class="doc-subtitle">SRA MILHO - Base Técnica: Boletim 100 IAC (2022)</p></div>
+        <div class="doc-section-title">1. IDENTIFICAÇÃO E DIAGNÓSTICO</div>
+        <div class="doc-text">
+            <strong>Produtor:</strong> <span id="doc_owner"></span> | <strong>Propriedade:</strong> <span id="doc_prop"></span><br>
+            <strong>Safra:</strong> <span id="doc_season"></span> | <strong>Meta:</strong> <span id="doc_yield"></span> sc/ha<br>
+            <strong>Solo:</strong> Classe Textural <span id="doc_texture"></span> (<span id="doc_clay"></span>% Argila) | V%: <span id="doc_v"></span>
         </div>
+        <div class="doc-section-title">2. CORREÇÃO E NUTRIÇÃO</div>
+        <div class="doc-text" id="doc_body_content"></div>
+        <div class="doc-section-title">3. RESUMO TÉCNICO</div>
+        <div id="doc_table_container"></div>
+        <div class="doc-footer">Documento gerado eletronicamente pelo SRA.</div>
     </div>
 
-    <!-- MODAL: RPA (RECIBO DE PAGAMENTO A AUTÔNOMO) -->
-    <div id="modal-rpa" class="modal-overlay hidden" onclick="if(event.target===this) app.closeModal('modal-rpa')">
-        <div class="modal-content">
-            <div class="flex justify-between"><h2>Gerar RPA</h2><i class="fa-solid fa-xmark" onclick="app.closeModal('modal-rpa')"></i></div>
-            
-            <label class="form-label">Selecione o Cliente (Contratante)</label>
-            <select id="rpa-client-select" class="auth-input" onchange="app.fillRPAClient()">
-                <option value="">-- Selecionar ou Digitar Manualmente --</option>
-            </select>
-            
-            <div style="background:#f0fdf4; padding:10px; border-radius:8px; margin-bottom:10px;">
-                <p style="font-weight:600; color:var(--primary-dark);">Dados do Cliente</p>
-                <input type="text" id="rpa-cli-razao" class="auth-input" placeholder="Razão Social / Nome" style="font-size:0.9rem; margin-bottom:5px;">
-                <div class="flex" style="gap:5px;">
-                    <input type="text" id="rpa-cli-cnpj" class="auth-input" placeholder="CNPJ/CPF" style="margin:0;">
-                    <input type="text" id="rpa-cli-addr" class="auth-input" placeholder="Endereço" style="margin:0;">
-                </div>
-            </div>
-
-            <label class="form-label">Descrição do Serviço</label>
-            <input type="text" id="rpa-desc" class="auth-input" placeholder="Ex: Consultoria Técnica">
-            
-            <label class="form-label">Data do Serviço</label>
-            <input type="date" id="rpa-date" class="auth-input">
-
-            <div class="flex" style="gap:10px; align-items:flex-end;">
-                <div style="flex:1;">
-                    <label class="form-label">Valor Bruto (R$)</label>
-                    <input type="number" id="rpa-val" class="auth-input" step="0.01" oninput="app.calcRPA()">
-                </div>
-                <div style="width:80px;">
-                    <label class="form-label">% ISS</label>
-                    <input type="number" id="rpa-iss-pct" class="auth-input" value="0" oninput="app.calcRPA()">
-                </div>
-            </div>
-
-            <div class="rpa-results">
-                <div class="rpa-line"><span>(-) INSS (11%)</span><span id="rpa-res-inss">R$ 0,00</span></div>
-                <div class="rpa-line"><span>(-) ISS</span><span id="rpa-res-iss">R$ 0,00</span></div>
-                <div class="rpa-line"><span>(-) IRRF</span><span id="rpa-res-irrf">R$ 0,00</span></div>
-                <div class="rpa-line" style="font-weight:bold; color:var(--primary-dark); font-size:1rem; border:none;">
-                    <span>Líquido a Receber</span><span id="rpa-res-liq">R$ 0,00</span>
-                </div>
-            </div>
-
-            <!-- Botões de Download Word e PDF -->
-            <div class="flex" style="gap:10px; margin-top:15px;">
-                <button class="btn btn-primary" style="flex:1;" onclick="app.downloadRPAWord()">
-                    <i class="fa-solid fa-file-word"></i> Word (.doc)
-                </button>
-                <button class="btn btn-danger" style="flex:1;" onclick="app.downloadRPAPDF()">
-                    <i class="fa-solid fa-file-pdf"></i> PDF (.pdf)
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL: MOVIMENTAÇÃO DE ESTOQUE (AVULSA) -->
-    <div id="modal-stock" class="modal-overlay hidden" onclick="if(event.target===this) app.closeModal('modal-stock')">
-        <div class="modal-content">
-            <div class="flex justify-between"><h2>Movimentar Estoque</h2><i class="fa-solid fa-xmark" onclick="app.closeModal('modal-stock')"></i></div>
-            <p id="stock-prod-name" style="text-align:center; font-weight:bold; margin-bottom:10px; color:var(--primary-dark);">Produto X</p>
-            <div class="type-switch">
-                <div class="type-opt active inc" id="stk-inc" onclick="app.setStockType('in')">Entrada (Compra)</div>
-                <div class="type-opt" id="stk-exp" onclick="app.setStockType('out')">Saída (Venda)</div>
-            </div>
-            <label class="form-label">Quantidade</label>
-            <input type="number" id="stk-qty" class="auth-input" style="font-size:1.5rem; text-align:center;" placeholder="0">
-            <label class="form-label">Motivo</label>
-            <select id="stk-reason" class="auth-input">
-                <option value="Compra">Compra / Reposição</option>
-                <option value="Devolução">Devolução</option>
-            </select>
-            <button class="btn btn-primary" style="margin-top:15px;" onclick="app.saveStockMovement()">Confirmar</button>
-        </div>
-    </div>
-
-    <!-- MODAL: LISTA DE COMPRAS -->
-    <div id="modal-shopping" class="modal-overlay hidden" onclick="if(event.target===this) app.closeModal('modal-shopping')">
-        <div class="modal-content">
-            <div class="flex justify-between"><h2>Lista de Compras</h2><i class="fa-solid fa-xmark" onclick="app.closeModal('modal-shopping')"></i></div>
-            <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:15px;">Itens abaixo do estoque mínimo.</p>
-            <div id="shopping-list-content" style="max-height:300px; overflow-y:auto; border:1px solid var(--border); border-radius:10px; padding:10px; margin-bottom:15px;"></div>
-            <button class="btn btn-secondary" onclick="window.print()"><i class="fa-solid fa-print"></i> Imprimir / Salvar PDF</button>
-        </div>
-    </div>
-
-    <!-- MODAIS DE PERFIL E SENHA -->
-    <div id="modal-profile" class="modal-overlay hidden" onclick="if(event.target===this) app.closeModal('modal-profile')">
-        <div class="modal-content">
-            <div class="flex justify-between"><h2>Editar Dados</h2><i class="fa-solid fa-xmark" onclick="app.closeModal('modal-profile')"></i></div>
-            <label class="form-label">Nome Completo</label><input type="text" id="edit-name" class="auth-input">
-            <label class="form-label">Nome Fantasia</label><input type="text" id="edit-fantasy" class="auth-input">
-            <div class="flex" style="gap:10px;">
-                <div style="flex:1"><label class="form-label">CPF/CNPJ</label><input type="tel" id="edit-doc" class="auth-input"></div>
-                <div style="flex:1"><label class="form-label">Telefone</label><input type="tel" id="edit-phone" class="auth-input"></div>
-            </div>
-            <label class="form-label">Endereço</label><input type="text" id="edit-addr" class="auth-input">
-            <label class="form-label">Atividade</label><input type="text" id="edit-activity" class="auth-input">
-            
-            <div class="flex" style="gap:10px;">
-                <div style="flex:1"><label class="form-label">Isenção IRRF</label><input type="number" id="edit-irrf" class="auth-input" step="0.01" placeholder="2112.00"></div>
-                <div style="flex:1"><label class="form-label">% INSS</label><input type="number" id="edit-inss" class="auth-input" step="0.1" placeholder="11"></div>
-                <div style="flex:1"><label class="form-label">% ISS</label><input type="number" id="edit-iss" class="auth-input" step="0.1" placeholder="3"></div>
-            </div>
-
-            <button class="btn btn-primary" onclick="app.saveProfile()">Atualizar</button>
-        </div>
-    </div>
-    <div id="modal-pass" class="modal-overlay hidden" onclick="if(event.target===this) app.closeModal('modal-pass')">
-        <div class="modal-content">
-            <div class="flex justify-between"><h2>Alterar Senha</h2><i class="fa-solid fa-xmark" onclick="app.closeModal('modal-pass')"></i></div>
-            <label class="form-label">Nova Senha</label><input type="password" id="new-pass" class="auth-input">
-            <label class="form-label">Confirmar</label><input type="password" id="conf-pass" class="auth-input">
-            <button class="btn btn-danger" onclick="app.changePassword()">Confirmar</button>
-        </div>
-    </div>
-
-    <!-- SCRIPT -->
+    <!-- JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, updateProfile, updatePassword } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, increment, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // CONFIGURAÇÃO
+        // CONFIG FIREBASE (RECOLOQUE SUAS CHAVES AQUI)
         const firebaseConfig = {
-            apiKey: "AIzaSyCijldF4haJzh0nzu4fbPYGHJadyYuqTP4",
-            authDomain: "projmei.firebaseapp.com",
-            projectId: "projmei",
-            storageBucket: "projmei.firebasestorage.app",
-            messagingSenderId: "39066795540",
-            appId: "1:39066795540:web:edc72cedb442daee423101",
-            measurementId: "G-PE631DFGE0"
+            apiKey: "AIzaSyB5LjcVrlnBSTQyzbj1PxOFoO176KnHdZs",
+            authDomain: "milho-iac.firebaseapp.com",
+            projectId: "milho-iac",
+            storageBucket: "milho-iac.firebasestorage.app",
+            messagingSenderId: "1072500431786",
+            appId: "1:1072500431786:web:7b9ac660aa47f6433969d3",
+            measurementId: "G-07R2DFGE8T"
         };
-        const SEU_LINK_PDF = "https://drive.google.com/file/d/1gMocDMAey8q35-bcJsRip7Zm0v2mCrMS/view?usp=sharing"; 
-        const DEFAULT_DAS_LINK = "https://www8.receita.fazenda.gov.br/SimplesNacional/Aplicacoes/ATSPO/pgmei.app/Identificacao";
-        const PIX_KEY = "b4648948-d0a8-4402-81f4-8a4047fcf4e5";
 
-        class App {
-            constructor() {
-                this.auth = null;
-                this.user = null;
-                
-                // Dados Locais
-                this.txs = [];
-                this.profile = {}; 
-                this.settings = { nfLink: '', dasLink: '', merchantMode: false, irrfTable: [] }; 
-                this.clients = [];
-                this.suppliers = [];
-                this.products = [];
-                this.services = [];
-                this.stockMovements = []; 
-
-                this.isRegister = false;
-                this.curType = 'income';
-                this.curRegTab = 'clients'; 
-                this.editIdx = null; 
-                this.stockIdx = null; 
-                this.stockType = 'in'; 
-                this.txStockAction = 'other'; 
-
-                this.categories = {
-                    income: ['Venda de Produto', 'Prestação de Serviço', 'Outras Receitas'],
-                    expense: ['Compra de Mercadoria', 'Material de Uso', 'Aluguel', 'Água/Luz/Internet', 'Imposto (DAS)', 'Transporte', 'Retirada Pessoal', 'Outras Despesas']
-                };
-
-                this.initFirebase();
-            }
-
-            initFirebase() {
-                if (!firebaseConfig.apiKey) {
-                    document.getElementById('config-warning').classList.remove('hidden');
-                    return;
-                }
-                const app = initializeApp(firebaseConfig);
-                this.auth = getAuth(app);
-                onAuthStateChanged(this.auth, (user) => {
-                    if (user) {
-                        this.user = user;
-                        this.onLoginSuccess();
-                    } else {
-                        this.user = null;
-                        this.showAuth();
-                    }
-                });
-            }
-
-            // --- AUTH ---
-            async handleAuth() {
-                const email = document.getElementById('auth-email').value;
-                const pass = document.getElementById('auth-pass').value;
-                const name = document.getElementById('auth-name').value;
-                try {
-                    if (this.isRegister) {
-                        if(!name) return alert("Digite seu nome.");
-                        const cred = await createUserWithEmailAndPassword(this.auth, email, pass);
-                        await updateProfile(cred.user, { displayName: name });
-                    } else {
-                        await signInWithEmailAndPassword(this.auth, email, pass);
-                    }
-                } catch (e) { alert("Erro: " + e.message); }
-            }
-
-            toggleAuthMode() {
-                this.isRegister = !this.isRegister;
-                document.getElementById('reg-fields').classList.toggle('hidden');
-                document.getElementById('btn-auth').innerText = this.isRegister ? "Cadastrar" : "Entrar";
-                document.getElementById('link-toggle').innerText = this.isRegister ? "Já tenho conta" : "Criar nova conta";
-            }
-
-            logout() { signOut(this.auth); }
-            showAuth() {
-                document.getElementById('auth-screen').classList.remove('hidden');
-                document.getElementById('app-screen').classList.add('hidden');
-            }
-
-            // --- DATA LOAD ---
-            onLoginSuccess() {
-                document.getElementById('auth-screen').classList.add('hidden');
-                document.getElementById('app-screen').classList.remove('hidden');
-                document.getElementById('conf-email').innerText = this.user.email;
-
-                const uid = this.user.uid;
-                // Carregar configurações primeiro para ver o link padrão e tabela padrão IRRF
-                const defaultIRRF = [
-                    { limit: 2428.80, rate: 0, ded: 0 },
-                    { limit: 2826.65, rate: 7.5, ded: 182.16 },
-                    { limit: 3751.05, rate: 15.0, ded: 394.16 },
-                    { limit: 4664.68, rate: 22.5, ded: 675.49 },
-                    { limit: 99999999, rate: 27.5, ded: 908.73 } // 99999999 representa "Acima de"
-                ];
-
-                const defaultSettings = JSON.stringify({ 
-                    nfLink: "https://www.nfse.gov.br/EmissorNacional", 
-                    dasLink: DEFAULT_DAS_LINK,
-                    merchantMode: false,
-                    irrfTable: defaultIRRF
-                });
-                
-                this.settings = JSON.parse(localStorage.getItem(`mei_settings_${uid}`) || defaultSettings);
-                // Garantir que dasLink e irrfTable existam se for um usuário antigo
-                if(!this.settings.dasLink) this.settings.dasLink = DEFAULT_DAS_LINK;
-                if(!this.settings.irrfTable || this.settings.irrfTable.length === 0) this.settings.irrfTable = defaultIRRF;
-
-                this.txs = JSON.parse(localStorage.getItem(`mei_data_${uid}`) || '[]');
-                this.profile = JSON.parse(localStorage.getItem(`mei_profile_${uid}`) || '{"fantasy":"","doc":""}');
-                this.clients = JSON.parse(localStorage.getItem(`mei_clients_${uid}`) || '[]');
-                this.suppliers = JSON.parse(localStorage.getItem(`mei_suppliers_${uid}`) || '[]');
-                this.products = JSON.parse(localStorage.getItem(`mei_products_${uid}`) || '[]');
-                this.services = JSON.parse(localStorage.getItem(`mei_services_${uid}`) || '[]');
-                this.stockMovements = JSON.parse(localStorage.getItem(`mei_stock_${uid}`) || '[]');
-
-                document.getElementById('conf-merchant-mode').checked = this.settings.merchantMode || false;
-
-                this.render();
-                this.renderHeader();
-                this.renderIRRFConfig(); // Renderiza a tabela nas configurações
-                this.checkNFLink();
-                this.checkDASLink();
-                this.checkDASAlert();
-            }
-
-            renderHeader() {
-                document.getElementById('head-name').innerText = this.user.displayName || "Usuário";
-                document.getElementById('head-fantasy').innerText = this.profile.fantasy || "Minha Empresa";
-                document.getElementById('conf-nf-link').value = this.settings.nfLink || '';
-                document.getElementById('conf-das-link').value = this.settings.dasLink || '';
-            }
-            
-            // --- Configuração IRRF ---
-            renderIRRFConfig() {
-                const tbody = document.getElementById('irrf-config-body');
-                tbody.innerHTML = '';
-                this.settings.irrfTable.forEach((row, idx) => {
-                    const isLast = idx === this.settings.irrfTable.length - 1;
-                    const limitLabel = isLast ? "Acima de..." : `Até R$`;
-                    const limitVal = isLast ? "" : row.limit;
-                    const disabled = isLast ? "disabled style='background:#eee;'" : "";
-                    
-                    tbody.innerHTML += `
-                        <tr>
-                            <td>
-                                ${isLast ? 'Acima' : ''}
-                                <input type="number" step="0.01" class="irrf-input" value="${limitVal}" onchange="app.updateIRRFVal(${idx}, 'limit', this.value)" ${disabled}>
-                            </td>
-                            <td><input type="number" step="0.1" class="irrf-input" value="${row.rate}" onchange="app.updateIRRFVal(${idx}, 'rate', this.value)"></td>
-                            <td><input type="number" step="0.01" class="irrf-input" value="${row.ded}" onchange="app.updateIRRFVal(${idx}, 'ded', this.value)"></td>
-                        </tr>
-                    `;
-                });
-            }
-
-            updateIRRFVal(idx, key, val) {
-                if(key === 'limit' && val === "") return; // Ignora o ultimo
-                this.settings.irrfTable[idx][key] = parseFloat(val);
-            }
-
-            saveIRRFConfig() {
-                // Ensure last limit is high
-                this.settings.irrfTable[this.settings.irrfTable.length-1].limit = 999999999;
-                localStorage.setItem(`mei_settings_${this.user.uid}`, JSON.stringify(this.settings));
-                alert("Tabela IRRF salva com sucesso!");
-            }
-
-            checkDASAlert() {
-                const today = new Date().getDate();
-                const el = document.getElementById('das-alert');
-                
-                if (today >= 15 && today <= 19) {
-                    el.className = 'alert-das das-warning';
-                    el.innerText = '📅 Lembrete MEI: O DAS vence dia 20!';
-                    el.classList.remove('hidden');
-                } else if (today === 20) {
-                    el.className = 'alert-das das-urgent';
-                    el.innerText = '🚨 Seu DAS vence hoje!';
-                    el.classList.remove('hidden');
-                } else {
-                    el.classList.add('hidden');
-                }
-            }
-
-            toggleMerchantMode() {
-                this.settings.merchantMode = document.getElementById('conf-merchant-mode').checked;
-                localStorage.setItem(`mei_settings_${this.user.uid}`, JSON.stringify(this.settings));
-                alert(this.settings.merchantMode ? "Modo Comerciante Ativado!" : "Modo Simples Ativado.");
-            }
-
-            setRegTab(tab) {
-                this.curRegTab = tab;
-                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-                const titles = { clients: 'Clientes', suppliers: 'Fornecedores', products: 'Produtos', services: 'Serviços' };
-                document.getElementById('reg-title').innerText = titles[tab];
-                
-                const tabs = ['clients', 'suppliers', 'products', 'services'];
-                document.querySelectorAll('.tab-btn')[tabs.indexOf(tab)].classList.add('active');
-
-                if(tab === 'products') document.getElementById('btn-shopping-list').classList.remove('hidden');
-                else document.getElementById('btn-shopping-list').classList.add('hidden');
-
-                this.renderRegList();
-            }
-
-            renderRegList() {
-                const list = document.getElementById('reg-list');
-                list.innerHTML = '';
-                let data = [];
-                if(this.curRegTab === 'clients') data = this.clients;
-                if(this.curRegTab === 'suppliers') data = this.suppliers;
-                if(this.curRegTab === 'products') data = this.products;
-                if(this.curRegTab === 'services') data = this.services;
-
-                if(data.length === 0) {
-                    list.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding:20px;">Nenhum item cadastrado.</p>';
-                    return;
-                }
-
-                data.forEach((item, idx) => {
-                    let subInfo = '';
-                    let stockBadge = '';
-
-                    if(this.curRegTab === 'products') {
-                        subInfo = `R$ ${parseFloat(item.price).toFixed(2)}`;
-                        if(item.supplier) subInfo += ` | F: ${item.supplier}`;
-                        
-                        const curr = parseInt(item.currentStock || 0);
-                        const min = parseInt(item.minStock || 0);
-                        let colorClass = 'stock-ok';
-                        if(curr <= min) colorClass = 'stock-crit';
-                        else if(curr <= min * 1.5) colorClass = 'stock-low';
-                        
-                        stockBadge = `<span class="badge-stock ${colorClass}">Est: ${curr}</span>`;
-                    }
-                    else if(this.curRegTab === 'services') subInfo = `R$ ${parseFloat(item.price).toFixed(2)}`;
-                    else {
-                        // Para clientes e fornecedores
-                        subInfo = item.phone || '';
-                        if(item.doc) subInfo += (subInfo ? ' | ' : '') + item.doc;
-                    }
-
-                    list.innerHTML += `
-                    <div class="tx-item">
-                        <div>
-                            <strong>${item.name}</strong> ${stockBadge}<br>
-                            <small style="color:var(--text-muted)">${subInfo}</small>
-                            ${(this.curRegTab === 'clients' && item.corpName) ? `<br><small style="color:var(--text-muted); font-size:0.75rem;">${item.corpName}</small>` : ''}
-                            ${(this.curRegTab === 'suppliers' && item.address) ? `<br><small style="color:var(--text-muted); font-size:0.75rem;"><i class="fa-solid fa-location-dot"></i> ${item.address}</small>` : ''}
-                        </div>
-                        <div style="display:flex; gap:8px;">
-                            ${this.curRegTab === 'products' ? `<button class="btn-outline btn-sm" onclick="app.openStockModal(${idx})" title="Movimentar Estoque"><i class="fa-solid fa-box"></i></button>` : ''}
-                            <button class="btn-outline btn-sm" onclick="app.openRegModal(${idx})" style="color:var(--primary);"><i class="fa-solid fa-pen"></i></button>
-                            <button class="btn-outline btn-sm" onclick="app.deleteRegister(${idx})" style="color:var(--danger);"><i class="fa-solid fa-trash"></i></button>
-                        </div>
-                    </div>`;
-                });
-            }
-
-            async downloadRegPDF() {
-                const { jsPDF } = window.jspdf;
-                const doc = new jsPDF();
-                
-                let title = '';
-                let head = [];
-                let body = [];
-                
-                if (this.curRegTab === 'clients') {
-                    title = 'Lista de Clientes';
-                    head = [['Nome', 'Razão Social', 'Doc', 'Tel', 'Endereço']];
-                    body = this.clients.map(i => [i.name, i.corpName || '-', i.doc || '-', i.phone || '-', i.address || '-']);
-                } else if (this.curRegTab === 'suppliers') {
-                    title = 'Lista de Fornecedores';
-                    head = [['Nome', 'Telefone', 'Documento', 'Endereço']];
-                    body = this.suppliers.map(i => [i.name, i.phone, i.doc, i.address || '-']);
-                } else if (this.curRegTab === 'products') {
-                    title = 'Lista de Produtos';
-                    head = [['Produto', 'Preço (R$)', 'Custo (R$)', 'Estoque', 'Fornecedor']];
-                    body = this.products.map(i => [i.name, parseFloat(i.price).toFixed(2), parseFloat(i.cost).toFixed(2), i.currentStock, i.supplier]);
-                } else if (this.curRegTab === 'services') {
-                    title = 'Lista de Serviços';
-                    head = [['Serviço', 'Preço (R$)', 'Custo (R$)']];
-                    body = this.services.map(i => [i.name, parseFloat(i.price).toFixed(2), parseFloat(i.cost).toFixed(2)]);
-                }
-
-                doc.text(title, 14, 10);
-                doc.autoTable({
-                    head: head,
-                    body: body,
-                    startY: 20
-                });
-                
-                // CORREÇÃO: Forçar o download como Blob para evitar arquivo .tmp
-                const filename = `${this.curRegTab}_${new Date().toISOString().slice(0,10)}.pdf`;
-                const blob = doc.output('blob');
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = filename;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-            }
-
-            openRegModal(idx = null) {
-                this.editIdx = idx; 
-                document.getElementById('reg-name').value = '';
-                const extra = document.getElementById('reg-fields-extra');
-                extra.innerHTML = '';
-                
-                // Referencia ao rótulo dinâmico
-                const nameLabel = document.getElementById('reg-name-label');
-
-                let data = null;
-                if (idx !== null) {
-                    if(this.curRegTab === 'clients') data = this.clients[idx];
-                    else if(this.curRegTab === 'suppliers') data = this.suppliers[idx];
-                    else if(this.curRegTab === 'products') data = this.products[idx];
-                    else data = this.services[idx];
-                    document.getElementById('reg-name').value = data.name;
-                }
-
-                if(this.curRegTab === 'products') {
-                    document.getElementById('reg-modal-title').innerText = idx !== null ? "Editar Produto" : "Novo Produto";
-                    nameLabel.innerText = "Nome do Produto";
-                    
-                    let supOptions = '<option value="">Sem Fornecedor</option>';
-                    this.suppliers.forEach(s => { supOptions += `<option value="${s.name}">${s.name}</option>`; });
-
-                    extra.innerHTML = `
-                        <div class="flex" style="gap:10px;">
-                            <div><label class="form-label">Preço Venda</label><input type="number" id="reg-price" class="auth-input" step="0.01"></div>
-                            <div><label class="form-label">Custo</label><input type="number" id="reg-cost" class="auth-input" step="0.01"></div>
-                        </div>
-                        <div class="flex" style="gap:10px;">
-                            <div><label class="form-label">Est. Atual</label><input type="number" id="reg-curr-stk" class="auth-input"></div>
-                            <div><label class="form-label">Est. Mínimo</label><input type="number" id="reg-min-stk" class="auth-input"></div>
-                            <div><label class="form-label">Est. Ideal</label><input type="number" id="reg-ideal-stk" class="auth-input"></div>
-                        </div>
-                        <label class="form-label">Fornecedor</label>
-                        <select id="reg-supplier" class="auth-input">${supOptions}</select>
-                    `;
-                    if(idx !== null) {
-                        setTimeout(() => {
-                            document.getElementById('reg-price').value = data.price;
-                            document.getElementById('reg-cost').value = data.cost;
-                            document.getElementById('reg-supplier').value = data.supplier || '';
-                            document.getElementById('reg-curr-stk').value = data.currentStock || 0;
-                            document.getElementById('reg-min-stk').value = data.minStock || 0;
-                            document.getElementById('reg-ideal-stk').value = data.idealStock || 0;
-                        }, 50);
-                    }
-                } else if(this.curRegTab === 'services') {
-                    document.getElementById('reg-modal-title').innerText = idx !== null ? "Editar Serviço" : "Novo Serviço";
-                    nameLabel.innerText = "Nome do Serviço";
-                    
-                    extra.innerHTML = `
-                        <label class="form-label">Preço de Venda (R$)</label><input type="number" id="reg-price" class="auth-input" step="0.01">
-                        <label class="form-label">Custo (Opcional)</label><input type="number" id="reg-cost" class="auth-input" step="0.01">
-                    `;
-                    if(idx !== null) {
-                        setTimeout(() => {
-                            document.getElementById('reg-price').value = data.price;
-                            document.getElementById('reg-cost').value = data.cost;
-                        }, 50);
-                    }
-                } else if(this.curRegTab === 'clients') {
-                    document.getElementById('reg-modal-title').innerText = idx !== null ? "Editar Cliente" : "Novo Cliente";
-                    nameLabel.innerText = "Nome do Cliente";
-                    
-                    extra.innerHTML = `
-                        <label class="form-label">Razão Social (Opcional)</label><input type="text" id="reg-corp-name" class="auth-input">
-                        <div class="flex" style="gap:10px;">
-                            <div style="flex:1"><label class="form-label">CPF / CNPJ</label><input type="text" id="reg-doc" class="auth-input"></div>
-                            <div style="flex:1"><label class="form-label">Telefone</label><input type="tel" id="reg-phone" class="auth-input"></div>
-                        </div>
-                        <label class="form-label">Endereço</label><input type="text" id="reg-addr" class="auth-input">
-                    `;
-                    if(idx !== null) {
-                        setTimeout(() => {
-                            document.getElementById('reg-corp-name').value = data.corpName || '';
-                            document.getElementById('reg-doc').value = data.doc || '';
-                            document.getElementById('reg-phone').value = data.phone || '';
-                            document.getElementById('reg-addr').value = data.address || '';
-                        }, 50);
-                    }
-                } else {
-                    // Fornecedores
-                    document.getElementById('reg-modal-title').innerText = "Novo Fornecedor";
-                    nameLabel.innerText = "Nome do Fornecedor";
-
-                    extra.innerHTML = `
-                        <label class="form-label">Telefone / WhatsApp</label><input type="tel" id="reg-phone" class="auth-input">
-                        <label class="form-label">CPF / CNPJ</label><input type="text" id="reg-doc" class="auth-input">
-                        <label class="form-label">Endereço</label><input type="text" id="reg-addr" class="auth-input">
-                    `;
-                    if(idx !== null) {
-                        setTimeout(() => {
-                            document.getElementById('reg-phone').value = data.phone;
-                            document.getElementById('reg-doc').value = data.doc;
-                            document.getElementById('reg-addr').value = data.address || '';
-                        }, 50);
-                    }
-                }
-                document.getElementById('modal-reg').classList.remove('hidden');
-            }
-
-            saveRegister() {
-                const name = document.getElementById('reg-name').value;
-                if(!name) return alert("Nome é obrigatório.");
-
-                let newItem = { name };
-
-                if(this.curRegTab === 'products') {
-                    newItem.price = document.getElementById('reg-price').value || 0;
-                    newItem.cost = document.getElementById('reg-cost').value || 0;
-                    newItem.supplier = document.getElementById('reg-supplier').value || '';
-                    newItem.currentStock = parseInt(document.getElementById('reg-curr-stk').value || 0);
-                    newItem.minStock = parseInt(document.getElementById('reg-min-stk').value || 0);
-                    newItem.idealStock = parseInt(document.getElementById('reg-ideal-stk').value || 0);
-                    
-                    if (this.editIdx !== null) this.products[this.editIdx] = newItem;
-                    else this.products.push(newItem);
-                    localStorage.setItem(`mei_products_${this.user.uid}`, JSON.stringify(this.products));
-
-                } else if (this.curRegTab === 'services') {
-                    newItem.price = document.getElementById('reg-price').value || 0;
-                    newItem.cost = document.getElementById('reg-cost').value || 0;
-                    if (this.editIdx !== null) this.services[this.editIdx] = newItem;
-                    else this.services.push(newItem);
-                    localStorage.setItem(`mei_services_${this.user.uid}`, JSON.stringify(this.services));
-
-                } else if (this.curRegTab === 'clients') {
-                    newItem.corpName = document.getElementById('reg-corp-name').value || '';
-                    newItem.phone = document.getElementById('reg-phone').value || '';
-                    newItem.doc = document.getElementById('reg-doc').value || '';
-                    newItem.address = document.getElementById('reg-addr').value || '';
-                    
-                    if (this.editIdx !== null) this.clients[this.editIdx] = newItem;
-                    else this.clients.push(newItem);
-                    localStorage.setItem(`mei_clients_${this.user.uid}`, JSON.stringify(this.clients));
-
-                } else {
-                    // Fornecedores
-                    newItem.phone = document.getElementById('reg-phone').value || '';
-                    newItem.doc = document.getElementById('reg-doc').value || '';
-                    newItem.address = document.getElementById('reg-addr').value || '';
-                    if (this.editIdx !== null) this.suppliers[this.editIdx] = newItem;
-                    else this.suppliers.push(newItem);
-                    localStorage.setItem(`mei_suppliers_${this.user.uid}`, JSON.stringify(this.suppliers));
-                }
-                this.closeModal('modal-reg');
-                this.renderRegList();
-            }
-
-            deleteRegister(idx) {
-                if(!confirm("Excluir item?")) return;
-                const arr = this.curRegTab === 'clients' ? this.clients : (this.curRegTab === 'suppliers' ? this.suppliers : (this.curRegTab === 'products' ? this.products : this.services));
-                arr.splice(idx, 1);
-                localStorage.setItem(`mei_${this.curRegTab}_${this.user.uid}`, JSON.stringify(arr));
-                this.renderRegList();
-            }
-
-            openStockModal(idx) {
-                this.stockIdx = idx;
-                const p = this.products[idx];
-                document.getElementById('stock-prod-name').innerText = p.name;
-                document.getElementById('stk-qty').value = '';
-                this.setStockType('in');
-                document.getElementById('modal-stock').classList.remove('hidden');
-            }
-
-            setStockType(type) {
-                this.stockType = type;
-                const inc = document.getElementById('stk-inc');
-                const exp = document.getElementById('stk-exp');
-                const reason = document.getElementById('stk-reason');
-                
-                if(type === 'in') {
-                    inc.classList.add('active'); exp.classList.remove('active');
-                    reason.innerHTML = '<option value="Compra">Compra</option><option value="Devolução">Devolução Cliente</option>';
-                } else {
-                    exp.classList.add('active'); inc.classList.remove('active');
-                    reason.innerHTML = '<option value="Venda">Venda</option><option value="Perda">Perda / Quebra</option><option value="Uso">Uso Interno</option>';
-                }
-            }
-
-            saveStockMovement() {
-                const qty = parseInt(document.getElementById('stk-qty').value);
-                const reason = document.getElementById('stk-reason').value;
-                if(!qty || qty <= 0) return alert("Quantidade inválida.");
-
-                const p = this.products[this.stockIdx];
-                const oldStock = parseInt(p.currentStock || 0);
-                
-                if(this.stockType === 'in') p.currentStock = oldStock + qty;
-                else p.currentStock = Math.max(0, oldStock - qty);
-
-                this.stockMovements.push({
-                    date: new Date().toISOString(), product: p.name, type: this.stockType,
-                    qty: qty, reason: reason, newStock: p.currentStock
-                });
-
-                localStorage.setItem(`mei_products_${this.user.uid}`, JSON.stringify(this.products));
-                localStorage.setItem(`mei_stock_${this.user.uid}`, JSON.stringify(this.stockMovements));
-                
-                alert("Estoque atualizado!");
-                this.closeModal('modal-stock');
-                this.renderRegList();
-            }
-
-            openShoppingList() {
-                const listDiv = document.getElementById('shopping-list-content');
-                listDiv.innerHTML = '';
-                let toBuy = this.products.filter(p => (parseInt(p.currentStock||0) <= parseInt(p.minStock||0)));
-                if(toBuy.length === 0) listDiv.innerHTML = '<p>Tudo certo! Nenhum produto abaixo do mínimo.</p>';
-                else {
-                    let html = '<table style="width:100%; font-size:0.85rem; border-collapse:collapse;">';
-                    html += '<tr style="text-align:left; border-bottom:1px solid #ddd;"><th>Produto</th><th>Atual</th><th>Comprar</th></tr>';
-                    toBuy.forEach(p => {
-                        const ideal = parseInt(p.idealStock || 0);
-                        const curr = parseInt(p.currentStock || 0);
-                        const buyQty = ideal > curr ? (ideal - curr) : 0;
-                        html += `<tr><td style="padding:5px;">${p.name}<br><small style="color:var(--text-muted)">${p.supplier||''}</small></td><td style="padding:5px; color:red;">${curr}</td><td style="padding:5px; font-weight:bold;">${buyQty > 0 ? buyQty : '-'}</td></tr>`;
-                    });
-                    html += '</table>';
-                    listDiv.innerHTML = html;
-                }
-                document.getElementById('modal-shopping').classList.remove('hidden');
-            }
-
-            // --- LÓGICA DO RPA (RECIBO) ---
-            openRPAModal() {
-                const sel = document.getElementById('rpa-client-select');
-                sel.innerHTML = '<option value="">-- Selecionar ou Digitar Manualmente --</option>';
-                this.clients.forEach((c, idx) => {
-                    sel.innerHTML += `<option value="${idx}">${c.name}</option>`;
-                });
-                
-                // Reset fields
-                document.getElementById('rpa-cli-razao').value = '';
-                document.getElementById('rpa-cli-cnpj').value = '';
-                document.getElementById('rpa-cli-addr').value = '';
-                document.getElementById('rpa-desc').value = '';
-                document.getElementById('rpa-date').value = new Date().toISOString().slice(0,10);
-                document.getElementById('rpa-val').value = '';
-                
-                // Usar valor padrão do perfil se existir, senão 0
-                document.getElementById('rpa-iss-pct').value = this.profile.issPct || 3;
-                
-                this.calcRPA();
-                
-                document.getElementById('modal-rpa').classList.remove('hidden');
-            }
-
-            fillRPAClient() {
-                const idx = document.getElementById('rpa-client-select').value;
-                if(idx !== "") {
-                    const c = this.clients[idx];
-                    document.getElementById('rpa-cli-razao').value = c.corpName || c.name || '';
-                    document.getElementById('rpa-cli-cnpj').value = c.doc || '';
-                    document.getElementById('rpa-cli-addr').value = c.address || '';
-                } else {
-                    document.getElementById('rpa-cli-razao').value = '';
-                    document.getElementById('rpa-cli-cnpj').value = '';
-                    document.getElementById('rpa-cli-addr').value = '';
-                }
-            }
-
-            calcRPA() {
-                const gross = parseFloat(document.getElementById('rpa-val').value || 0);
-                const issPct = parseFloat(document.getElementById('rpa-iss-pct').value || 0);
-                const inssPct = 11; // 11% fixo
-
-                const inssVal = gross * (inssPct / 100);
-                const issVal = gross * (issPct / 100);
-
-                // Cálculo Base IRRF: Bruto - INSS - ISS
-                let baseIRRF = gross - inssVal - issVal;
-                let irrfVal = 0;
-
-                // Loop pela tabela configurada
-                // A tabela deve estar ordenada pelo limite.
-                // O último item é o "acima de tudo".
-                for (const row of this.settings.irrfTable) {
-                    if (baseIRRF <= row.limit) {
-                        irrfVal = (baseIRRF * (row.rate / 100)) - row.ded;
-                        break; // Encontrou a faixa, para.
-                    }
-                }
-
-                if (irrfVal < 0) irrfVal = 0;
-
-                const net = gross - inssVal - issVal - irrfVal;
-
-                document.getElementById('rpa-res-inss').innerText = `R$ ${inssVal.toFixed(2)}`;
-                document.getElementById('rpa-res-iss').innerText = `R$ ${issVal.toFixed(2)}`;
-                document.getElementById('rpa-res-irrf').innerText = `R$ ${irrfVal.toFixed(2)}`;
-                document.getElementById('rpa-res-liq').innerText = `R$ ${net.toFixed(2)}`;
-            }
-
-            async downloadRPAPDF() {
-                const { jsPDF } = window.jspdf;
-                const doc = new jsPDF();
-
-                // Fetch values
-                const razaoCli = document.getElementById('rpa-cli-razao').value || "_________________";
-                const cnpjCli = document.getElementById('rpa-cli-cnpj').value || "_________________";
-                const endCli = document.getElementById('rpa-cli-addr').value || "_________________";
-
-                const nomeFor = this.user.displayName || "_________________";
-                const cpfFor = this.profile.doc || "_________________";
-                const endFor = this.profile.address || "_________________";
-                const telFor = this.profile.phone || "_________________";
-
-                const servico = document.getElementById('rpa-desc').value || "Serviços Gerais";
-                const dataServ = document.getElementById('rpa-date').value.split('-').reverse().join('/') || "__/__/____";
-                const dataHoje = new Date().toLocaleDateString('pt-BR');
-
-                const gross = parseFloat(document.getElementById('rpa-val').value || 0).toFixed(2);
-                const inss = document.getElementById('rpa-res-inss').innerText;
-                const iss = document.getElementById('rpa-res-iss').innerText;
-                const issPct = document.getElementById('rpa-iss-pct').value;
-                const irrf = document.getElementById('rpa-res-irrf').innerText;
-                const liq = document.getElementById('rpa-res-liq').innerText;
-
-                // PDF Layout
-                let y = 20;
-                doc.setFontSize(16);
-                doc.setFont("helvetica", "bold");
-                doc.text("RECIBO DE PAGAMENTO A AUTÔNOMO – RPA", 105, y, { align: "center" });
-                y += 15;
-
-                doc.setFontSize(12);
-                doc.setFont("helvetica", "bold");
-                doc.text("1. Contratante (Empresa)", 20, y);
-                y += 7;
-                doc.setFont("helvetica", "normal");
-                doc.text(`Razão Social: ${razaoCli}`, 20, y); y += 7;
-                doc.text(`CNPJ: ${cnpjCli}`, 20, y); y += 7;
-                doc.text(`Endereço: ${endCli}`, 20, y); y += 10;
-                
-                doc.line(20, y, 190, y); y += 10;
-
-                doc.setFont("helvetica", "bold");
-                doc.text("2. Autônomo (Prestador)", 20, y);
-                y += 7;
-                doc.setFont("helvetica", "normal");
-                doc.text(`Nome Completo: ${nomeFor}`, 20, y); y += 7;
-                doc.text(`CPF: ${cpfFor}`, 20, y); y += 7;
-                doc.text(`Endereço: ${endFor}`, 20, y); y += 7;
-                doc.text(`Telefone: ${telFor}`, 20, y); y += 10;
-
-                doc.line(20, y, 190, y); y += 10;
-
-                doc.setFont("helvetica", "bold");
-                doc.text("3. Serviço Prestado", 20, y);
-                y += 7;
-                doc.setFont("helvetica", "normal");
-                doc.text(`Descrição: ${servico}`, 20, y); y += 7;
-                doc.text(`Data do Serviço: ${dataServ}`, 20, y); y += 10;
-
-                doc.line(20, y, 190, y); y += 10;
-
-                doc.setFont("helvetica", "bold");
-                doc.text("4. Valor do Serviço", 20, y);
-                y += 7;
-                doc.setFont("helvetica", "normal");
-                doc.text(`Valor bruto: R$ ${gross}`, 20, y); y += 10;
-
-                doc.line(20, y, 190, y); y += 10;
-
-                doc.setFont("helvetica", "bold");
-                doc.text("5. Cálculo dos Descontos", 20, y);
-                y += 7;
-                doc.setFont("helvetica", "normal");
-                doc.text(`a) INSS (11%): ${inss}`, 20, y); y += 7;
-                doc.text(`b) ISS (${issPct}%): ${iss}`, 20, y); y += 7;
-                doc.text(`c) IRRF: ${irrf}`, 20, y); y += 10;
-                doc.setFont("helvetica", "bold");
-                doc.text(`Valor Líquido a Receber: ${liq}`, 20, y); y += 10;
-
-                doc.line(20, y, 190, y); y += 10;
-
-                doc.setFont("helvetica", "bold");
-                doc.text("6. Declaração", 20, y); y += 7;
-                doc.setFont("helvetica", "normal");
-                doc.setFontSize(10);
-                const declText = "Declaro que prestei os serviços acima descritos e recebi da contratante o valor líquido correspondente, estando o presente documento pago e quitado.";
-                const splitDecl = doc.splitTextToSize(declText, 170);
-                doc.text(splitDecl, 20, y);
-                y += 25;
-
-                doc.text("__________________________________________", 20, y); y += 5;
-                doc.text(`${nomeFor} (Prestador)`, 20, y); y += 5;
-                doc.text(`Data: ${dataHoje}`, 20, y); y += 20;
-
-                doc.text("__________________________________________", 20, y); y += 5;
-                doc.text(`${razaoCli} (Contratante)`, 20, y); y += 5;
-                doc.text(`Data: ${dataHoje}`, 20, y);
-
-                // CORREÇÃO: Limpar nome do arquivo e forçar Blob para evitar .tmp
-                let safeRazao = razaoCli.replace(/[^a-zA-Z0-9ãõáéíóúâêîôûàçÃÕÁÉÍÓÚÂÊÎÔÛÀÇ \-_]/g, ''); 
-                safeRazao = safeRazao.replace(/\s+/g, '_');
-                
-                const filename = `RPA_${safeRazao}_${new Date().toISOString().slice(0,10)}.pdf`;
-                
-                const blob = doc.output('blob');
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = filename;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-            }
-
-            downloadRPAWord() {
-                // Dados do Contratante (Cliente)
-                const razaoCli = document.getElementById('rpa-cli-razao').value || "_________________";
-                const cnpjCli = document.getElementById('rpa-cli-cnpj').value || "_________________";
-                const endCli = document.getElementById('rpa-cli-addr').value || "_________________";
-
-                // Dados do Prestador (Usuario)
-                const nomeFor = this.user.displayName || "_________________";
-                const cpfFor = this.profile.doc || "_________________";
-                const endFor = this.profile.address || "_________________";
-                const telFor = this.profile.phone || "_________________";
-
-                // Serviço
-                const servico = document.getElementById('rpa-desc').value || "Serviços Gerais";
-                const dataServ = document.getElementById('rpa-date').value.split('-').reverse().join('/') || "__/__/____";
-                const dataHoje = new Date().toLocaleDateString('pt-BR');
-
-                // Valores
-                const gross = parseFloat(document.getElementById('rpa-val').value || 0).toFixed(2);
-                const inss = document.getElementById('rpa-res-inss').innerText;
-                const iss = document.getElementById('rpa-res-iss').innerText;
-                const issPct = document.getElementById('rpa-iss-pct').value;
-                const irrf = document.getElementById('rpa-res-irrf').innerText;
-                const liq = document.getElementById('rpa-res-liq').innerText;
-
-                // Template HTML para o Word
-                const content = `
-                <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
-                <head><meta charset='utf-8'><title>RPA</title>
-                <style>body{font-family:Arial, sans-serif; font-size:12pt; line-height:1.5;}</style>
-                </head><body>
-                <h2 style="text-align:center;">RECIBO DE PAGAMENTO A AUTÔNOMO – RPA</h2>
-                <br>
-                <h3>1. Contratante (Empresa)</h3>
-                <p><strong>Razão Social:</strong> ${razaoCli}<br>
-                <strong>CNPJ:</strong> ${cnpjCli}<br>
-                <strong>Endereço:</strong> ${endCli}</p>
-                <hr>
-                <h3>2. Autônomo (Prestador)</h3>
-                <p><strong>Nome Completo:</strong> ${nomeFor}<br>
-                <strong>CPF:</strong> ${cpfFor}<br>
-                <strong>Endereço:</strong> ${endFor}<br>
-                <strong>Telefone:</strong> ${telFor}</p>
-                <hr>
-                <h3>3. Serviço Prestado</h3>
-                <p><strong>Descrição do Serviço:</strong> ${servico}<br>
-                <strong>Data do Serviço:</strong> ${dataServ}</p>
-                <hr>
-                <h3>4. Valor do Serviço</h3>
-                <p><strong>Valor bruto do serviço:</strong> R$ ${gross}</p>
-                <hr>
-                <h3>5. Cálculo dos Descontos</h3>
-                <p>a) INSS (11%): ${inss}<br>
-                b) ISS (${issPct}%): ${iss}<br>
-                c) IRRF: ${irrf}<br>
-                <strong>➡ Valor líquido a receber: ${liq}</strong></p>
-                <hr>
-                <h3>6. Declaração</h3>
-                <p>Declaro que prestei os serviços acima descritos e recebi da contratante o valor líquido correspondente, estando o presente documento pago e quitado.</p>
-                <br>
-                <p>${nomeFor}<br>__________________________________________<br>Data: ${dataHoje}</p>
-                <br>
-                <p>${razaoCli}<br>__________________________________________<br>Data: ${dataHoje}</p>
-                </body></html>`;
-
-                const blob = new Blob(['\ufeff', content], { type: 'application/msword' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `RPA_${razaoCli.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0,10)}.doc`;
-                a.click();
-            }
-
-            saveNFLink() {
-                this.settings.nfLink = document.getElementById('conf-nf-link').value;
-                localStorage.setItem(`mei_settings_${this.user.uid}`, JSON.stringify(this.settings));
-                alert("Link NF Salvo!");
-                this.checkNFLink();
-            }
-            saveDASLink() {
-                this.settings.dasLink = document.getElementById('conf-das-link').value;
-                localStorage.setItem(`mei_settings_${this.user.uid}`, JSON.stringify(this.settings));
-                alert("Link DAS Salvo!");
-                this.checkDASLink();
-            }
-            
-            checkNFLink() {
-                const el = document.getElementById('nf-shortcut');
-                if(this.settings.nfLink && this.settings.nfLink.length > 5) el.classList.remove('hidden');
-                else el.classList.add('hidden');
-            }
-            checkDASLink() {
-                const el = document.getElementById('das-shortcut');
-                if(this.settings.dasLink && this.settings.dasLink.length > 5) el.classList.remove('hidden');
-                else el.classList.add('hidden');
-            }
-
-            openNFLink() { if(this.settings.nfLink) window.open(this.settings.nfLink, '_blank'); }
-            openDASLink() { if(this.settings.dasLink) window.open(this.settings.dasLink, '_blank'); }
-
-            downloadManual() { if(!SEU_LINK_PDF) return alert("Configure o PDF"); window.open(SEU_LINK_PDF, '_blank'); }
-
-            openProfileModal() {
-                document.getElementById('edit-name').value = this.user.displayName || '';
-                document.getElementById('edit-fantasy').value = this.profile.fantasy || '';
-                document.getElementById('edit-doc').value = this.profile.doc || '';
-                
-                // Novos Campos
-                document.getElementById('edit-addr').value = this.profile.address || '';
-                document.getElementById('edit-phone').value = this.profile.phone || '';
-                document.getElementById('edit-activity').value = this.profile.activity || '';
-                document.getElementById('edit-irrf').value = this.profile.irrfLimit || '2112.00';
-                document.getElementById('edit-inss').value = this.profile.inssPct || '11';
-                document.getElementById('edit-iss').value = this.profile.issPct || '3'; // NOVO
-
-                document.getElementById('modal-profile').classList.remove('hidden');
-            }
-            async saveProfile() {
-                const newName = document.getElementById('edit-name').value;
-                if(!newName) return alert("Nome obrigatório");
-                try {
-                    if(newName !== this.user.displayName) await updateProfile(this.user, {displayName: newName});
-                    this.profile = { 
-                        fantasy: document.getElementById('edit-fantasy').value, 
-                        doc: document.getElementById('edit-doc').value,
-                        address: document.getElementById('edit-addr').value,
-                        phone: document.getElementById('edit-phone').value,
-                        activity: document.getElementById('edit-activity').value,
-                        irrfLimit: document.getElementById('edit-irrf').value || '2112.00',
-                        inssPct: document.getElementById('edit-inss').value || '11',
-                        issPct: document.getElementById('edit-iss').value || '3' // NOVO
-                    };
-                    localStorage.setItem(`mei_profile_${this.user.uid}`, JSON.stringify(this.profile));
-                    alert("Atualizado!"); this.closeModal('modal-profile'); this.renderHeader();
-                } catch(e) { alert("Erro: " + e.message); }
-            }
-
-            openPassModal() { document.getElementById('modal-pass').classList.remove('hidden'); }
-            async changePassword() {
-                const p1 = document.getElementById('new-pass').value;
-                const p2 = document.getElementById('conf-pass').value;
-                if(p1.length < 6 || p1!==p2) return alert("Senha inválida ou não confere.");
-                try { await updatePassword(this.user, p1); alert("Senha alterada!"); this.logout(); }
-                catch(e) { alert("Erro: " + e.message); }
-            }
-
-            openTxModal() {
-                document.getElementById('tx-date').value = new Date().toISOString().split('T')[0];
-                document.getElementById('tx-val').value = '';
-                document.getElementById('tx-desc').value = '';
-                const radios = document.getElementsByName('tx-action');
-                radios.forEach(r => r.checked = (r.value === 'other'));
-                this.handleStockAction('other');
-                this.setType('income'); 
-                document.getElementById('modal-tx').classList.remove('hidden');
-            }
-
-            setType(type) {
-                this.curType = type;
-                document.getElementById('opt-inc').classList.toggle('active', type === 'income');
-                document.getElementById('opt-exp').classList.toggle('active', type === 'expense');
-                
-                const select = document.getElementById('tx-cat');
-                select.innerHTML = '';
-                this.categories[type].forEach(c => { select.innerHTML += `<option value="${c}">${c}</option>`; });
-                
-                const merchantOpts = document.getElementById('merchant-options');
-                if(this.settings.merchantMode) {
-                    merchantOpts.classList.remove('hidden');
-                    const prodSel = document.getElementById('tx-prod-select');
-                    prodSel.innerHTML = '<option value="">Selecione...</option>';
-                    this.products.forEach((p, idx) => {
-                        prodSel.innerHTML += `<option value="${idx}">${p.name} (R$ ${p.price})</option>`;
-                    });
-                } else {
-                    merchantOpts.classList.add('hidden');
-                }
-            }
-
-            handleStockAction(action) {
-                this.txStockAction = action;
-                const details = document.getElementById('tx-prod-details');
-                const valInput = document.getElementById('tx-val');
-
-                if(action === 'sale') {
-                    this.setType('income'); 
-                    details.classList.remove('hidden');
-                    valInput.setAttribute('readonly', true);
-                    valInput.style.background = "#eee";
-                } else if (action === 'buy') {
-                    this.setType('expense');
-                    details.classList.remove('hidden');
-                    valInput.removeAttribute('readonly');
-                    valInput.style.background = "#fff";
-                } else {
-                    details.classList.add('hidden');
-                    valInput.removeAttribute('readonly');
-                    valInput.style.background = "#fff";
-                }
-            }
-
-            onTxProductChange() {
-                this.calcTxTotal();
-            }
-
-            calcTxTotal() {
-                const idx = document.getElementById('tx-prod-select').value;
-                if(idx === "") return;
-                
-                const qty = parseInt(document.getElementById('tx-prod-qty').value || 1);
-                const prod = this.products[idx];
-                
-                let price = 0;
-                if(this.txStockAction === 'sale') price = parseFloat(prod.price || 0);
-                else price = parseFloat(prod.cost || 0);
-                
-                document.getElementById('tx-prod-price').value = price.toFixed(2);
-                
-                if(this.txStockAction === 'sale') {
-                    document.getElementById('tx-val').value = (price * qty).toFixed(2);
-                } else {
-                    if(document.getElementById('tx-val').value === "") {
-                        document.getElementById('tx-val').value = (price * qty).toFixed(2);
-                    }
-                }
-            }
-
-            saveTx() {
-                const val = parseFloat(document.getElementById('tx-val').value);
-                const date = document.getElementById('tx-date').value;
-                const cat = document.getElementById('tx-cat').value; 
-                let desc = document.getElementById('tx-desc').value;
-
-                if (!val || !date) return alert("Preencha valor e data");
-
-                if(this.settings.merchantMode && this.txStockAction !== 'other') {
-                    const prodIdx = document.getElementById('tx-prod-select').value;
-                    const qty = parseInt(document.getElementById('tx-prod-qty').value);
-                    
-                    if(prodIdx === "" || !qty) return alert("Selecione o produto e quantidade.");
-                    
-                    const p = this.products[prodIdx];
-                    const oldStock = parseInt(p.currentStock)||0;
-                    
-                    if(this.txStockAction === 'sale') {
-                        p.currentStock = Math.max(0, oldStock - qty);
-                        desc = `Venda: ${p.name} (x${qty}) - ${desc}`;
-                        this.stockMovements.push({
-                            date: new Date().toISOString(), product: p.name, type: 'out',
-                            qty: qty, reason: 'Venda Direta', newStock: p.currentStock
-                        });
-
-                    } else if (this.txStockAction === 'buy') {
-                        p.currentStock = oldStock + qty;
-                        desc = `Compra: ${p.name} (x${qty}) - ${desc}`;
-                        this.stockMovements.push({
-                            date: new Date().toISOString(), product: p.name, type: 'in',
-                            qty: qty, reason: 'Reposição', newStock: p.currentStock
-                        });
-                    }
-                    
-                    localStorage.setItem(`mei_products_${this.user.uid}`, JSON.stringify(this.products));
-                    localStorage.setItem(`mei_stock_${this.user.uid}`, JSON.stringify(this.stockMovements));
-                }
-
-                this.txs.push({ id: Date.now(), type: this.curType, val, date, cat, desc });
-                localStorage.setItem(`mei_data_${this.user.uid}`, JSON.stringify(this.txs));
-                
-                this.closeModal('modal-tx');
-                this.render();
-                if(this.curRegTab === 'products') this.renderRegList();
-            }
-
-            render() {
-                const list = document.getElementById('list-recent');
-                list.innerHTML = '';
-                let bal = 0, incTotal = 0, expTotal = 0;
-                if (this.txs.length === 0) document.getElementById('empty-state').classList.remove('hidden');
-                else {
-                    document.getElementById('empty-state').classList.add('hidden');
-                    this.txs.sort((a,b) => new Date(b.date) - new Date(a.date));
-                    this.txs.forEach(tx => {
-                        if(tx.type === 'income') { bal += tx.val; incTotal += tx.val; } 
-                        else { bal -= tx.val; expTotal += tx.val; }
-                        list.innerHTML += `<div class="tx-item"><div><strong>${tx.cat}</strong><br><small style="color:var(--text-muted)">${new Date(tx.date).toLocaleDateString()} ${tx.desc}</small></div><span class="${tx.type==='income'?'text-green':'text-red'}">${tx.type==='income'?'+':'-'} R$ ${tx.val.toFixed(2)}</span></div>`;
-                    });
-                }
-                document.getElementById('dash-bal').innerText = `R$ ${bal.toFixed(2)}`;
-                document.getElementById('dash-inc').innerText = incTotal.toFixed(2);
-                document.getElementById('dash-exp').innerText = expTotal.toFixed(2);
-            }
-
-            closeModal(id) { document.getElementById(id).classList.add('hidden'); }
-            navTo(viewId, btn) {
-                ['home', 'registers', 'settings', 'support'].forEach(v => document.getElementById('view-'+v).classList.add('hidden'));
-                document.getElementById('view-'+viewId).classList.remove('hidden');
-                document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                if(viewId === 'registers') this.renderRegList();
-            }
-
-            // --- FUNÇÕES DE PIX (COPIA E COLA) ---
-            
-            // 1. Calcula CRC16 (Padrão CCITT-FALSE para BR Code)
-            crc16(str) {
-                let crc = 0xFFFF;
-                for (let i = 0; i < str.length; i++) {
-                    crc ^= str.charCodeAt(i) << 8;
-                    for (let j = 0; j < 8; j++) {
-                        if ((crc & 0x8000) !== 0) crc = (crc << 1) ^ 0x1021;
-                        else crc = crc << 1;
-                    }
-                }
-                return (crc & 0xFFFF).toString(16).toUpperCase().padStart(4, '0');
-            }
-
-            // 2. Monta o Payload EMVCo
-            generatePixPayload(amount) {
-                const format = (id, val) => id + val.length.toString().padStart(2, '0') + val;
-                
-                // Merchant Account Info
-                const merchantInfo = format('00', 'BR.GOV.BCB.PIX') + format('01', PIX_KEY);
-                
-                let payload = 
-                    format('00', '01') +                          // Format
-                    format('26', merchantInfo) +                  // Merchant Info
-                    format('52', '0000') +                        // Category Code
-                    format('53', '986');                          // Currency BRL
-
-                if (amount > 0) {
-                    payload += format('54', amount.toFixed(2));   // Amount
-                }
-
-                payload += format('58', 'BR') +                   // Country
-                           format('59', 'MEI CONTROLE') +         // Merchant Name (Genérico)
-                           format('60', 'BRASIL') +               // City
-                           format('62', format('05', '***'));     // TxID
-
-                payload += '6304'; // Inicio CRC
-                payload += this.crc16(payload); // Fim CRC
-                return payload;
-            }
-
-            // 3. Ação do Botão
-            generatePixCopyPaste(amount) {
-                const code = this.generatePixPayload(amount);
-                this.copyToClipboard(code, `Pix Copia e Cola de R$ ${amount},00 gerado!`);
-                
-                // Mostra o código visualmente se necessário
-                const disp = document.getElementById('pix-display-area');
-                disp.style.display = 'block';
-                disp.innerText = code;
-            }
-
-            // 4. Copia apenas a chave (Botão Outro)
-            copyPixKeyOnly() {
-                this.copyToClipboard(PIX_KEY, "Chave Pix copiada! Digite o valor no seu banco.");
-                const disp = document.getElementById('pix-display-area');
-                disp.style.display = 'block';
-                disp.innerText = PIX_KEY;
-            }
-
-            copyToClipboard(text, msg) {
-                navigator.clipboard.writeText(text).then(() => {
-                    const fb = document.getElementById('pix-feedback-msg');
-                    fb.innerText = "✅ " + msg;
-                    fb.style.display = 'block';
-                    setTimeout(() => fb.style.display = 'none', 5000);
-                }).catch(err => alert("Erro ao copiar: " + text));
-            }
-            
-            backupData() {
-                const payload = { 
-                    txs: this.txs, profile: this.profile, settings: this.settings,
-                    clients: this.clients, suppliers: this.suppliers, products: this.products,
-                    services: this.services, stockMovements: this.stockMovements
-                };
-                const a = document.createElement('a');
-                a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(payload));
-                a.download = `backup_mei_${new Date().toISOString().slice(0,10)}.json`;
-                a.click();
-            }
-
-            restoreData(input) {
-                const file = input.files[0];
-                if(!file) return;
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    try {
-                        const json = JSON.parse(e.target.result);
-                        if(json.txs) this.txs = json.txs; 
-                        if(json.profile) this.profile = json.profile;
-                        if(json.settings) this.settings = json.settings;
-                        if(json.clients) this.clients = json.clients;
-                        if(json.suppliers) this.suppliers = json.suppliers;
-                        if(json.products) this.products = json.products;
-                        if(json.services) this.services = json.services;
-                        if(json.stockMovements) this.stockMovements = json.stockMovements;
-
-                        const uid = this.user.uid;
-                        localStorage.setItem(`mei_data_${uid}`, JSON.stringify(this.txs));
-                        localStorage.setItem(`mei_profile_${uid}`, JSON.stringify(this.profile));
-                        localStorage.setItem(`mei_settings_${uid}`, JSON.stringify(this.settings));
-                        localStorage.setItem(`mei_clients_${uid}`, JSON.stringify(this.clients));
-                        localStorage.setItem(`mei_suppliers_${uid}`, JSON.stringify(this.suppliers));
-                        localStorage.setItem(`mei_products_${uid}`, JSON.stringify(this.products));
-                        localStorage.setItem(`mei_services_${uid}`, JSON.stringify(this.services));
-                        localStorage.setItem(`mei_stock_${uid}`, JSON.stringify(this.stockMovements));
-
-                        this.render(); this.renderHeader(); this.checkNFLink(); this.checkDASLink();
-                        alert("Restaurado!");
-                    } catch(e) { alert("Arquivo inválido"); }
-                };
-                reader.readAsText(file);
-            }
+        let app, auth, db;
+        try { app = initializeApp(firebaseConfig); auth = getAuth(app); db = getFirestore(app); } 
+        catch(e) { console.warn("Firebase config missing"); }
+
+        let currentUserData = null;
+        let appState = { isDemo: false, isFreeExample: false, generatedCode: null };
+
+        const els = {
+            authScreen: document.getElementById('authScreen'), appContainer: document.getElementById('appContainer'),
+            loginForm: document.getElementById('loginForm'), regForm: document.getElementById('registerForm'), tokenForm: document.getElementById('tokenForm'), forgotForm: document.getElementById('forgotForm'),
+            creditCounter: document.getElementById('creditCounter'), userName: document.getElementById('userNameDisplay'), btnCalc: document.getElementById('btnCalculate')
+        };
+
+        // AUTH
+        onAuthStateChanged(auth, async (user) => {
+            if(user){
+                const snap = await getDoc(doc(db,"users",user.uid));
+                currentUserData = snap.exists() ? snap.data() : {name:user.email.split('@')[0], email:user.email, credits:3};
+                if(!snap.exists()) await setDoc(doc(db,"users",user.uid), currentUserData);
+                showAppUI();
+            } else { currentUserData=null; showAuthUI('login'); }
+        });
+
+        window.toggleAuth=(s)=>{ ['loginForm','registerForm','tokenForm','forgotForm'].forEach(i=>document.getElementById(i).style.display='none'); document.getElementById(s+'Form').style.display='block'; };
+        window.startUnauthorized=()=>{ appState.isDemo=true; showAppUI(); setStatus("DEMO", "Visualização", "alert-danger", "fa-ban", false); triggerExampleData(); };
+        window.handleLogout=()=>{ if(confirm("Sair?")) signOut(auth).then(()=>location.reload()); };
+
+        // Listeners
+        document.getElementById('btnLoginAction').addEventListener('click',()=>signInWithEmailAndPassword(auth, document.getElementById('loginEmail').value, document.getElementById('loginPass').value).catch(e=>alert(e.message)));
+        document.getElementById('btnRegAction').addEventListener('click',()=>createUserWithEmailAndPassword(auth, document.getElementById('regEmail').value, document.getElementById('regPass').value).then(c=>setDoc(doc(db,"users",c.user.uid),{name:document.getElementById('regName').value,email:c.user.email,credits:3})).catch(e=>alert(e.message)));
+        document.getElementById('btnGoogleAction').addEventListener('click',()=>signInWithPopup(auth, new GoogleAuthProvider()).catch(e=>console.error(e)));
+        document.getElementById('btnForgotAction').addEventListener('click',()=>sendPasswordResetEmail(auth, document.getElementById('forgotEmail').value).then(()=>alert("Verifique e-mail")).catch(e=>alert(e.message)));
+
+        // UI
+        function showAppUI(){ els.authScreen.style.display='none'; els.appContainer.style.display='block'; updateHeader(); }
+        function showAuthUI(s){ els.authScreen.style.display='flex'; els.appContainer.style.display='none'; toggleAuth(s); }
+        function updateHeader(){ 
+            els.creditCounter.innerText = appState.isDemo ? "DEMO" : currentUserData?.credits; 
+            els.userName.innerText = appState.isDemo ? "Visitante" : currentUserData?.name;
         }
-        window.app = new App();
+
+        // Tokens
+        window.showTokenScreen = () => { els.appContainer.style.display='none'; els.authScreen.style.display='flex'; toggleAuth('token'); appState.generatedCode=Math.floor(Math.random()*9000)+1000; document.getElementById('displayAuthCode').innerText=appState.generatedCode; };
+        document.getElementById('btnTokenAction').addEventListener('click', async()=>{
+            const inp = document.getElementById('inputToken').value.replace(/\D/g,'');
+            if(inp.length<6) return alert("Inválido");
+            const exp = (appState.generatedCode+13)*9+1954;
+            if(parseInt(inp.substring(0,5))===exp && parseInt(inp.substring(5))>0) {
+                await updateDoc(doc(db,"users",auth.currentUser.uid),{credits:increment(parseInt(inp.substring(5)))});
+                currentUserData = (await getDoc(doc(db,"users",auth.currentUser.uid))).data();
+                alert("Sucesso!"); showAppUI();
+            } else alert("Senha incorreta");
+        });
+
+        // --- CÁLCULOS COMPLEXOS DE SOLO (SOMA DE BASES E CTC) ---
+        window.calculateComplex = () => {
+            const get = id => parseFloat(document.getElementById(id).value)||0;
+            // Valores (mmolc)
+            const K = get('soilK');
+            const Ca = get('soilCa');
+            const Mg = get('soilMg');
+            const Na = 0; // Se quiser adicionar Na
+            const HAl = get('soilHAl'); 
+
+            // Cálculos
+            const SB = Ca + Mg + K;
+            const CTC = SB + HAl;
+            const V = CTC > 0 ? (SB / CTC) * 100 : 0;
+
+            document.getElementById('soilCTC').value = CTC.toFixed(2);
+            document.getElementById('soilV').value = V.toFixed(1);
+        };
+
+        window.triggerExampleData = () => {
+            appState.isFreeExample=true; setStatus("SIMULAÇÃO", "Dados fictícios", "alert-warning", "fa-magic", true);
+            const r = (min,max)=>(Math.random()*(max-min)+min).toFixed(1);
+            const r2 = (min,max)=>(Math.random()*(max-min)+min).toFixed(2);
+            
+            document.getElementById('ownerName').value="Produtor Teste";
+            document.getElementById('propName').value="Fazenda Modelo";
+            document.getElementById('cityState').value="Uberlândia-MG";
+            document.getElementById('techResp').value="Dr. Agrônomo Exemplo";
+            document.getElementById('protocolId').value="LAB-12345";
+            document.getElementById('plotId').value="Talhão 01";
+            document.getElementById('sampleDate').value=new Date().toISOString().split('T')[0];
+            document.getElementById('targetYield').value=160;
+            document.getElementById('rowSpacing').value="0.50";
+            document.getElementById('plantSpacing').value="0.20";
+            
+            // Quimica
+            document.getElementById('soilPH').value=r(4.5, 6.5);
+            document.getElementById('soilMO').value=r(1.5, 4.0);
+            document.getElementById('soilP').value=r(10, 50);
+            document.getElementById('soilS').value=r(5, 20);
+            document.getElementById('soilK').value=r(1.5, 4.5); // mmolc
+            document.getElementById('soilCa').value=r(20, 50); // mmolc
+            document.getElementById('soilMg').value=r(5, 15); // mmolc
+            document.getElementById('soilHAl').value=r(20, 40); // mmolc
+            document.getElementById('soilAl').value=r(0, 2);
+            
+            // Fisica e Micro
+            document.getElementById('soilClay').value=r(20, 50);
+            document.getElementById('soilSand').value=r(30, 60);
+            document.getElementById('soilZn').value=r(0.5, 3);
+            document.getElementById('soilB').value=r(0.2, 0.8);
+            document.getElementById('soilMn').value=r(2, 20);
+            document.getElementById('soilCu').value=r(0.5, 2);
+            document.getElementById('soilFe').value=r(10, 50);
+            document.getElementById('soilMo').value=r2(0.05, 0.2);
+
+            window.calculateComplex();
+            
+            document.querySelectorAll('#agronomicForm input, #agronomicForm select').forEach(el=>{el.readOnly=true; el.classList.add('demo-locked');});
+            els.btnCalc.innerHTML="SALVAR (SIMULAÇÃO)";
+        };
+
+        window.resetToRealMode = () => {
+            appState.isFreeExample=false; document.getElementById('statusAlert').style.display='none';
+            document.querySelectorAll('#agronomicForm input, #agronomicForm select').forEach(el=>{el.readOnly=false; el.classList.remove('demo-locked'); el.value=''; if(el.id==='limePRNT')el.value=80;});
+            els.btnCalc.innerHTML='Salvar Amostra';
+            document.getElementById('resultsSection').style.display='none';
+        };
+
+        // --- GERAÇÃO E LOGICA IAC 100 COMPLETA ---
+        document.getElementById('btnCalculate').addEventListener('click', async (e) => {
+            const isReal = !appState.isDemo && !appState.isFreeExample;
+            if(isReal) {
+                if(!currentUserData || currentUserData.credits<=0) return alert("Sem créditos.");
+                try { await updateDoc(doc(db,"users",auth.currentUser.uid),{credits:increment(-1)}); currentUserData.credits--; updateHeader(); } catch(e){return alert("Erro rede");}
+            }
+
+            const get = id => parseFloat(document.getElementById(id).value)||0;
+            const data = {
+                owner: document.getElementById('ownerName').value,
+                prop: document.getElementById('propName').value,
+                season: document.getElementById('cropSeason').value,
+                yield: get('targetYield'),
+                clay: get('soilClay'), P: get('soilP'),
+                K: get('soilK') * 10, // cmolc -> mmolc para tabela IAC (normalização)
+                V: get('soilV'), CTC: get('soilCTC') * 10, // mmolc
+                PRNT: get('limePRNT')||100, Mg: get('soilMg') * 10 // mmolc
+            };
+
+            // 1. Calagem (IAC 100)
+            let nc = Math.max(0, data.V < 70 ? ((70 - data.V) * data.CTC) / (10 * data.PRNT) : 0);
+            let limeType = data.Mg < 5 ? "Dolomítico" : "Calcítico";
+            
+            // 2. Textura
+            let texClass = "";
+            if (data.clay <= 20) texClass = "Arenosa";
+            else if (data.clay <= 60) texClass = "Média";
+            else texClass = "Argilosa";
+
+            // 3. Fósforo (IAC Tabela 1 Completa)
+            let recP = 0;
+            if(texClass === "Arenosa") {
+                if(data.P <= 10) recP = 80; else if(data.P <= 20) recP = 60; else if(data.P <= 30) recP = 40; else recP = 20;
+            } else if(texClass === "Média") {
+                if(data.P <= 10) recP = 100; else if(data.P <= 20) recP = 80; else if(data.P <= 30) recP = 60; else recP = 40;
+            } else { // Argilosa
+                if(data.P <= 10) recP = 120; else if(data.P <= 20) recP = 100; else if(data.P <= 30) recP = 80; else recP = 60;
+            }
+
+            // 4. Potássio (IAC Tabela 1 Completa)
+            let recK = 0;
+            if(texClass === "Arenosa") {
+                if(data.K <= 0.8) recK = 80; else if(data.K <= 1.5) recK = 60; else if(data.K <= 2.5) recK = 40; else recK = 20;
+            } else if(texClass === "Média") {
+                if(data.K <= 1.0) recK = 100; else if(data.K <= 2.0) recK = 80; else if(data.K <= 3.5) recK = 60; else recK = 40;
+            } else { // Argilosa
+                if(data.K <= 1.2) recK = 120; else if(data.K <= 2.5) recK = 100; else if(data.K <= 4.5) recK = 80; else recK = 60;
+            }
+
+            // 5. Nitrogênio (IAC Tabela 2 Completa)
+            let recN = 0;
+            const highYield = data.yield > 100;
+            const prev = document.getElementById('prevCulture').value;
+            if(prev === "milho") recN = highYield ? 80 : 60;
+            else if(prev === "graminea") recN = highYield ? 100 : 80;
+            else recN = highYield ? 60 : 40;
+            // Ajuste Prático: +1.2kg N por saca extra > 100
+            if (data.yield > 100) recN += (data.yield - 100) * 1.2;
+
+            // Ajustes Safra
+            let warningSafra = "";
+            if(data.season === 'safrinha') { recN *= 0.8; recK *= 0.8; warningSafra = " (-20% Safrinha)"; }
+
+            // Fontes
+            const map = recP/0.52, kcl = recK/0.60, nFromMap = map * 0.11;
+            const urea = Math.max(0, recN-nFromMap)/0.45, gessoTon = (data.clay*50)/1000;
+
+            const dateStr = new Date().toLocaleDateString('pt-BR');
+            
+            // LAUDO TEXTUAL DETALHADO
+            const laudo = `
+LAUDO TÉCNICO DE RECOMENDAÇÃO AGRONÔMICA - MILHO
+Base Técnica: Boletim 100 IAC (2022)
+Data da Emissão: ${dateStr}
+------------------------------------------------------------
+DADOS CADASTRAIS
+Produtor: ${data.owner}
+Propriedade: ${data.prop}
+Safra de Cultivo: ${data.season.toUpperCase()}
+Meta de Produtividade: ${data.yield} sacas/ha
+
+1. DIAGNÓSTICO DA FERTILIDADE
+A análise de solo (0-20 cm) apresenta uma textura ${texClass.toUpperCase()} (${data.clay}% de Argila).
+A saturação por bases atual (V%) é de ${data.V.toFixed(1)}%. O nível crítico recomendado para a cultura do milho é 70%.
+
+2. CORREÇÃO DE ACIDEZ E PERFIL
+Para elevar a saturação a 70% e neutralizar o alumínio tóxico, recomenda-se:
+> CALAGEM: Aplicar ${nc.toFixed(1)} toneladas por hectare de Calcário ${limeType}.
+  Recomendação: Aplicar a lanço em área total e incorporar, preferencialmente 60 a 90 dias antes do plantio.
+
+> GESSAGEM: Sugere-se a aplicação de ${gessoTon.toFixed(1)} t/ha de Gesso Agrícola.
+  Objetivo: Condicionamento de subsolo (fornecimento de Ca em profundidade e neutralização de Al), essencial para suportar veranicos.
+
+3. PROGRAMA DE ADUBAÇÃO MINERAL (N-P-K)
+Considerando a extração da cultura para a meta de ${data.yield} sc/ha e os teores do solo:
+- Nitrogênio (N): ${recN.toFixed(0)} kg/ha${warningSafra}
+- Fósforo (P2O5): ${recP} kg/ha
+- Potássio (K2O): ${recK.toFixed(0)} kg/ha${warningSafra}
+
+SUGESTÃO DE MANEJO E FONTES:
+
+A) ADUBAÇÃO DE SEMEADURA (NO SULCO)
+   > ${Math.round(map)} kg/ha de MAP (Monoamônio Fosfato)
+   > ${Math.round(kcl/2)} kg/ha de Cloreto de Potássio (KCl)
+   Nota: Em solos arenosos ou se a dose de KCl for elevada (>60kg K2O), recomenda-se antecipar o potássio a lanço para evitar salinidade na semente.
+
+B) ADUBAÇÃO DE COBERTURA
+   > ${Math.round(urea)} kg/ha de Ureia Agrícola
+   > ${Math.round(kcl/2)} kg/ha de Cloreto de Potássio (KCl) - Saldo restante
+
+   Cronograma de Aplicação:
+   - Estádio V4 (4 folhas): Aplicar 100% da cobertura em solos argilosos/médios.
+   - Parcelamento em Solos Arenosos: Aplicar 50% em V4 e 50% em V8 para reduzir perdas por lixiviação.
+
+4. MICRONUTRIENTES E ORGÂNICOS
+   - Zinco (Zn): Recomenda-se 300-400 g/ha via foliar (V4-V6) ou 2 kg/ha via solo.
+   - Boro (B): Recomenda-se 150-200 g/ha via foliar.
+   - Matéria Orgânica: Opcionalmente, pode-se usar 15-20 t/ha de esterco de curral ou 4-6 t/ha de cama de frango para melhoria da estrutura do solo.
+
+------------------------------------------------------------
+Sistema de Recomendação Agronômica (SRA)
+`;
+
+            document.getElementById('resultsSection').style.display='block';
+            document.getElementById('finalReportText').value=laudo;
+            document.getElementById('techTableBody').innerHTML=`<tr><td>Calagem</td><td>${nc.toFixed(1)}</td><td>t/ha</td></tr><tr><td>Gesso</td><td>${gessoTon.toFixed(1)}</td><td>t/ha</td></tr><tr><td>MAP</td><td>${Math.round(map)}</td><td>kg/ha</td></tr><tr><td>Ureia</td><td>${Math.round(urea)}</td><td>kg/ha</td></tr>`;
+            document.getElementById('resultsSection').scrollIntoView({behavior:'smooth'});
+
+            // Populate Export DOC
+            document.getElementById('doc_owner').innerText = data.owner;
+            document.getElementById('doc_prop').innerText = data.prop;
+            document.getElementById('doc_season').innerText = data.season;
+            document.getElementById('doc_yield').innerText = data.yield;
+            document.getElementById('doc_texture').innerText = texClass;
+            document.getElementById('doc_clay').innerText = data.clay;
+            document.getElementById('doc_v').innerText = data.V.toFixed(1);
+            document.getElementById('doc_body_content').innerText = laudo.split("1. CORREÇÃO")[1];
+            document.getElementById('doc_table_container').innerHTML = `<table class="doc-table"><thead><tr><th>Item</th><th>Valor</th><th>Unid</th></tr></thead><tbody>${document.getElementById('techTableBody').innerHTML}</tbody></table>`;
+
+            // Save
+            const rObj = {date:new Date().toISOString(), owner:data.owner, result:laudo};
+            if(isReal && document.getElementById('checkSaveCloud').checked) try{await addDoc(collection(db,"users",auth.currentUser.uid,"reports"),{...rObj,timestamp:serverTimestamp()});}catch(e){}
+            if(document.getElementById('checkSaveLocal').checked){ const h=JSON.parse(localStorage.getItem('sra_local_history'))||[]; h.unshift(rObj); localStorage.setItem('sra_local_history',JSON.stringify(h)); }
+        };
+
+        // Utils
+        function setStatus(t,m,c,i,r){const e=document.getElementById('statusAlert');e.className=`alert shadow-sm ${c}`;e.style.display='block';document.getElementById('statusTitle').innerText=t;document.getElementById('statusMsg').innerText=m;document.getElementById('statusIcon').innerHTML=`<i class="fas ${i}"></i>`;document.getElementById('returnBtnContainer').style.display=r?'block':'none';}
+        window.shareWhatsapp=()=>window.open(`https://wa.me/?text=${encodeURIComponent(document.getElementById('finalReportText').value)}`);
+        
+        window.openHistoryModal=()=>{
+            const l=document.getElementById('localHistoryList'), d=JSON.parse(localStorage.getItem('sra_local_history'))||[];
+            l.innerHTML=''; if(!d.length)l.innerHTML='<div class="p-3 text-center text-muted">Vazio</div>';
+            else d.forEach(i=>{ const x=document.createElement('div'); x.className="list-group-item list-group-item-action"; x.innerHTML=`<b>${i.owner}</b> <small>${new Date(i.date).toLocaleDateString()}</small>`; x.onclick=()=>{document.getElementById('finalReportText').value=i.result; document.getElementById('resultsSection').style.display='block'; bootstrap.Modal.getInstance(document.getElementById('historyModal')).hide();}; l.appendChild(x); });
+            new bootstrap.Modal(document.getElementById('historyModal')).show();
+        };
+        window.clearLocalHistory=()=>{ if(confirm("Apagar?")){localStorage.removeItem('sra_local_history'); window.openHistoryModal();} };
+
+        // Export DOCX (.docx real)
+        window.downloadWord = () => {
+            const content = document.getElementById('exportContent').innerHTML;
+            const htmlContent = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{font-family:'Calibri',sans-serif;font-size:11pt} h1{color:#2e7d32;font-size:16pt;margin-bottom:5px} p{margin-bottom:10px} table{width:100%;border-collapse:collapse;margin-top:15px} th,td{border:1px solid #ccc;padding:5px;text-align:center} th{background-color:#f2f2f2}</style></head><body>${content}</body></html>`;
+            if (typeof htmlDocx !== 'undefined') {
+                const converted = htmlDocx.asBlob(htmlContent);
+                const link = document.createElement('a'); link.href = URL.createObjectURL(converted);
+                link.download = `Laudo_${document.getElementById('ownerName').value || 'SRA'}.docx`;
+                document.body.appendChild(link); link.click(); document.body.removeChild(link);
+            } else { alert("Erro ao carregar biblioteca DOCX. Verifique a internet."); }
+        };
+
     </script>
 </body>
 </html>
