@@ -48,7 +48,31 @@
 
         /* Login */
         #auth-screen { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; background: var(--surface); position: fixed; top: 0; width: 100%; z-index: 9999; }
-        .auth-input { width: 100%; padding: 14px; margin-bottom: 10px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg-light); font-size: 1rem; }
+        
+        /* ESTILO MELHORADO DOS INPUTS */
+        .auth-input { 
+            width: 100%; 
+            padding: 12px; 
+            margin-bottom: 10px; 
+            border-radius: 8px; 
+            border: 1px solid #cbd5e1; 
+            background: #f8fafc; 
+            font-size: 0.95rem; 
+            color: #333;
+            transition: all 0.2s ease;
+        }
+        .auth-input:focus {
+            border-color: var(--primary);
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(0, 191, 99, 0.15);
+        }
+        select.auth-input {
+            background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23007CB2%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+            background-repeat: no-repeat;
+            background-position: right .7em top 50%;
+            background-size: .65em auto;
+            appearance: none;
+        }
 
         /* App */
         #app-screen { padding-bottom: 90px; }
@@ -68,7 +92,7 @@
         .modal-content { background: var(--surface); width: 100%; max-width: 600px; border-radius: 24px 24px 0 0; padding: 25px; max-height: 90vh; overflow-y: auto; animation: slideUp 0.3s ease; }
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 
-        .form-label { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 4px; display: block; margin-top: 10px; }
+        .form-label { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 4px; display: block; margin-top: 10px; font-weight: 500; }
         
         .type-switch { display: flex; background: var(--bg-light); border-radius: 12px; padding: 4px; margin-bottom: 15px; }
         .type-opt { flex: 1; text-align: center; padding: 10px; border-radius: 8px; cursor: pointer; transition: 0.2s; }
@@ -132,6 +156,29 @@
         .irrf-table th { text-align: left; padding: 5px; background: #eee; }
         .irrf-table td { padding: 5px; border-bottom: 1px solid #eee; }
         .irrf-input { width: 100%; padding: 5px; border: 1px solid #ccc; border-radius: 4px; }
+
+        /* NOVO: BLOCOS DE DESTAQUE PARA CADASTROS */
+        .highlight-box {
+            border: 1px solid #e2e8f0;
+            border-left: 4px solid var(--primary);
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+        }
+        .highlight-box.blue { border-left-color: var(--secondary); background: #fdfdff; }
+        .highlight-box.orange { border-left-color: var(--warning); background: #fffcf5; }
+        
+        .highlight-title {
+            font-weight: 700; 
+            margin-bottom: 10px; 
+            display: block; 
+            font-size: 0.9rem;
+            color: #333;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
     </style>
 </head>
 <body>
@@ -167,9 +214,15 @@
     <section id="app-screen" class="hidden">
         <header>
             <div class="container flex justify-between">
-                <div>
-                    <h2 style="font-size:1rem;" id="head-fantasy">Minha Empresa</h2>
-                    <p style="font-size:0.75rem; color:var(--text-muted);" id="head-name">Usuário</p>
+                <div class="flex" style="gap: 15px;">
+                    <!-- Botão de Sair adicionado no cabeçalho -->
+                    <button onclick="app.logout()" class="btn-outline btn-sm" style="border:none; color:var(--danger); font-size:1.1rem; padding: 0;" title="Sair do App">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                    </button>
+                    <div>
+                        <h2 style="font-size:1rem;" id="head-fantasy">Minha Empresa</h2>
+                        <p style="font-size:0.75rem; color:var(--text-muted);" id="head-name">Usuário</p>
+                    </div>
                 </div>
                 <button onclick="app.openTxModal()" class="btn-primary" style="width:auto; padding:8px 15px; font-size:0.8rem; border-radius:20px;">
                     <i class="fa-solid fa-plus"></i> Novo
@@ -453,11 +506,14 @@
         <div class="modal-content">
             <div class="flex justify-between"><h2 id="reg-modal-title">Novo Item</h2><i class="fa-solid fa-xmark" onclick="app.closeModal('modal-reg')"></i></div>
             
-            <!-- Rótulo do campo Nome alterado para ter ID -->
-            <label class="form-label" id="reg-name-label">Nome</label>
-            <input type="text" id="reg-name" class="auth-input">
+            <div class="highlight-box">
+                <!-- Rótulo do campo Nome alterado para ter ID -->
+                <label class="form-label" id="reg-name-label">Nome</label>
+                <input type="text" id="reg-name" class="auth-input">
+                
+                <div id="reg-fields-extra"></div>
+            </div>
             
-            <div id="reg-fields-extra"></div>
             <button class="btn btn-primary" style="margin-top:15px;" onclick="app.saveRegister()">Salvar Cadastro</button>
         </div>
     </div>
@@ -467,13 +523,14 @@
         <div class="modal-content">
             <div class="flex justify-between"><h2>Gerar RPA</h2><i class="fa-solid fa-xmark" onclick="app.closeModal('modal-rpa')"></i></div>
             
-            <label class="form-label">Selecione o Cliente (Contratante)</label>
-            <select id="rpa-client-select" class="auth-input" onchange="app.fillRPAClient()">
-                <option value="">-- Selecionar ou Digitar Manualmente --</option>
-            </select>
-            
-            <div style="background:#f0fdf4; padding:10px; border-radius:8px; margin-bottom:10px;">
-                <p style="font-weight:600; color:var(--primary-dark);">Dados do Cliente</p>
+            <!-- BLOCO 1: CLIENTE (Contratante) -->
+            <div class="highlight-box">
+                <span class="highlight-title" style="color:var(--primary-dark);">1. Contratante (Cliente)</span>
+                <label class="form-label">Selecione o Cliente</label>
+                <select id="rpa-client-select" class="auth-input" onchange="app.fillRPAClient()">
+                    <option value="">-- Selecionar ou Digitar Manualmente --</option>
+                </select>
+                
                 <input type="text" id="rpa-cli-razao" class="auth-input" placeholder="Razão Social / Nome" style="font-size:0.9rem; margin-bottom:5px;">
                 <div class="flex" style="gap:5px;">
                     <input type="text" id="rpa-cli-cnpj" class="auth-input" placeholder="CNPJ/CPF" style="margin:0;">
@@ -481,14 +538,14 @@
                 </div>
             </div>
 
-            <!-- NOVA SEÇÃO: SELEÇÃO DO FORNECEDOR/PRESTADOR -->
-            <label class="form-label">Selecione o Prestador (Fornecedor/Autônomo)</label>
-            <select id="rpa-supplier-select" class="auth-input" onchange="app.fillRPASupplier()">
-                <option value="">-- Selecionar --</option>
-            </select>
-            
-            <div style="background:#f8fafc; padding:10px; border-radius:8px; margin-bottom:10px; border:1px solid var(--border);">
-                <p style="font-weight:600; color:var(--text-main);">Dados do Prestador</p>
+            <!-- BLOCO 2: PRESTADOR (Fornecedor) -->
+            <div class="highlight-box blue">
+                <span class="highlight-title" style="color:var(--secondary);">2. Prestador (Autônomo)</span>
+                <label class="form-label">Selecione o Prestador</label>
+                <select id="rpa-supplier-select" class="auth-input" onchange="app.fillRPASupplier()">
+                    <option value="">-- Selecionar --</option>
+                </select>
+                
                 <input type="text" id="rpa-supp-name" class="auth-input" placeholder="Nome Completo" style="font-size:0.9rem; margin-bottom:5px;">
                 <div class="flex" style="gap:5px;">
                     <input type="text" id="rpa-supp-doc" class="auth-input" placeholder="CPF/CNPJ" style="margin:0;">
@@ -496,31 +553,35 @@
                 </div>
                 <input type="text" id="rpa-supp-addr" class="auth-input" placeholder="Endereço" style="margin-top:5px;">
             </div>
-            <!-- FIM SEÇÃO PRESTADOR -->
 
-            <label class="form-label">Descrição do Serviço</label>
-            <input type="text" id="rpa-desc" class="auth-input" placeholder="Ex: Consultoria Técnica">
-            
-            <label class="form-label">Data do Serviço</label>
-            <input type="date" id="rpa-date" class="auth-input">
+            <!-- BLOCO 3: SERVIÇO E VALORES -->
+            <div class="highlight-box orange">
+                <span class="highlight-title" style="color:#b45309;">3. Serviço & Valores</span>
+                
+                <label class="form-label">Descrição do Serviço</label>
+                <input type="text" id="rpa-desc" class="auth-input" placeholder="Ex: Consultoria Técnica">
+                
+                <label class="form-label">Data do Serviço</label>
+                <input type="date" id="rpa-date" class="auth-input">
 
-            <div class="flex" style="gap:10px; align-items:flex-end;">
-                <div style="flex:1;">
-                    <label class="form-label">Valor Bruto (R$)</label>
-                    <input type="number" id="rpa-val" class="auth-input" step="0.01" oninput="app.calcRPA()">
+                <div class="flex" style="gap:10px; align-items:flex-end;">
+                    <div style="flex:1;">
+                        <label class="form-label">Valor Bruto (R$)</label>
+                        <input type="number" id="rpa-val" class="auth-input" step="0.01" oninput="app.calcRPA()">
+                    </div>
+                    <div style="width:80px;">
+                        <label class="form-label">% ISS</label>
+                        <input type="number" id="rpa-iss-pct" class="auth-input" value="0" oninput="app.calcRPA()">
+                    </div>
                 </div>
-                <div style="width:80px;">
-                    <label class="form-label">% ISS</label>
-                    <input type="number" id="rpa-iss-pct" class="auth-input" value="0" oninput="app.calcRPA()">
-                </div>
-            </div>
 
-            <div class="rpa-results">
-                <div class="rpa-line"><span>(-) INSS (11%)</span><span id="rpa-res-inss">R$ 0,00</span></div>
-                <div class="rpa-line"><span>(-) ISS</span><span id="rpa-res-iss">R$ 0,00</span></div>
-                <div class="rpa-line"><span>(-) IRRF</span><span id="rpa-res-irrf">R$ 0,00</span></div>
-                <div class="rpa-line" style="font-weight:bold; color:var(--primary-dark); font-size:1rem; border:none;">
-                    <span>Líquido a Receber</span><span id="rpa-res-liq">R$ 0,00</span>
+                <div class="rpa-results">
+                    <div class="rpa-line"><span>(-) INSS (11%)</span><span id="rpa-res-inss">R$ 0,00</span></div>
+                    <div class="rpa-line"><span>(-) ISS</span><span id="rpa-res-iss">R$ 0,00</span></div>
+                    <div class="rpa-line"><span>(-) IRRF</span><span id="rpa-res-irrf">R$ 0,00</span></div>
+                    <div class="rpa-line" style="font-weight:bold; color:var(--primary-dark); font-size:1rem; border:none;">
+                        <span>Líquido a Receber</span><span id="rpa-res-liq">R$ 0,00</span>
+                    </div>
                 </div>
             </div>
 
