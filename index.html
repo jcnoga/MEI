@@ -1737,6 +1737,17 @@
                 if(this.curRegTab === 'products') this.renderRegList();
             }
 
+            // NEW FUNCTION FOR DELETING TRANSACTION
+            deleteTx(id) {
+                if(!confirm("Tem certeza que deseja excluir este registro do histórico?")) return;
+                const index = this.txs.findIndex(t => t.id === id);
+                if (index > -1) {
+                    this.txs.splice(index, 1);
+                    localStorage.setItem(`mei_data_${this.user.uid}`, JSON.stringify(this.txs));
+                    this.render();
+                }
+            }
+
             render() {
                 const list = document.getElementById('list-recent');
                 list.innerHTML = '';
@@ -1749,11 +1760,17 @@
                         if(tx.type === 'income') { bal += tx.val; incTotal += tx.val; } 
                         else { bal -= tx.val; expTotal += tx.val; }
                         
-                        // NOVO: Botão de consultar RPA na linha da transação (apenas para entradas)
+                        // Botão de consultar RPA
                         const rpaBtn = tx.type === 'income' ? 
                             `<button class="btn-sm btn-outline" onclick="app.loadRPAFromTx(${tx.id})" style="margin-right:5px; border:none;" title="Ver/Gerar RPA"><i class="fa-solid fa-file-contract text-muted"></i></button>` : '';
 
-                        list.innerHTML += `<div class="tx-item"><div><strong>${tx.cat}</strong><br><small style="color:var(--text-muted)">${new Date(tx.date).toLocaleDateString()} ${tx.desc}</small></div><div class="flex">${rpaBtn}<span class="${tx.type==='income'?'text-green':'text-red'}">${tx.type==='income'?'+':'-'} R$ ${tx.val.toFixed(2)}</span></div></div>`;
+                        // NEW: Botão de deletar
+                        const delBtn = `<button class="btn-sm btn-outline" onclick="app.deleteTx(${tx.id})" style="border:none; color:var(--danger); margin-left: 8px;" title="Excluir"><i class="fa-solid fa-trash"></i></button>`;
+
+                        list.innerHTML += `<div class="tx-item">
+                            <div><strong>${tx.cat}</strong><br><small style="color:var(--text-muted)">${new Date(tx.date).toLocaleDateString()} ${tx.desc}</small></div>
+                            <div class="flex">${rpaBtn}<span class="${tx.type==='income'?'text-green':'text-red'}">${tx.type==='income'?'+':'-'} R$ ${tx.val.toFixed(2)}</span>${delBtn}</div>
+                        </div>`;
                     });
                 }
                 document.getElementById('dash-bal').innerText = `R$ ${bal.toFixed(2)}`;
@@ -1984,4 +2001,4 @@
 </body>
 </html>
 ```
-
+Use Arrow Up and Arrow Down to select a turn, Enter to jump to it, and Escape to return to the chat.
