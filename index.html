@@ -699,6 +699,9 @@
                 this.stockIdx = null; 
                 this.stockType = 'in'; 
                 this.txStockAction = 'other'; 
+                
+                // Track active transaction for RPA editing
+                this.activeRpaTxId = null;
 
                 this.categories = {
                     income: ['Venda de Produto', 'Prestação de Serviço', 'Outras Receitas'],
@@ -1210,6 +1213,9 @@
 
             // --- LÓGICA DO RPA (RECIBO) ---
             openRPAModal() {
+                // Reset active transaction tracking
+                this.activeRpaTxId = null;
+
                 // Populate Clients
                 const sel = document.getElementById('rpa-client-select');
                 sel.innerHTML = '<option value="">-- Selecionar ou Digitar Manualmente --</option>';
@@ -1309,7 +1315,35 @@
                 document.getElementById('rpa-res-liq').innerText = `R$ ${net.toFixed(2)}`;
             }
 
+            // NEW: Save RPA Context to Transaction
+            saveRPAContext() {
+                if (!this.activeRpaTxId) return;
+
+                const txIndex = this.txs.findIndex(t => t.id === this.activeRpaTxId);
+                if (txIndex === -1) return;
+
+                const rpaData = {
+                    clientRazao: document.getElementById('rpa-cli-razao').value,
+                    clientCnpj: document.getElementById('rpa-cli-cnpj').value,
+                    clientAddr: document.getElementById('rpa-cli-addr').value,
+                    suppName: document.getElementById('rpa-supp-name').value,
+                    suppDoc: document.getElementById('rpa-supp-doc').value,
+                    suppPhone: document.getElementById('rpa-supp-phone').value,
+                    suppAddr: document.getElementById('rpa-supp-addr').value,
+                    issPct: document.getElementById('rpa-iss-pct').value,
+                    desc: document.getElementById('rpa-desc').value,
+                    val: document.getElementById('rpa-val').value,
+                    date: document.getElementById('rpa-date').value
+                };
+
+                this.txs[txIndex].rpaData = rpaData;
+                localStorage.setItem(`mei_data_${this.user.uid}`, JSON.stringify(this.txs));
+            }
+
             async downloadRPAPDF() {
+                // Save context before downloading
+                this.saveRPAContext();
+
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF();
 
@@ -1428,6 +1462,9 @@
             }
 
             downloadRPAWord() {
+                // Save context before downloading
+                this.saveRPAContext();
+
                 // Dados do Contratante (Cliente)
                 const razaoCli = document.getElementById('rpa-cli-razao').value || "_________________";
                 const cnpjCli = document.getElementById('rpa-cli-cnpj').value || "_________________";
@@ -1731,11 +1768,31 @@
 
                 this.openRPAModal();
                 
-                // Preenche os campos com os dados da transação
-                document.getElementById('rpa-val').value = tx.val;
-                document.getElementById('rpa-desc').value = tx.desc;
-                // Formatar data YYYY-MM-DD
-                document.getElementById('rpa-date').value = tx.date;
+                // Track active transaction
+                this.activeRpaTxId = id;
+
+                // Check if we have saved RPA data in this transaction
+                if (tx.rpaData) {
+                    // Populate from saved context
+                    document.getElementById('rpa-cli-razao').value = tx.rpaData.clientRazao || '';
+                    document.getElementById('rpa-cli-cnpj').value = tx.rpaData.clientCnpj || '';
+                    document.getElementById('rpa-cli-addr').value = tx.rpaData.clientAddr || '';
+                    
+                    document.getElementById('rpa-supp-name').value = tx.rpaData.suppName || '';
+                    document.getElementById('rpa-supp-doc').value = tx.rpaData.suppDoc || '';
+                    document.getElementById('rpa-supp-phone').value = tx.rpaData.suppPhone || '';
+                    document.getElementById('rpa-supp-addr').value = tx.rpaData.suppAddr || '';
+                    
+                    document.getElementById('rpa-iss-pct').value = tx.rpaData.issPct || 0;
+                    document.getElementById('rpa-desc').value = tx.rpaData.desc || '';
+                    document.getElementById('rpa-val').value = tx.rpaData.val || 0;
+                    document.getElementById('rpa-date').value = tx.rpaData.date || '';
+                } else {
+                    // Fallback: Populate basic fields from transaction details
+                    document.getElementById('rpa-val').value = tx.val;
+                    document.getElementById('rpa-desc').value = tx.desc;
+                    document.getElementById('rpa-date').value = tx.date;
+                }
                 
                 // Recalcula imediatamente
                 this.calcRPA();
@@ -1927,3 +1984,4 @@
 </body>
 </html>
 ```
+
