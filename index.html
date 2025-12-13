@@ -42,7 +42,6 @@
         .btn-dark { background: var(--text-main); color: white; }
         .btn-warning { background: var(--warning); color: white; }
         .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-main); }
-        /* Botão Google */
         .btn-google { background: #db4437; color: white; margin-bottom: 15px; }
         .btn-sm { padding: 6px 10px; font-size: 0.85rem; width: auto; margin: 0; }
 
@@ -159,7 +158,6 @@
             <form onsubmit="event.preventDefault(); app.handleAuth();">
                 <div id="reg-fields" class="hidden">
                     <input type="text" id="auth-name" class="auth-input" placeholder="Seu Nome">
-                    <!-- NOVO: Campo Nome do MEI Obrigatório no Cadastro -->
                     <input type="text" id="auth-mei-name" class="auth-input" placeholder="Nome do MEI (Obrigatório)">
                 </div>
                 <input type="email" id="auth-email" class="auth-input" placeholder="Email" required>
@@ -168,12 +166,10 @@
                 <button class="btn btn-primary" id="btn-auth">Entrar</button>
             </form>
 
-            <!-- NOVO: Botão Google -->
             <button class="btn btn-google" onclick="app.loginWithGoogle()">
                 <i class="fa-brands fa-google"></i> Entrar com Google
             </button>
             
-            <!-- NOVO: Link Esqueci Senha -->
             <div style="margin-top:10px; cursor:pointer; color:var(--text-muted); font-size: 0.9rem;" onclick="app.forgotPassword()">
                 Esqueci minha senha
             </div>
@@ -218,7 +214,6 @@
         </header>
 
         <main class="container" style="padding-top:20px;">
-            <!-- VIEW: DASHBOARD -->
             <div id="view-home">
                 <div id="das-alert" class="alert-das hidden"></div>
                 <div class="card" style="background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white;">
@@ -245,7 +240,6 @@
                 </div>
             </div>
 
-            <!-- VIEW: CADASTROS -->
             <div id="view-registers" class="hidden">
                 <h2>Cadastros</h2>
                 <div class="tab-menu">
@@ -265,11 +259,10 @@
                 <div id="reg-list"></div>
             </div>
 
-            <!-- VIEW: CONFIGURAÇÕES -->
             <div id="view-settings" class="hidden">
                 <h2>Configurações</h2>
                 
-                <!-- NOVO: PAINEL DE LICENÇA -->
+                <!-- PAINEL DE LICENÇA -->
                 <div class="card" style="border-left: 4px solid var(--secondary);">
                     <h3><i class="fa-solid fa-key"></i> Licença de Uso</h3>
                     <p id="license-status" style="font-weight:bold; margin: 10px 0; color: var(--primary);">Verificando...</p>
@@ -282,7 +275,7 @@
                         <button class="btn btn-primary" style="width:auto; margin:0;" onclick="app.activateLicense()">Ativar</button>
                     </div>
 
-                    <!-- ADMIN PANEL (Hidden by default) -->
+                    <!-- ADMIN PANEL -->
                     <div id="admin-panel" class="hidden" style="margin-top:15px; padding:10px; background:#fee2e2; border-radius:8px;">
                         <p style="color:#991b1b; font-weight:bold; margin-bottom:5px;">Admin (jcnvap)</p>
                         <button class="btn btn-danger btn-sm" onclick="app.adminZeroDays()">Zerar Dias</button>
@@ -357,7 +350,6 @@
                 </div>
             </div>
 
-            <!-- VIEW: APOIO -->
             <div id="view-support" class="hidden" style="text-align: center; padding: 40px 20px;">
                 <i class="fa-solid fa-hand-holding-heart" style="font-size: 4rem; color: var(--primary); margin-bottom: 20px;"></i>
                 <h2 style="margin-bottom: 15px;">Apoie o Projeto ☕</h2>
@@ -381,14 +373,11 @@
         </nav>
     </section>
 
-    <!-- MODAL: NOVA TRANSAÇÃO -->
+    <!-- MODAIS (Transaction, Register, RPA, Stock, Shopping, Profile, Password) - MANTIDOS IGUAIS -->
     <div id="modal-tx" class="modal-overlay hidden" onclick="if(event.target===this) app.closeModal('modal-tx')">
         <div class="modal-content">
             <div class="flex justify-between"><h2>Novo Lançamento</h2><i class="fa-solid fa-xmark" onclick="app.closeModal('modal-tx')"></i></div>
-            <div class="type-switch">
-                <div class="type-opt active inc" id="opt-inc" onclick="app.setType('income')">Entrada</div>
-                <div class="type-opt" id="opt-exp" onclick="app.setType('expense')">Saída</div>
-            </div>
+            <div class="type-switch"><div class="type-opt active inc" id="opt-inc" onclick="app.setType('income')">Entrada</div><div class="type-opt" id="opt-exp" onclick="app.setType('expense')">Saída</div></div>
             <div id="merchant-options" class="hidden">
                 <div class="radio-group">
                     <label class="radio-item"><input type="radio" name="tx-action" value="sale" onclick="app.handleStockAction('sale')"><strong>Venda</strong> (Baixar)</label>
@@ -416,7 +405,6 @@
         </div>
     </div>
 
-    <!-- OUTROS MODAIS (Registro, RPA, Estoque, Lista, Perfil, Senha) mantidos identicos -->
     <div id="modal-reg" class="modal-overlay hidden" onclick="if(event.target===this) app.closeModal('modal-reg')">
         <div class="modal-content">
             <div class="flex justify-between"><h2 id="reg-modal-title">Novo Item</h2><i class="fa-solid fa-xmark" onclick="app.closeModal('modal-reg')"></i></div>
@@ -618,7 +606,13 @@
                         // Pede nome MEI depois se não tiver (fluxo simplificado: define padrão)
                         localStorage.setItem(`mei_profile_${result.user.uid}`, JSON.stringify({ fantasy: "Meu Negócio MEI" }));
                     }
-                } catch (e) { alert("Erro Google: " + e.message); }
+                } catch (e) { 
+                    if (e.code === 'auth/unauthorized-domain') {
+                        alert("ERRO DE DOMÍNIO: Este site não está autorizado no Firebase.\n\n1. Vá no Firebase Console > Authentication > Configurações > Domínios Autorizados.\n2. Adicione o domínio atual.\n3. Se estiver no PC, não abra o arquivo direto, use um servidor local (localhost).");
+                    } else {
+                        alert("Erro Google: " + e.message); 
+                    }
+                }
             }
 
             async forgotPassword() {
@@ -1128,7 +1122,7 @@
                 
                 if(type === 'in') {
                     inc.classList.add('active'); exp.classList.remove('active');
-                    reason.innerHTML = '<option value="Compra">Compra</option><option value="Devolução">Devolução Cliente</option>';
+                    reason.innerHTML = '<option value="Compra">Compra / Reposição</option><option value="Devolução">Devolução</option>';
                 } else {
                     exp.classList.add('active'); inc.classList.remove('active');
                     reason.innerHTML = '<option value="Venda">Venda</option><option value="Perda">Perda / Quebra</option><option value="Uso">Uso Interno</option>';
@@ -1177,444 +1171,6 @@
                     listDiv.innerHTML = html;
                 }
                 document.getElementById('modal-shopping').classList.remove('hidden');
-            }
-
-            openRPAModal() {
-                this.activeRpaTxId = null;
-                const sel = document.getElementById('rpa-client-select');
-                sel.innerHTML = '<option value="">-- Selecionar ou Digitar Manualmente --</option>';
-                this.clients.forEach((c, idx) => { sel.innerHTML += `<option value="${idx}">${c.name}</option>`; });
-
-                const suppSel = document.getElementById('rpa-supplier-select');
-                suppSel.innerHTML = '<option value="">-- Selecionar --</option>';
-                this.suppliers.forEach((s, idx) => { suppSel.innerHTML += `<option value="${idx}">${s.name}</option>`; });
-                
-                document.getElementById('rpa-cli-razao').value = '';
-                document.getElementById('rpa-cli-cnpj').value = '';
-                document.getElementById('rpa-cli-addr').value = '';
-                document.getElementById('rpa-supp-name').value = '';
-                document.getElementById('rpa-supp-doc').value = '';
-                document.getElementById('rpa-supp-phone').value = '';
-                document.getElementById('rpa-supp-addr').value = '';
-                document.getElementById('rpa-desc').value = '';
-                document.getElementById('rpa-date').value = new Date().toISOString().slice(0,10);
-                document.getElementById('rpa-val').value = '';
-                document.getElementById('rpa-iss-pct').value = this.profile.issPct || 3;
-                
-                this.calcRPA();
-                document.getElementById('modal-rpa').classList.remove('hidden');
-            }
-
-            fillRPAClient() {
-                const idx = document.getElementById('rpa-client-select').value;
-                if(idx !== "") {
-                    const c = this.clients[idx];
-                    document.getElementById('rpa-cli-razao').value = c.corpName || c.name || '';
-                    document.getElementById('rpa-cli-cnpj').value = c.doc || '';
-                    document.getElementById('rpa-cli-addr').value = c.address || '';
-                }
-            }
-
-            fillRPASupplier() {
-                const idx = document.getElementById('rpa-supplier-select').value;
-                if(idx !== "") {
-                    const s = this.suppliers[idx];
-                    document.getElementById('rpa-supp-name').value = s.name || '';
-                    document.getElementById('rpa-supp-doc').value = s.doc || '';
-                    document.getElementById('rpa-supp-phone').value = s.phone || '';
-                    document.getElementById('rpa-supp-addr').value = s.address || '';
-                }
-            }
-
-            calcRPA() {
-                const gross = parseFloat(document.getElementById('rpa-val').value || 0);
-                const issPct = parseFloat(document.getElementById('rpa-iss-pct').value || 0);
-                const inssPct = 11;
-                const inssVal = gross * (inssPct / 100);
-                const issVal = gross * (issPct / 100);
-                let baseIRRF = gross - inssVal - issVal;
-                let irrfVal = 0;
-
-                for (const row of this.settings.irrfTable) {
-                    if (baseIRRF <= row.limit) {
-                        irrfVal = (baseIRRF * (row.rate / 100)) - row.ded;
-                        break;
-                    }
-                }
-                if (irrfVal < 0) irrfVal = 0;
-                const net = gross - inssVal - issVal - irrfVal;
-
-                document.getElementById('rpa-res-inss').innerText = `R$ ${inssVal.toFixed(2)}`;
-                document.getElementById('rpa-res-iss').innerText = `R$ ${issVal.toFixed(2)}`;
-                document.getElementById('rpa-res-irrf').innerText = `R$ ${irrfVal.toFixed(2)}`;
-                document.getElementById('rpa-res-liq').innerText = `R$ ${net.toFixed(2)}`;
-            }
-
-            saveRPAContext() {
-                if (!this.activeRpaTxId) return;
-                const txIndex = this.txs.findIndex(t => t.id === this.activeRpaTxId);
-                if (txIndex === -1) return;
-                const rpaData = {
-                    clientRazao: document.getElementById('rpa-cli-razao').value,
-                    clientCnpj: document.getElementById('rpa-cli-cnpj').value,
-                    clientAddr: document.getElementById('rpa-cli-addr').value,
-                    suppName: document.getElementById('rpa-supp-name').value,
-                    suppDoc: document.getElementById('rpa-supp-doc').value,
-                    suppPhone: document.getElementById('rpa-supp-phone').value,
-                    suppAddr: document.getElementById('rpa-supp-addr').value,
-                    issPct: document.getElementById('rpa-iss-pct').value,
-                    desc: document.getElementById('rpa-desc').value,
-                    val: document.getElementById('rpa-val').value,
-                    date: document.getElementById('rpa-date').value
-                };
-                this.txs[txIndex].rpaData = rpaData;
-                localStorage.setItem(`mei_data_${this.user.uid}`, JSON.stringify(this.txs));
-            }
-
-            async downloadRPAPDF() {
-                this.saveRPAContext();
-                const { jsPDF } = window.jspdf;
-                const doc = new jsPDF();
-                const razaoCli = document.getElementById('rpa-cli-razao').value || "_________________";
-                const cnpjCli = document.getElementById('rpa-cli-cnpj').value || "_________________";
-                const endCli = document.getElementById('rpa-cli-addr').value || "_________________";
-                const nomeFor = document.getElementById('rpa-supp-name').value || "_________________";
-                const cpfFor = document.getElementById('rpa-supp-doc').value || "_________________";
-                const endFor = document.getElementById('rpa-supp-addr').value || "_________________";
-                const telFor = document.getElementById('rpa-supp-phone').value || "_________________";
-                const servico = document.getElementById('rpa-desc').value || "Serviços Gerais";
-                const dataServ = document.getElementById('rpa-date').value.split('-').reverse().join('/') || "__/__/____";
-                const dataHoje = new Date().toLocaleDateString('pt-BR');
-                const gross = parseFloat(document.getElementById('rpa-val').value || 0).toFixed(2);
-                const inss = document.getElementById('rpa-res-inss').innerText;
-                const iss = document.getElementById('rpa-res-iss').innerText;
-                const issPct = document.getElementById('rpa-iss-pct').value;
-                const irrf = document.getElementById('rpa-res-irrf').innerText;
-                const liq = document.getElementById('rpa-res-liq').innerText;
-
-                let y = 20;
-                doc.setFontSize(16); doc.setFont("helvetica", "bold");
-                doc.text("RECIBO DE PAGAMENTO A AUTÔNOMO – RPA", 105, y, { align: "center" });
-                y += 15;
-                doc.setFontSize(12); doc.setFont("helvetica", "bold");
-                doc.text("1. Contratante (Empresa)", 20, y); y += 7;
-                doc.setFont("helvetica", "normal");
-                doc.text(`Razão Social: ${razaoCli}`, 20, y); y += 7;
-                doc.text(`CNPJ: ${cnpjCli}`, 20, y); y += 7;
-                doc.text(`Endereço: ${endCli}`, 20, y); y += 10;
-                doc.line(20, y, 190, y); y += 10;
-                doc.setFont("helvetica", "bold");
-                doc.text("2. Autônomo (Prestador)", 20, y); y += 7;
-                doc.setFont("helvetica", "normal");
-                doc.text(`Nome Completo: ${nomeFor}`, 20, y); y += 7;
-                doc.text(`CPF: ${cpfFor}`, 20, y); y += 7;
-                doc.text(`Endereço: ${endFor}`, 20, y); y += 7;
-                doc.text(`Telefone: ${telFor}`, 20, y); y += 10;
-                doc.line(20, y, 190, y); y += 10;
-                doc.setFont("helvetica", "bold");
-                doc.text("3. Serviço Prestado", 20, y); y += 7;
-                doc.setFont("helvetica", "normal");
-                doc.text(`Descrição: ${servico}`, 20, y); y += 7;
-                doc.text(`Data do Serviço: ${dataServ}`, 20, y); y += 10;
-                doc.line(20, y, 190, y); y += 10;
-                doc.setFont("helvetica", "bold");
-                doc.text("4. Valor do Serviço", 20, y); y += 7;
-                doc.setFont("helvetica", "normal");
-                doc.text(`Valor bruto: R$ ${gross}`, 20, y); y += 10;
-                doc.line(20, y, 190, y); y += 10;
-                doc.setFont("helvetica", "bold");
-                doc.text("5. Cálculo dos Descontos", 20, y); y += 7;
-                doc.setFont("helvetica", "normal");
-                doc.text(`a) INSS (11%): ${inss}`, 20, y); y += 7;
-                doc.text(`b) ISS (${issPct}%): ${iss}`, 20, y); y += 7;
-                doc.text(`c) IRRF: ${irrf}`, 20, y); y += 10;
-                doc.setFont("helvetica", "bold");
-                doc.text(`Valor Líquido a Receber: ${liq}`, 20, y); y += 10;
-                doc.line(20, y, 190, y); y += 10;
-                doc.setFont("helvetica", "bold");
-                doc.text("6. Declaração", 20, y); y += 7;
-                doc.setFont("helvetica", "normal"); doc.setFontSize(10);
-                const declText = "Declaro que prestei os serviços acima descritos e recebi da contratante o valor líquido correspondente, estando o presente documento pago e quitado.";
-                const splitDecl = doc.splitTextToSize(declText, 170);
-                doc.text(splitDecl, 20, y); y += 25;
-                doc.text("__________________________________________", 20, y); y += 5;
-                doc.text(`${nomeFor} (Prestador)`, 20, y); y += 5;
-                doc.text(`Data: ${dataHoje}`, 20, y); y += 20;
-                doc.text("__________________________________________", 20, y); y += 5;
-                doc.text(`${razaoCli} (Contratante)`, 20, y); y += 5;
-                doc.text(`Data: ${dataHoje}`, 20, y);
-
-                let safeRazao = razaoCli.replace(/[^a-zA-Z0-9ãõáéíóúâêîôûàçÃÕÁÉÍÓÚÂÊÎÔÛÀÇ \-_]/g, '').replace(/\s+/g, '_');
-                const filename = `RPA_${safeRazao}_${new Date().toISOString().slice(0,10)}.pdf`;
-                const blob = doc.output('blob');
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a'); a.href = url; a.download = filename;
-                document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
-            }
-
-            downloadRPAWord() {
-                this.saveRPAContext();
-                const razaoCli = document.getElementById('rpa-cli-razao').value || "_________________";
-                const cnpjCli = document.getElementById('rpa-cli-cnpj').value || "_________________";
-                const endCli = document.getElementById('rpa-cli-addr').value || "_________________";
-                const nomeFor = document.getElementById('rpa-supp-name').value || "_________________";
-                const cpfFor = document.getElementById('rpa-supp-doc').value || "_________________";
-                const endFor = document.getElementById('rpa-supp-addr').value || "_________________";
-                const telFor = document.getElementById('rpa-supp-phone').value || "_________________";
-                const servico = document.getElementById('rpa-desc').value || "Serviços Gerais";
-                const dataServ = document.getElementById('rpa-date').value.split('-').reverse().join('/') || "__/__/____";
-                const dataHoje = new Date().toLocaleDateString('pt-BR');
-                const gross = parseFloat(document.getElementById('rpa-val').value || 0).toFixed(2);
-                const inss = document.getElementById('rpa-res-inss').innerText;
-                const iss = document.getElementById('rpa-res-iss').innerText;
-                const issPct = document.getElementById('rpa-iss-pct').value;
-                const irrf = document.getElementById('rpa-res-irrf').innerText;
-                const liq = document.getElementById('rpa-res-liq').innerText;
-
-                const content = `
-                <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
-                <head><meta charset='utf-8'><title>RPA</title><style>body{font-family:Arial, sans-serif; font-size:12pt; line-height:1.5;}</style></head><body>
-                <h2 style="text-align:center;">RECIBO DE PAGAMENTO A AUTÔNOMO – RPA</h2><br>
-                <h3>1. Contratante (Empresa)</h3><p><strong>Razão Social:</strong> ${razaoCli}<br><strong>CNPJ:</strong> ${cnpjCli}<br><strong>Endereço:</strong> ${endCli}</p><hr>
-                <h3>2. Autônomo (Prestador)</h3><p><strong>Nome Completo:</strong> ${nomeFor}<br><strong>CPF:</strong> ${cpfFor}<br><strong>Endereço:</strong> ${endFor}<br><strong>Telefone:</strong> ${telFor}</p><hr>
-                <h3>3. Serviço Prestado</h3><p><strong>Descrição do Serviço:</strong> ${servico}<br><strong>Data do Serviço:</strong> ${dataServ}</p><hr>
-                <h3>4. Valor do Serviço</h3><p><strong>Valor bruto do serviço:</strong> R$ ${gross}</p><hr>
-                <h3>5. Cálculo dos Descontos</h3><p>a) INSS (11%): ${inss}<br>b) ISS (${issPct}%): ${iss}<br>c) IRRF: ${irrf}<br><strong>➡ Valor líquido a receber: ${liq}</strong></p><hr>
-                <h3>6. Declaração</h3><p>Declaro que prestei os serviços acima descritos e recebi da contratante o valor líquido correspondente, estando o presente documento pago e quitado.</p><br>
-                <p>${nomeFor}<br>__________________________________________<br>Data: ${dataHoje}</p><br>
-                <p>${razaoCli}<br>__________________________________________<br>Data: ${dataHoje}</p></body></html>`;
-
-                const blob = new Blob(['\ufeff', content], { type: 'application/msword' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a'); a.href = url;
-                a.download = `RPA_${razaoCli.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0,10)}.doc`;
-                a.click();
-            }
-
-            saveNFLink() {
-                this.settings.nfLink = document.getElementById('conf-nf-link').value;
-                localStorage.setItem(`mei_settings_${this.user.uid}`, JSON.stringify(this.settings));
-                alert("Link NF Salvo!"); this.checkNFLink();
-            }
-            saveDASLink() {
-                this.settings.dasLink = document.getElementById('conf-das-link').value;
-                localStorage.setItem(`mei_settings_${this.user.uid}`, JSON.stringify(this.settings));
-                alert("Link DAS Salvo!"); this.checkDASLink();
-            }
-            checkNFLink() {
-                const el = document.getElementById('nf-shortcut');
-                if(this.settings.nfLink && this.settings.nfLink.length > 5) el.classList.remove('hidden'); else el.classList.add('hidden');
-            }
-            checkDASLink() {
-                const el = document.getElementById('das-shortcut');
-                if(this.settings.dasLink && this.settings.dasLink.length > 5) el.classList.remove('hidden'); else el.classList.add('hidden');
-            }
-            openNFLink() { if(this.settings.nfLink) window.open(this.settings.nfLink, '_blank'); }
-            openDASLink() { if(this.settings.dasLink) window.open(this.settings.dasLink, '_blank'); }
-            downloadManual() { if(!SEU_LINK_PDF) return alert("Configure o PDF"); window.open(SEU_LINK_PDF, '_blank'); }
-
-            openProfileModal() {
-                document.getElementById('edit-name').value = this.user.displayName || '';
-                document.getElementById('edit-fantasy').value = this.profile.fantasy || '';
-                document.getElementById('edit-doc').value = this.profile.doc || '';
-                document.getElementById('edit-addr').value = this.profile.address || '';
-                document.getElementById('edit-phone').value = this.profile.phone || '';
-                document.getElementById('edit-activity').value = this.profile.activity || '';
-                document.getElementById('edit-irrf').value = this.profile.irrfLimit || '2112.00';
-                document.getElementById('edit-inss').value = this.profile.inssPct || '11';
-                document.getElementById('edit-iss').value = this.profile.issPct || '3';
-                document.getElementById('modal-profile').classList.remove('hidden');
-            }
-            async saveProfile() {
-                const newName = document.getElementById('edit-name').value;
-                if(!newName) return alert("Nome obrigatório");
-                try {
-                    if(newName !== this.user.displayName) await updateProfile(this.user, {displayName: newName});
-                    this.profile = { 
-                        fantasy: document.getElementById('edit-fantasy').value, 
-                        doc: document.getElementById('edit-doc').value,
-                        address: document.getElementById('edit-addr').value,
-                        phone: document.getElementById('edit-phone').value,
-                        activity: document.getElementById('edit-activity').value,
-                        irrfLimit: document.getElementById('edit-irrf').value || '2112.00',
-                        inssPct: document.getElementById('edit-inss').value || '11',
-                        issPct: document.getElementById('edit-iss').value || '3'
-                    };
-                    localStorage.setItem(`mei_profile_${this.user.uid}`, JSON.stringify(this.profile));
-                    alert("Atualizado!"); this.closeModal('modal-profile'); this.renderHeader();
-                } catch(e) { alert("Erro: " + e.message); }
-            }
-
-            openPassModal() { document.getElementById('modal-pass').classList.remove('hidden'); }
-            async changePassword() {
-                const p1 = document.getElementById('new-pass').value;
-                const p2 = document.getElementById('conf-pass').value;
-                if(p1.length < 6 || p1!==p2) return alert("Senha inválida ou não confere.");
-                try { await updatePassword(this.user, p1); alert("Senha alterada!"); this.logout(); }
-                catch(e) { alert("Erro: " + e.message); }
-            }
-
-            openTxModal() {
-                document.getElementById('tx-date').value = new Date().toISOString().split('T')[0];
-                document.getElementById('tx-val').value = '';
-                document.getElementById('tx-desc').value = '';
-                const radios = document.getElementsByName('tx-action');
-                radios.forEach(r => r.checked = (r.value === 'other'));
-                this.handleStockAction('other');
-                this.setType('income'); 
-                document.getElementById('modal-tx').classList.remove('hidden');
-            }
-
-            setType(type) {
-                this.curType = type;
-                document.getElementById('opt-inc').classList.toggle('active', type === 'income');
-                document.getElementById('opt-exp').classList.toggle('active', type === 'expense');
-                const select = document.getElementById('tx-cat');
-                select.innerHTML = '';
-                this.categories[type].forEach(c => { select.innerHTML += `<option value="${c}">${c}</option>`; });
-                const merchantOpts = document.getElementById('merchant-options');
-                if(this.settings.merchantMode) {
-                    merchantOpts.classList.remove('hidden');
-                    const prodSel = document.getElementById('tx-prod-select');
-                    prodSel.innerHTML = '<option value="">Selecione...</option>';
-                    this.products.forEach((p, idx) => { prodSel.innerHTML += `<option value="${idx}">${p.name} (R$ ${p.price})</option>`; });
-                } else { merchantOpts.classList.add('hidden'); }
-            }
-
-            handleStockAction(action) {
-                this.txStockAction = action;
-                const details = document.getElementById('tx-prod-details');
-                const valInput = document.getElementById('tx-val');
-                if(action === 'sale') {
-                    this.setType('income'); details.classList.remove('hidden'); valInput.setAttribute('readonly', true); valInput.style.background = "#eee";
-                } else if (action === 'buy') {
-                    this.setType('expense'); details.classList.remove('hidden'); valInput.removeAttribute('readonly'); valInput.style.background = "#fff";
-                } else {
-                    details.classList.add('hidden'); valInput.removeAttribute('readonly'); valInput.style.background = "#fff";
-                }
-            }
-
-            onTxProductChange() { this.calcTxTotal(); }
-            calcTxTotal() {
-                const idx = document.getElementById('tx-prod-select').value;
-                if(idx === "") return;
-                const qty = parseInt(document.getElementById('tx-prod-qty').value || 1);
-                const prod = this.products[idx];
-                let price = 0;
-                if(this.txStockAction === 'sale') price = parseFloat(prod.price || 0); else price = parseFloat(prod.cost || 0);
-                document.getElementById('tx-prod-price').value = price.toFixed(2);
-                if(this.txStockAction === 'sale') document.getElementById('tx-val').value = (price * qty).toFixed(2);
-                else { if(document.getElementById('tx-val').value === "") document.getElementById('tx-val').value = (price * qty).toFixed(2); }
-            }
-
-            saveTx() {
-                const val = parseFloat(document.getElementById('tx-val').value);
-                const date = document.getElementById('tx-date').value;
-                const cat = document.getElementById('tx-cat').value; 
-                let desc = document.getElementById('tx-desc').value;
-                if (!val || !date) return alert("Preencha valor e data");
-
-                if(this.settings.merchantMode && this.txStockAction !== 'other') {
-                    const prodIdx = document.getElementById('tx-prod-select').value;
-                    const qty = parseInt(document.getElementById('tx-prod-qty').value);
-                    if(prodIdx === "" || !qty) return alert("Selecione o produto e quantidade.");
-                    const p = this.products[prodIdx];
-                    const oldStock = parseInt(p.currentStock)||0;
-                    if(this.txStockAction === 'sale') {
-                        p.currentStock = Math.max(0, oldStock - qty);
-                        desc = `Venda: ${p.name} (x${qty}) - ${desc}`;
-                        this.stockMovements.push({ date: new Date().toISOString(), product: p.name, type: 'out', qty: qty, reason: 'Venda Direta', newStock: p.currentStock });
-                    } else if (this.txStockAction === 'buy') {
-                        p.currentStock = oldStock + qty;
-                        desc = `Compra: ${p.name} (x${qty}) - ${desc}`;
-                        this.stockMovements.push({ date: new Date().toISOString(), product: p.name, type: 'in', qty: qty, reason: 'Reposição', newStock: p.currentStock });
-                    }
-                    localStorage.setItem(`mei_products_${this.user.uid}`, JSON.stringify(this.products));
-                    localStorage.setItem(`mei_stock_${this.user.uid}`, JSON.stringify(this.stockMovements));
-                }
-                this.txs.push({ id: Date.now(), type: this.curType, val, date, cat, desc });
-                localStorage.setItem(`mei_data_${this.user.uid}`, JSON.stringify(this.txs));
-                this.closeModal('modal-tx'); this.render();
-                if(this.curRegTab === 'products') this.renderRegList();
-            }
-
-            deleteTx(id) {
-                if(!confirm("Excluir?")) return;
-                const index = this.txs.findIndex(t => t.id === id);
-                if (index > -1) {
-                    this.txs.splice(index, 1);
-                    localStorage.setItem(`mei_data_${this.user.uid}`, JSON.stringify(this.txs));
-                    this.render();
-                }
-            }
-
-            render() {
-                const list = document.getElementById('list-recent');
-                list.innerHTML = '';
-                let bal = 0, incTotal = 0, expTotal = 0;
-                if (this.txs.length === 0) document.getElementById('empty-state').classList.remove('hidden');
-                else {
-                    document.getElementById('empty-state').classList.add('hidden');
-                    this.txs.sort((a,b) => new Date(b.date) - new Date(a.date));
-                    this.txs.forEach(tx => {
-                        if(tx.type === 'income') { bal += tx.val; incTotal += tx.val; } else { bal -= tx.val; expTotal += tx.val; }
-                        const rpaBtn = tx.type === 'income' ? `<button class="btn-sm btn-outline" onclick="app.loadRPAFromTx(${tx.id})" style="margin-right:5px; border:none;" title="Ver/Gerar RPA"><i class="fa-solid fa-file-contract text-muted"></i></button>` : '';
-                        const delBtn = `<button class="btn-sm btn-outline" onclick="app.deleteTx(${tx.id})" style="border:none; color:var(--danger); margin-left: 8px;" title="Excluir"><i class="fa-solid fa-trash"></i></button>`;
-                        list.innerHTML += `<div class="tx-item"><div><strong>${tx.cat}</strong><br><small style="color:var(--text-muted)">${new Date(tx.date).toLocaleDateString()} ${tx.desc}</small></div><div class="flex">${rpaBtn}<span class="${tx.type==='income'?'text-green':'text-red'}">${tx.type==='income'?'+':'-'} R$ ${tx.val.toFixed(2)}</span>${delBtn}</div></div>`;
-                    });
-                }
-                document.getElementById('dash-bal').innerText = `R$ ${bal.toFixed(2)}`;
-                document.getElementById('dash-inc').innerText = incTotal.toFixed(2);
-                document.getElementById('dash-exp').innerText = expTotal.toFixed(2);
-            }
-
-            loadRPAFromTx(id) {
-                const tx = this.txs.find(t => t.id === id);
-                if(!tx) return;
-                this.openRPAModal();
-                this.activeRpaTxId = id;
-                if (tx.rpaData) {
-                    document.getElementById('rpa-cli-razao').value = tx.rpaData.clientRazao || '';
-                    document.getElementById('rpa-cli-cnpj').value = tx.rpaData.clientCnpj || '';
-                    document.getElementById('rpa-cli-addr').value = tx.rpaData.clientAddr || '';
-                    document.getElementById('rpa-supp-name').value = tx.rpaData.suppName || '';
-                    document.getElementById('rpa-supp-doc').value = tx.rpaData.suppDoc || '';
-                    document.getElementById('rpa-supp-phone').value = tx.rpaData.suppPhone || '';
-                    document.getElementById('rpa-supp-addr').value = tx.rpaData.suppAddr || '';
-                    document.getElementById('rpa-iss-pct').value = tx.rpaData.issPct || 0;
-                    document.getElementById('rpa-desc').value = tx.rpaData.desc || '';
-                    document.getElementById('rpa-val').value = tx.rpaData.val || 0;
-                    document.getElementById('rpa-date').value = tx.rpaData.date || '';
-                } else {
-                    document.getElementById('rpa-val').value = tx.val;
-                    document.getElementById('rpa-desc').value = tx.desc;
-                    document.getElementById('rpa-date').value = tx.date;
-                }
-                this.calcRPA();
-            }
-
-            generateMockData() {
-                if(!confirm("Gerar dados teste?")) return;
-                const uid = this.user.uid;
-                this.clients.push({ name: "Cliente Exemplo Ltda", corpName: "Exemplo Comércio", doc: "12.345.678/0001-90", phone: "(11) 98888-7777", address: "Rua das Flores, 123" });
-                this.suppliers.push({ name: "Atacadão do Bairro", phone: "(11) 3333-4444", doc: "98.765.432/0001-10", address: "Av. Industrial, 500" });
-                this.products.push({ name: "Produto Teste A", price: 50.00, cost: 25.00, supplier: "Atacadão do Bairro", currentStock: 5, minStock: 10, idealStock: 20 });
-                this.services.push({ name: "Manutenção Padrão", price: 150.00, cost: 10.00 });
-                localStorage.setItem(`mei_clients_${uid}`, JSON.stringify(this.clients));
-                localStorage.setItem(`mei_suppliers_${uid}`, JSON.stringify(this.suppliers));
-                localStorage.setItem(`mei_products_${uid}`, JSON.stringify(this.products));
-                localStorage.setItem(`mei_services_${uid}`, JSON.stringify(this.services));
-                alert("Dados de teste gerados!");
-                this.renderRegList();
-            }
-
-            closeModal(id) { document.getElementById(id).classList.add('hidden'); }
-            navTo(viewId, btn) {
-                ['home', 'registers', 'settings', 'support'].forEach(v => document.getElementById('view-'+v).classList.add('hidden'));
-                document.getElementById('view-'+viewId).classList.remove('hidden');
-                document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                if(viewId === 'registers') this.renderRegList();
             }
 
             // PIX
@@ -1689,4 +1245,3 @@
     </script>
 </body>
 </html>
-```
