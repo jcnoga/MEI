@@ -5,13 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>MEI Controle Total</title>
     
-    <!-- Bibliotecas -->
+    <!-- Bibliotecas de Estilo -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Bibliotecas para PDF -->
+    <!-- Bibliotecas para PDF e Word -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://unpkg.com/html-docx-js/dist/html-docx.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+    <!-- FIREBASE SDK (COMPAT V9) - Versão estável para arquivo único -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
     <style>
         :root {
@@ -42,7 +49,6 @@
         .btn-dark { background: var(--text-main); color: white; }
         .btn-warning { background: var(--warning); color: white; }
         .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-main); }
-        .btn-google { background: #db4437; color: white; margin-bottom: 15px; }
         .btn-sm { padding: 6px 10px; font-size: 0.85rem; width: auto; margin: 0; }
 
         .card { background: var(--surface); padding: 20px; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); margin-bottom: 15px; }
@@ -51,15 +57,8 @@
         #auth-screen { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; background: var(--surface); position: fixed; top: 0; width: 100%; z-index: 9999; }
         
         .auth-input { 
-            width: 100%; 
-            padding: 12px; 
-            margin-bottom: 10px; 
-            border-radius: 8px; 
-            border: 1px solid #cbd5e1; 
-            background: #f8fafc; 
-            font-size: 0.95rem; 
-            color: #333;
-            transition: all 0.2s ease;
+            width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 8px; 
+            border: 1px solid #cbd5e1; background: #f8fafc; font-size: 0.95rem; color: #333; transition: all 0.2s ease;
         }
         .auth-input:focus { border-color: var(--primary); background: #fff; box-shadow: 0 0 0 3px rgba(0, 191, 99, 0.15); }
         
@@ -158,17 +157,13 @@
             <form onsubmit="event.preventDefault(); app.handleAuth();">
                 <div id="reg-fields" class="hidden">
                     <input type="text" id="auth-name" class="auth-input" placeholder="Seu Nome">
-                    <input type="text" id="auth-mei-name" class="auth-input" placeholder="Nome do MEI (Obrigatório)">
+                    <input type="text" id="auth-empresa" class="auth-input" placeholder="Nome da Empresa (Obrigatório)">
                 </div>
                 <input type="email" id="auth-email" class="auth-input" placeholder="Email" required>
                 <input type="password" id="auth-pass" class="auth-input" placeholder="Senha" required>
                 
                 <button class="btn btn-primary" id="btn-auth">Entrar</button>
             </form>
-
-            <button class="btn btn-google" onclick="app.loginWithGoogle()">
-                <i class="fa-brands fa-google"></i> Entrar com Google
-            </button>
             
             <div style="margin-top:10px; cursor:pointer; color:var(--text-muted); font-size: 0.9rem;" onclick="app.forgotPassword()">
                 Esqueci minha senha
@@ -373,7 +368,7 @@
         </nav>
     </section>
 
-    <!-- MODAIS (Transaction, Register, RPA, Stock, Shopping, Profile, Password) - MANTIDOS IGUAIS -->
+    <!-- MODAL: NOVA TRANSAÇÃO -->
     <div id="modal-tx" class="modal-overlay hidden" onclick="if(event.target===this) app.closeModal('modal-tx')">
         <div class="modal-content">
             <div class="flex justify-between"><h2>Novo Lançamento</h2><i class="fa-solid fa-xmark" onclick="app.closeModal('modal-tx')"></i></div>
@@ -405,6 +400,7 @@
         </div>
     </div>
 
+    <!-- MODAL REGISTRO -->
     <div id="modal-reg" class="modal-overlay hidden" onclick="if(event.target===this) app.closeModal('modal-reg')">
         <div class="modal-content">
             <div class="flex justify-between"><h2 id="reg-modal-title">Novo Item</h2><i class="fa-solid fa-xmark" onclick="app.closeModal('modal-reg')"></i></div>
@@ -413,6 +409,7 @@
         </div>
     </div>
 
+    <!-- MODAL RPA -->
     <div id="modal-rpa" class="modal-overlay hidden" onclick="if(event.target===this) app.closeModal('modal-rpa')">
         <div class="modal-content">
             <div class="flex justify-between"><h2>Gerar RPA</h2><i class="fa-solid fa-xmark" onclick="app.closeModal('modal-rpa')"></i></div>
@@ -456,11 +453,12 @@
         </div>
     </div>
 
+    <!-- MODAL PERFIL -->
     <div id="modal-profile" class="modal-overlay hidden" onclick="if(event.target===this) app.closeModal('modal-profile')">
         <div class="modal-content">
             <div class="flex justify-between"><h2>Editar Dados</h2><i class="fa-solid fa-xmark" onclick="app.closeModal('modal-profile')"></i></div>
             <label class="form-label">Nome Completo</label><input type="text" id="edit-name" class="auth-input">
-            <label class="form-label">Nome do MEI (Fantasia)</label><input type="text" id="edit-fantasy" class="auth-input">
+            <label class="form-label">Nome da Empresa</label><input type="text" id="edit-fantasy" class="auth-input">
             <div class="flex" style="gap:10px;"><div style="flex:1"><label class="form-label">CPF/CNPJ</label><input type="tel" id="edit-doc" class="auth-input"></div><div style="flex:1"><label class="form-label">Telefone</label><input type="tel" id="edit-phone" class="auth-input"></div></div>
             <label class="form-label">Endereço</label><input type="text" id="edit-addr" class="auth-input">
             <label class="form-label">Atividade</label><input type="text" id="edit-activity" class="auth-input">
@@ -469,6 +467,7 @@
         </div>
     </div>
 
+    <!-- MODAL SENHA -->
     <div id="modal-pass" class="modal-overlay hidden" onclick="if(event.target===this) app.closeModal('modal-pass')">
         <div class="modal-content">
             <div class="flex justify-between"><h2>Alterar Senha</h2><i class="fa-solid fa-xmark" onclick="app.closeModal('modal-pass')"></i></div>
@@ -478,13 +477,9 @@
         </div>
     </div>
 
-    <!-- SCRIPT -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, updateProfile, updatePassword, GoogleAuthProvider, signInWithPopup, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
-
-        // CONFIGURAÇÃO
+    <!-- SCRIPT PRINCIPAL -->
+    <script>
+        // CONFIGURAÇÃO FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyCijldF4haJzh0nzu4fbPYGHJadyYuqTP4",
             authDomain: "projmei.firebaseapp.com",
@@ -494,6 +489,7 @@
             appId: "1:39066795540:web:edc72cedb442daee423101",
             measurementId: "G-PE631DFGE0"
         };
+
         const SEU_LINK_PDF = "https://drive.google.com/file/d/1gMocDMAey8q35-bcJsRip7Zm0v2mCrMS/view?usp=sharing"; 
         const DEFAULT_DAS_LINK = "https://www8.receita.fazenda.gov.br/SimplesNacional/Aplicacoes/ATSPO/pgmei.app/Identificacao";
         const PIX_KEY = "b4648948-d0a8-4402-81f4-8a4047fcf4e5";
@@ -508,7 +504,7 @@
                 this.auth = null;
                 this.db = null;
                 this.user = null;
-                this.licenseData = null; // Armazena validade
+                this.licenseData = null;
                 
                 // Dados Locais
                 this.txs = [];
@@ -539,15 +535,16 @@
             }
 
             initFirebase() {
-                if (!firebaseConfig.apiKey) {
-                    document.getElementById('config-warning').classList.remove('hidden');
+                if (typeof firebase === 'undefined') {
+                    alert("Erro: Firebase SDK não carregado. Verifique sua conexão.");
                     return;
                 }
-                const app = initializeApp(firebaseConfig);
-                this.auth = getAuth(app);
-                this.db = getFirestore(app);
+                
+                firebase.initializeApp(firebaseConfig);
+                this.auth = firebase.auth();
+                this.db = firebase.firestore();
 
-                onAuthStateChanged(this.auth, (user) => {
+                this.auth.onAuthStateChanged((user) => {
                     if (user) {
                         this.user = user;
                         this.onLoginSuccess();
@@ -563,63 +560,38 @@
                 const email = document.getElementById('auth-email').value;
                 const pass = document.getElementById('auth-pass').value;
                 const name = document.getElementById('auth-name').value;
-                const meiName = document.getElementById('auth-mei-name').value; // NOVO
+                const empresa = document.getElementById('auth-empresa').value; // Novo campo empresa
 
                 try {
                     if (this.isRegister) {
                         if(!name) return alert("Digite seu nome.");
-                        if(!meiName) return alert("Nome do MEI é obrigatório."); // VALIDAÇÃO
+                        if(!empresa) return alert("Nome da Empresa é obrigatório.");
 
-                        const cred = await createUserWithEmailAndPassword(this.auth, email, pass);
-                        await updateProfile(cred.user, { displayName: name });
+                        const cred = await this.auth.createUserWithEmailAndPassword(email, pass);
+                        await cred.user.updateProfile({ displayName: name });
                         
-                        // Inicializar perfil local com Nome MEI
-                        const profile = { fantasy: meiName };
+                        // Inicializar perfil local com Nome da Empresa
+                        const profile = { fantasy: empresa };
                         localStorage.setItem(`mei_profile_${cred.user.uid}`, JSON.stringify(profile));
 
                         // Inicializar Licença no Firestore (30 dias)
                         const expiryDate = new Date();
                         expiryDate.setDate(expiryDate.getDate() + 30);
-                        await setDoc(doc(this.db, "licenses", cred.user.uid), {
+                        await this.db.collection("licenses").doc(cred.user.uid).set({
                             validUntil: expiryDate.getTime()
                         });
 
                     } else {
-                        await signInWithEmailAndPassword(this.auth, email, pass);
+                        await this.auth.signInWithEmailAndPassword(email, pass);
                     }
                 } catch (e) { alert("Erro: " + e.message); }
-            }
-
-            async loginWithGoogle() {
-                const provider = new GoogleAuthProvider();
-                try {
-                    const result = await signInWithPopup(this.auth, provider);
-                    // Verifica se já tem licença, se não cria (usuário novo via Google)
-                    const licenseRef = doc(this.db, "licenses", result.user.uid);
-                    const licenseSnap = await getDoc(licenseRef);
-                    
-                    if (!licenseSnap.exists()) {
-                        const expiryDate = new Date();
-                        expiryDate.setDate(expiryDate.getDate() + 30);
-                        await setDoc(licenseRef, { validUntil: expiryDate.getTime() });
-                        
-                        // Pede nome MEI depois se não tiver (fluxo simplificado: define padrão)
-                        localStorage.setItem(`mei_profile_${result.user.uid}`, JSON.stringify({ fantasy: "Meu Negócio MEI" }));
-                    }
-                } catch (e) { 
-                    if (e.code === 'auth/unauthorized-domain') {
-                        alert("ERRO DE DOMÍNIO: Este site não está autorizado no Firebase.\n\n1. Vá no Firebase Console > Authentication > Configurações > Domínios Autorizados.\n2. Adicione o domínio atual.\n3. Se estiver no PC, não abra o arquivo direto, use um servidor local (localhost).");
-                    } else {
-                        alert("Erro Google: " + e.message); 
-                    }
-                }
             }
 
             async forgotPassword() {
                 const email = prompt("Digite seu e-mail para recuperação:");
                 if(email) {
                     try {
-                        await sendPasswordResetEmail(this.auth, email);
+                        await this.auth.sendPasswordResetEmail(email);
                         alert("E-mail de recuperação enviado! Verifique sua caixa de entrada.");
                     } catch(e) { alert("Erro: " + e.message); }
                 }
@@ -632,7 +604,7 @@
                 document.getElementById('link-toggle').innerText = this.isRegister ? "Já tenho conta" : "Criar nova conta";
             }
 
-            logout() { signOut(this.auth); location.reload(); }
+            logout() { this.auth.signOut(); location.reload(); }
             showAuth() {
                 document.getElementById('auth-screen').classList.remove('hidden');
                 document.getElementById('app-screen').classList.add('hidden');
@@ -645,15 +617,15 @@
                 
                 // 1. Verificar Licença no Firestore
                 try {
-                    const licenseRef = doc(this.db, "licenses", uid);
-                    const licenseSnap = await getDoc(licenseRef);
-                    if (licenseSnap.exists()) {
+                    const licenseRef = this.db.collection("licenses").doc(uid);
+                    const licenseSnap = await licenseRef.get();
+                    if (licenseSnap.exists) {
                         this.licenseData = licenseSnap.data();
                         this.checkLicenseValidity();
                     } else {
-                        // Fallback se erro no cadastro
+                        // Fallback: 30 dias se não houver licença
                         this.licenseData = { validUntil: Date.now() + (30*24*60*60*1000) };
-                        await setDoc(licenseRef, this.licenseData);
+                        await licenseRef.set(this.licenseData);
                     }
                 } catch(e) { console.error("Erro licença", e); }
 
@@ -713,7 +685,6 @@
                 const statusEl = document.getElementById('license-status');
                 
                 if (daysLeft <= 0) {
-                    // Bloquear
                     document.getElementById('license-lock-screen').classList.remove('hidden');
                     statusEl.innerText = "EXPIRADA";
                     statusEl.style.color = "var(--danger)";
@@ -726,7 +697,6 @@
 
             // --- SISTEMA DE CÓDIGOS DE LICENÇA ---
             generateCode() {
-                // Gera num entre 100 e 1000
                 const code = Math.floor(Math.random() * (1000 - 100 + 1)) + 100;
                 this.generatedCode = code;
                 const display = document.getElementById('generated-code-display');
@@ -743,13 +713,13 @@
                 const passInt = parseInt(pass);
                 const daysInt = parseInt(days);
 
-                // Cálculo: (número aleatório + 13) * 9 + 1954
+                // Cálculo Seguro
                 const expectedPass = (this.generatedCode + CONST_ADD) * CONST_MULT + CONST_BASE;
 
                 if (passInt === expectedPass) {
                     try {
                         const newExpiry = Date.now() + (daysInt * 24 * 60 * 60 * 1000);
-                        await updateDoc(doc(this.db, "licenses", this.user.uid), {
+                        await this.db.collection("licenses").doc(this.user.uid).update({
                             validUntil: newExpiry
                         });
                         this.licenseData.validUntil = newExpiry;
@@ -768,13 +738,13 @@
             async adminZeroDays() {
                 if(this.user.email !== 'jcnvap@gmail.com') return;
                 if(!confirm("Zerar licença?")) return;
-                await updateDoc(doc(this.db, "licenses", this.user.uid), { validUntil: Date.now() - 1000 });
+                await this.db.collection("licenses").doc(this.user.uid).update({ validUntil: Date.now() - 1000 });
                 location.reload();
             }
             async adminOneDay() {
                 if(this.user.email !== 'jcnvap@gmail.com') return;
                 const oneDay = Date.now() + (24 * 60 * 60 * 1000);
-                await updateDoc(doc(this.db, "licenses", this.user.uid), { validUntil: oneDay });
+                await this.db.collection("licenses").doc(this.user.uid).update({ validUntil: oneDay });
                 location.reload();
             }
 
@@ -785,26 +755,15 @@
                 document.getElementById('conf-das-link').value = this.settings.dasLink || '';
             }
             
-            // --- Configuração IRRF ---
             renderIRRFConfig() {
                 const tbody = document.getElementById('irrf-config-body');
                 tbody.innerHTML = '';
                 this.settings.irrfTable.forEach((row, idx) => {
                     const isLast = idx === this.settings.irrfTable.length - 1;
-                    const limitLabel = isLast ? "Acima de..." : `Até R$`;
                     const limitVal = isLast ? "" : row.limit;
                     const disabled = isLast ? "disabled style='background:#eee;'" : "";
                     
-                    tbody.innerHTML += `
-                        <tr>
-                            <td>
-                                ${isLast ? 'Acima' : ''}
-                                <input type="number" step="0.01" class="irrf-input" value="${limitVal}" onchange="app.updateIRRFVal(${idx}, 'limit', this.value)" ${disabled}>
-                            </td>
-                            <td><input type="number" step="0.1" class="irrf-input" value="${row.rate}" onchange="app.updateIRRFVal(${idx}, 'rate', this.value)"></td>
-                            <td><input type="number" step="0.01" class="irrf-input" value="${row.ded}" onchange="app.updateIRRFVal(${idx}, 'ded', this.value)"></td>
-                        </tr>
-                    `;
+                    tbody.innerHTML += `<tr><td>${isLast ? 'Acima' : ''}<input type="number" step="0.01" class="irrf-input" value="${limitVal}" onchange="app.updateIRRFVal(${idx}, 'limit', this.value)" ${disabled}></td><td><input type="number" step="0.1" class="irrf-input" value="${row.rate}" onchange="app.updateIRRFVal(${idx}, 'rate', this.value)"></td><td><input type="number" step="0.01" class="irrf-input" value="${row.ded}" onchange="app.updateIRRFVal(${idx}, 'ded', this.value)"></td></tr>`;
                 });
             }
 
@@ -822,18 +781,11 @@
             checkDASAlert() {
                 const today = new Date().getDate();
                 const el = document.getElementById('das-alert');
-                
                 if (today >= 15 && today <= 19) {
-                    el.className = 'alert-das das-warning';
-                    el.innerText = '📅 Lembrete MEI: O DAS vence dia 20!';
-                    el.classList.remove('hidden');
+                    el.className = 'alert-das das-warning'; el.innerText = '📅 Lembrete MEI: O DAS vence dia 20!'; el.classList.remove('hidden');
                 } else if (today === 20) {
-                    el.className = 'alert-das das-urgent';
-                    el.innerText = '🚨 Seu DAS vence hoje!';
-                    el.classList.remove('hidden');
-                } else {
-                    el.classList.add('hidden');
-                }
+                    el.className = 'alert-das das-urgent'; el.innerText = '🚨 Seu DAS vence hoje!'; el.classList.remove('hidden');
+                } else { el.classList.add('hidden'); }
             }
 
             toggleMerchantMode() {
@@ -847,13 +799,10 @@
                 document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
                 const titles = { clients: 'Clientes', suppliers: 'Fornecedores', products: 'Produtos', services: 'Serviços' };
                 document.getElementById('reg-title').innerText = titles[tab];
-                
                 const tabs = ['clients', 'suppliers', 'products', 'services'];
                 document.querySelectorAll('.tab-btn')[tabs.indexOf(tab)].classList.add('active');
-
                 if(tab === 'products') document.getElementById('btn-shopping-list').classList.remove('hidden');
                 else document.getElementById('btn-shopping-list').classList.add('hidden');
-
                 this.renderRegList();
             }
 
@@ -867,73 +816,40 @@
                 if(this.curRegTab === 'services') data = this.services;
 
                 if(data.length === 0) {
-                    list.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding:20px;">Nenhum item cadastrado.</p>';
-                    return;
+                    list.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding:20px;">Nenhum item cadastrado.</p>'; return;
                 }
 
                 data.forEach((item, idx) => {
                     let subInfo = '';
                     let stockBadge = '';
-
                     if(this.curRegTab === 'products') {
                         subInfo = `R$ ${parseFloat(item.price).toFixed(2)}`;
                         if(item.supplier) subInfo += ` | F: ${item.supplier}`;
-                        
                         const curr = parseInt(item.currentStock || 0);
                         const min = parseInt(item.minStock || 0);
                         let colorClass = 'stock-ok';
-                        if(curr <= min) colorClass = 'stock-crit';
-                        else if(curr <= min * 1.5) colorClass = 'stock-low';
-                        
+                        if(curr <= min) colorClass = 'stock-crit'; else if(curr <= min * 1.5) colorClass = 'stock-low';
                         stockBadge = `<span class="badge-stock ${colorClass}">Est: ${curr}</span>`;
-                    }
-                    else if(this.curRegTab === 'services') subInfo = `R$ ${parseFloat(item.price).toFixed(2)}`;
-                    else {
-                        subInfo = item.phone || '';
-                        if(item.doc) subInfo += (subInfo ? ' | ' : '') + item.doc;
-                    }
+                    } else if(this.curRegTab === 'services') subInfo = `R$ ${parseFloat(item.price).toFixed(2)}`;
+                    else { subInfo = item.phone || ''; if(item.doc) subInfo += (subInfo ? ' | ' : '') + item.doc; }
 
-                    list.innerHTML += `
-                    <div class="tx-item">
-                        <div>
-                            <strong>${item.name}</strong> ${stockBadge}<br>
-                            <small style="color:var(--text-muted)">${subInfo}</small>
-                            ${(this.curRegTab === 'clients' && item.corpName) ? `<br><small style="color:var(--text-muted); font-size:0.75rem;">${item.corpName}</small>` : ''}
-                            ${(this.curRegTab === 'suppliers' && item.address) ? `<br><small style="color:var(--text-muted); font-size:0.75rem;"><i class="fa-solid fa-location-dot"></i> ${item.address}</small>` : ''}
-                        </div>
-                        <div style="display:flex; gap:8px;">
-                            ${this.curRegTab === 'products' ? `<button class="btn-outline btn-sm" onclick="app.openStockModal(${idx})" title="Movimentar Estoque"><i class="fa-solid fa-box"></i></button>` : ''}
-                            <button class="btn-outline btn-sm" onclick="app.openRegModal(${idx})" style="color:var(--primary);"><i class="fa-solid fa-pen"></i></button>
-                            <button class="btn-outline btn-sm" onclick="app.deleteRegister(${idx})" style="color:var(--danger);"><i class="fa-solid fa-trash"></i></button>
-                        </div>
-                    </div>`;
+                    list.innerHTML += `<div class="tx-item"><div><strong>${item.name}</strong> ${stockBadge}<br><small style="color:var(--text-muted)">${subInfo}</small>${(this.curRegTab === 'clients' && item.corpName) ? `<br><small style="color:var(--text-muted); font-size:0.75rem;">${item.corpName}</small>` : ''}${(this.curRegTab === 'suppliers' && item.address) ? `<br><small style="color:var(--text-muted); font-size:0.75rem;"><i class="fa-solid fa-location-dot"></i> ${item.address}</small>` : ''}</div><div style="display:flex; gap:8px;">${this.curRegTab === 'products' ? `<button class="btn-outline btn-sm" onclick="app.openStockModal(${idx})" title="Movimentar Estoque"><i class="fa-solid fa-box"></i></button>` : ''}<button class="btn-outline btn-sm" onclick="app.openRegModal(${idx})" style="color:var(--primary);"><i class="fa-solid fa-pen"></i></button><button class="btn-outline btn-sm" onclick="app.deleteRegister(${idx})" style="color:var(--danger);"><i class="fa-solid fa-trash"></i></button></div></div>`;
                 });
             }
 
             async downloadRegPDF() {
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF();
-                
-                let title = '';
-                let head = [];
-                let body = [];
+                let title = '', head = [], body = [];
                 
                 if (this.curRegTab === 'clients') {
-                    title = 'Lista de Clientes';
-                    head = [['Nome', 'Razão Social', 'Doc', 'Tel', 'Endereço']];
-                    body = this.clients.map(i => [i.name, i.corpName || '-', i.doc || '-', i.phone || '-', i.address || '-']);
+                    title = 'Lista de Clientes'; head = [['Nome', 'Razão Social', 'Doc', 'Tel', 'Endereço']]; body = this.clients.map(i => [i.name, i.corpName || '-', i.doc || '-', i.phone || '-', i.address || '-']);
                 } else if (this.curRegTab === 'suppliers') {
-                    title = 'Lista de Fornecedores';
-                    head = [['Nome', 'Telefone', 'Documento', 'Endereço']];
-                    body = this.suppliers.map(i => [i.name, i.phone, i.doc, i.address || '-']);
+                    title = 'Lista de Fornecedores'; head = [['Nome', 'Telefone', 'Documento', 'Endereço']]; body = this.suppliers.map(i => [i.name, i.phone, i.doc, i.address || '-']);
                 } else if (this.curRegTab === 'products') {
-                    title = 'Lista de Produtos';
-                    head = [['Produto', 'Preço (R$)', 'Custo (R$)', 'Estoque', 'Fornecedor']];
-                    body = this.products.map(i => [i.name, parseFloat(i.price).toFixed(2), parseFloat(i.cost).toFixed(2), i.currentStock, i.supplier]);
+                    title = 'Lista de Produtos'; head = [['Produto', 'Preço (R$)', 'Custo (R$)', 'Estoque', 'Fornecedor']]; body = this.products.map(i => [i.name, parseFloat(i.price).toFixed(2), parseFloat(i.cost).toFixed(2), i.currentStock, i.supplier]);
                 } else if (this.curRegTab === 'services') {
-                    title = 'Lista de Serviços';
-                    head = [['Serviço', 'Preço (R$)', 'Custo (R$)']];
-                    body = this.services.map(i => [i.name, parseFloat(i.price).toFixed(2), parseFloat(i.cost).toFixed(2)]);
+                    title = 'Lista de Serviços'; head = [['Serviço', 'Preço (R$)', 'Custo (R$)']]; body = this.services.map(i => [i.name, parseFloat(i.price).toFixed(2), parseFloat(i.cost).toFixed(2)]);
                 }
 
                 doc.text(title, 14, 10);
@@ -942,110 +858,43 @@
                 const filename = `${this.curRegTab}_${new Date().toISOString().slice(0,10)}.pdf`;
                 const blob = doc.output('blob');
                 const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = filename;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
+                const a = document.createElement('a'); a.href = url; a.download = filename;
+                document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
             }
 
             openRegModal(idx = null) {
-                this.editIdx = idx; 
-                document.getElementById('reg-name').value = '';
-                const extra = document.getElementById('reg-fields-extra');
-                extra.innerHTML = '';
+                this.editIdx = idx; document.getElementById('reg-name').value = '';
+                const extra = document.getElementById('reg-fields-extra'); extra.innerHTML = '';
                 const nameLabel = document.getElementById('reg-name-label');
-
                 let data = null;
                 if (idx !== null) {
-                    if(this.curRegTab === 'clients') data = this.clients[idx];
-                    else if(this.curRegTab === 'suppliers') data = this.suppliers[idx];
-                    else if(this.curRegTab === 'products') data = this.products[idx];
-                    else data = this.services[idx];
+                    if(this.curRegTab === 'clients') data = this.clients[idx]; else if(this.curRegTab === 'suppliers') data = this.suppliers[idx];
+                    else if(this.curRegTab === 'products') data = this.products[idx]; else data = this.services[idx];
                     document.getElementById('reg-name').value = data.name;
                 }
 
                 if(this.curRegTab === 'products') {
                     document.getElementById('reg-modal-title').innerText = idx !== null ? "Editar Produto" : "Novo Produto";
                     nameLabel.innerText = "Nome do Produto";
-                    
                     let supOptions = '<option value="">Sem Fornecedor</option>';
                     this.suppliers.forEach(s => { supOptions += `<option value="${s.name}">${s.name}</option>`; });
-
-                    extra.innerHTML = `
-                        <div class="flex" style="gap:10px;">
-                            <div><label class="form-label">Preço Venda</label><input type="number" id="reg-price" class="auth-input" step="0.01"></div>
-                            <div><label class="form-label">Custo</label><input type="number" id="reg-cost" class="auth-input" step="0.01"></div>
-                        </div>
-                        <div class="flex" style="gap:10px;">
-                            <div><label class="form-label">Est. Atual</label><input type="number" id="reg-curr-stk" class="auth-input"></div>
-                            <div><label class="form-label">Est. Mínimo</label><input type="number" id="reg-min-stk" class="auth-input"></div>
-                            <div><label class="form-label">Est. Ideal</label><input type="number" id="reg-ideal-stk" class="auth-input"></div>
-                        </div>
-                        <label class="form-label">Fornecedor</label>
-                        <select id="reg-supplier" class="auth-input">${supOptions}</select>
-                    `;
-                    if(idx !== null) {
-                        setTimeout(() => {
-                            document.getElementById('reg-price').value = data.price;
-                            document.getElementById('reg-cost').value = data.cost;
-                            document.getElementById('reg-supplier').value = data.supplier || '';
-                            document.getElementById('reg-curr-stk').value = data.currentStock || 0;
-                            document.getElementById('reg-min-stk').value = data.minStock || 0;
-                            document.getElementById('reg-ideal-stk').value = data.idealStock || 0;
-                        }, 50);
-                    }
+                    extra.innerHTML = `<div class="flex" style="gap:10px;"><div><label class="form-label">Preço Venda</label><input type="number" id="reg-price" class="auth-input" step="0.01"></div><div><label class="form-label">Custo</label><input type="number" id="reg-cost" class="auth-input" step="0.01"></div></div><div class="flex" style="gap:10px;"><div><label class="form-label">Est. Atual</label><input type="number" id="reg-curr-stk" class="auth-input"></div><div><label class="form-label">Est. Mínimo</label><input type="number" id="reg-min-stk" class="auth-input"></div><div><label class="form-label">Est. Ideal</label><input type="number" id="reg-ideal-stk" class="auth-input"></div></div><label class="form-label">Fornecedor</label><select id="reg-supplier" class="auth-input">${supOptions}</select>`;
+                    if(idx !== null) { setTimeout(() => { document.getElementById('reg-price').value = data.price; document.getElementById('reg-cost').value = data.cost; document.getElementById('reg-supplier').value = data.supplier || ''; document.getElementById('reg-curr-stk').value = data.currentStock || 0; document.getElementById('reg-min-stk').value = data.minStock || 0; document.getElementById('reg-ideal-stk').value = data.idealStock || 0; }, 50); }
                 } else if(this.curRegTab === 'services') {
                     document.getElementById('reg-modal-title').innerText = idx !== null ? "Editar Serviço" : "Novo Serviço";
                     nameLabel.innerText = "Nome do Serviço";
-                    
-                    extra.innerHTML = `
-                        <label class="form-label">Preço de Venda (R$)</label><input type="number" id="reg-price" class="auth-input" step="0.01">
-                        <label class="form-label">Custo (Opcional)</label><input type="number" id="reg-cost" class="auth-input" step="0.01">
-                    `;
-                    if(idx !== null) {
-                        setTimeout(() => {
-                            document.getElementById('reg-price').value = data.price;
-                            document.getElementById('reg-cost').value = data.cost;
-                        }, 50);
-                    }
+                    extra.innerHTML = `<label class="form-label">Preço de Venda (R$)</label><input type="number" id="reg-price" class="auth-input" step="0.01"><label class="form-label">Custo (Opcional)</label><input type="number" id="reg-cost" class="auth-input" step="0.01">`;
+                    if(idx !== null) { setTimeout(() => { document.getElementById('reg-price').value = data.price; document.getElementById('reg-cost').value = data.cost; }, 50); }
                 } else if(this.curRegTab === 'clients') {
                     document.getElementById('reg-modal-title').innerText = idx !== null ? "Editar Cliente" : "Novo Cliente";
                     nameLabel.innerText = "Nome do Cliente";
-                    
-                    extra.innerHTML = `
-                        <label class="form-label">Razão Social (Opcional)</label><input type="text" id="reg-corp-name" class="auth-input">
-                        <div class="flex" style="gap:10px;">
-                            <div style="flex:1"><label class="form-label">CPF / CNPJ</label><input type="text" id="reg-doc" class="auth-input"></div>
-                            <div style="flex:1"><label class="form-label">Telefone</label><input type="tel" id="reg-phone" class="auth-input"></div>
-                        </div>
-                        <label class="form-label">Endereço</label><input type="text" id="reg-addr" class="auth-input">
-                    `;
-                    if(idx !== null) {
-                        setTimeout(() => {
-                            document.getElementById('reg-corp-name').value = data.corpName || '';
-                            document.getElementById('reg-doc').value = data.doc || '';
-                            document.getElementById('reg-phone').value = data.phone || '';
-                            document.getElementById('reg-addr').value = data.address || '';
-                        }, 50);
-                    }
+                    extra.innerHTML = `<label class="form-label">Razão Social (Opcional)</label><input type="text" id="reg-corp-name" class="auth-input"><div class="flex" style="gap:10px;"><div style="flex:1"><label class="form-label">CPF / CNPJ</label><input type="text" id="reg-doc" class="auth-input"></div><div style="flex:1"><label class="form-label">Telefone</label><input type="tel" id="reg-phone" class="auth-input"></div></div><label class="form-label">Endereço</label><input type="text" id="reg-addr" class="auth-input">`;
+                    if(idx !== null) { setTimeout(() => { document.getElementById('reg-corp-name').value = data.corpName || ''; document.getElementById('reg-doc').value = data.doc || ''; document.getElementById('reg-phone').value = data.phone || ''; document.getElementById('reg-addr').value = data.address || ''; }, 50); }
                 } else {
                     document.getElementById('reg-modal-title').innerText = "Novo Fornecedor";
                     nameLabel.innerText = "Nome do Fornecedor";
-                    extra.innerHTML = `
-                        <label class="form-label">Telefone / WhatsApp</label><input type="tel" id="reg-phone" class="auth-input">
-                        <label class="form-label">CPF / CNPJ</label><input type="text" id="reg-doc" class="auth-input">
-                        <label class="form-label">Endereço</label><input type="text" id="reg-addr" class="auth-input">
-                    `;
-                    if(idx !== null) {
-                        setTimeout(() => {
-                            document.getElementById('reg-phone').value = data.phone;
-                            document.getElementById('reg-doc').value = data.doc;
-                            document.getElementById('reg-addr').value = data.address || '';
-                        }, 50);
-                    }
+                    extra.innerHTML = `<label class="form-label">Telefone / WhatsApp</label><input type="tel" id="reg-phone" class="auth-input"><label class="form-label">CPF / CNPJ</label><input type="text" id="reg-doc" class="auth-input"><label class="form-label">Endereço</label><input type="text" id="reg-addr" class="auth-input">`;
+                    if(idx !== null) { setTimeout(() => { document.getElementById('reg-phone').value = data.phone; document.getElementById('reg-doc').value = data.doc; document.getElementById('reg-addr').value = data.address || ''; }, 50); }
                 }
                 document.getElementById('modal-reg').classList.remove('hidden');
             }
@@ -1053,122 +902,70 @@
             saveRegister() {
                 const name = document.getElementById('reg-name').value;
                 if(!name) return alert("Nome é obrigatório.");
-
                 let newItem = { name };
-
                 if(this.curRegTab === 'products') {
-                    newItem.price = document.getElementById('reg-price').value || 0;
-                    newItem.cost = document.getElementById('reg-cost').value || 0;
-                    newItem.supplier = document.getElementById('reg-supplier').value || '';
-                    newItem.currentStock = parseInt(document.getElementById('reg-curr-stk').value || 0);
-                    newItem.minStock = parseInt(document.getElementById('reg-min-stk').value || 0);
-                    newItem.idealStock = parseInt(document.getElementById('reg-ideal-stk').value || 0);
-                    
-                    if (this.editIdx !== null) this.products[this.editIdx] = newItem;
-                    else this.products.push(newItem);
+                    newItem.price = document.getElementById('reg-price').value || 0; newItem.cost = document.getElementById('reg-cost').value || 0; newItem.supplier = document.getElementById('reg-supplier').value || ''; newItem.currentStock = parseInt(document.getElementById('reg-curr-stk').value || 0); newItem.minStock = parseInt(document.getElementById('reg-min-stk').value || 0); newItem.idealStock = parseInt(document.getElementById('reg-ideal-stk').value || 0);
+                    if (this.editIdx !== null) this.products[this.editIdx] = newItem; else this.products.push(newItem);
                     localStorage.setItem(`mei_products_${this.user.uid}`, JSON.stringify(this.products));
-
                 } else if (this.curRegTab === 'services') {
-                    newItem.price = document.getElementById('reg-price').value || 0;
-                    newItem.cost = document.getElementById('reg-cost').value || 0;
-                    if (this.editIdx !== null) this.services[this.editIdx] = newItem;
-                    else this.services.push(newItem);
+                    newItem.price = document.getElementById('reg-price').value || 0; newItem.cost = document.getElementById('reg-cost').value || 0;
+                    if (this.editIdx !== null) this.services[this.editIdx] = newItem; else this.services.push(newItem);
                     localStorage.setItem(`mei_services_${this.user.uid}`, JSON.stringify(this.services));
-
                 } else if (this.curRegTab === 'clients') {
-                    newItem.corpName = document.getElementById('reg-corp-name').value || '';
-                    newItem.phone = document.getElementById('reg-phone').value || '';
-                    newItem.doc = document.getElementById('reg-doc').value || '';
-                    newItem.address = document.getElementById('reg-addr').value || '';
-                    
-                    if (this.editIdx !== null) this.clients[this.editIdx] = newItem;
-                    else this.clients.push(newItem);
+                    newItem.corpName = document.getElementById('reg-corp-name').value || ''; newItem.phone = document.getElementById('reg-phone').value || ''; newItem.doc = document.getElementById('reg-doc').value || ''; newItem.address = document.getElementById('reg-addr').value || '';
+                    if (this.editIdx !== null) this.clients[this.editIdx] = newItem; else this.clients.push(newItem);
                     localStorage.setItem(`mei_clients_${this.user.uid}`, JSON.stringify(this.clients));
-
                 } else {
-                    newItem.phone = document.getElementById('reg-phone').value || '';
-                    newItem.doc = document.getElementById('reg-doc').value || '';
-                    newItem.address = document.getElementById('reg-addr').value || '';
-                    if (this.editIdx !== null) this.suppliers[this.editIdx] = newItem;
-                    else this.suppliers.push(newItem);
+                    newItem.phone = document.getElementById('reg-phone').value || ''; newItem.doc = document.getElementById('reg-doc').value || ''; newItem.address = document.getElementById('reg-addr').value || '';
+                    if (this.editIdx !== null) this.suppliers[this.editIdx] = newItem; else this.suppliers.push(newItem);
                     localStorage.setItem(`mei_suppliers_${this.user.uid}`, JSON.stringify(this.suppliers));
                 }
-                this.closeModal('modal-reg');
-                this.renderRegList();
+                this.closeModal('modal-reg'); this.renderRegList();
             }
 
             deleteRegister(idx) {
                 if(!confirm("Excluir item?")) return;
                 const arr = this.curRegTab === 'clients' ? this.clients : (this.curRegTab === 'suppliers' ? this.suppliers : (this.curRegTab === 'products' ? this.products : this.services));
-                arr.splice(idx, 1);
-                localStorage.setItem(`mei_${this.curRegTab}_${this.user.uid}`, JSON.stringify(arr));
-                this.renderRegList();
+                arr.splice(idx, 1); localStorage.setItem(`mei_${this.curRegTab}_${this.user.uid}`, JSON.stringify(arr)); this.renderRegList();
             }
 
             openStockModal(idx) {
-                this.stockIdx = idx;
-                const p = this.products[idx];
-                document.getElementById('stock-prod-name').innerText = p.name;
-                document.getElementById('stk-qty').value = '';
-                this.setStockType('in');
+                this.stockIdx = idx; const p = this.products[idx];
+                document.getElementById('stock-prod-name').innerText = p.name; document.getElementById('stk-qty').value = ''; this.setStockType('in');
                 document.getElementById('modal-stock').classList.remove('hidden');
             }
 
             setStockType(type) {
                 this.stockType = type;
-                const inc = document.getElementById('stk-inc');
-                const exp = document.getElementById('stk-exp');
-                const reason = document.getElementById('stk-reason');
-                
-                if(type === 'in') {
-                    inc.classList.add('active'); exp.classList.remove('active');
-                    reason.innerHTML = '<option value="Compra">Compra / Reposição</option><option value="Devolução">Devolução</option>';
-                } else {
-                    exp.classList.add('active'); inc.classList.remove('active');
-                    reason.innerHTML = '<option value="Venda">Venda</option><option value="Perda">Perda / Quebra</option><option value="Uso">Uso Interno</option>';
-                }
+                const inc = document.getElementById('stk-inc'); const exp = document.getElementById('stk-exp'); const reason = document.getElementById('stk-reason');
+                if(type === 'in') { inc.classList.add('active'); exp.classList.remove('active'); reason.innerHTML = '<option value="Compra">Compra</option><option value="Devolução">Devolução Cliente</option>'; }
+                else { exp.classList.add('active'); inc.classList.remove('active'); reason.innerHTML = '<option value="Venda">Venda</option><option value="Perda">Perda / Quebra</option><option value="Uso">Uso Interno</option>'; }
             }
 
             saveStockMovement() {
                 const qty = parseInt(document.getElementById('stk-qty').value);
                 const reason = document.getElementById('stk-reason').value;
                 if(!qty || qty <= 0) return alert("Quantidade inválida.");
-
                 const p = this.products[this.stockIdx];
                 const oldStock = parseInt(p.currentStock || 0);
-                
-                if(this.stockType === 'in') p.currentStock = oldStock + qty;
-                else p.currentStock = Math.max(0, oldStock - qty);
-
-                this.stockMovements.push({
-                    date: new Date().toISOString(), product: p.name, type: this.stockType,
-                    qty: qty, reason: reason, newStock: p.currentStock
-                });
-
+                if(this.stockType === 'in') p.currentStock = oldStock + qty; else p.currentStock = Math.max(0, oldStock - qty);
+                this.stockMovements.push({ date: new Date().toISOString(), product: p.name, type: this.stockType, qty: qty, reason: reason, newStock: p.currentStock });
                 localStorage.setItem(`mei_products_${this.user.uid}`, JSON.stringify(this.products));
                 localStorage.setItem(`mei_stock_${this.user.uid}`, JSON.stringify(this.stockMovements));
-                
-                alert("Estoque atualizado!");
-                this.closeModal('modal-stock');
-                this.renderRegList();
+                alert("Estoque atualizado!"); this.closeModal('modal-stock'); this.renderRegList();
             }
 
             openShoppingList() {
-                const listDiv = document.getElementById('shopping-list-content');
-                listDiv.innerHTML = '';
+                const listDiv = document.getElementById('shopping-list-content'); listDiv.innerHTML = '';
                 let toBuy = this.products.filter(p => (parseInt(p.currentStock||0) <= parseInt(p.minStock||0)));
                 if(toBuy.length === 0) listDiv.innerHTML = '<p>Tudo certo! Nenhum produto abaixo do mínimo.</p>';
                 else {
-                    let html = '<table style="width:100%; font-size:0.85rem; border-collapse:collapse;">';
-                    html += '<tr style="text-align:left; border-bottom:1px solid #ddd;"><th>Produto</th><th>Atual</th><th>Comprar</th></tr>';
+                    let html = '<table style="width:100%; font-size:0.85rem; border-collapse:collapse;"><tr style="text-align:left; border-bottom:1px solid #ddd;"><th>Produto</th><th>Atual</th><th>Comprar</th></tr>';
                     toBuy.forEach(p => {
-                        const ideal = parseInt(p.idealStock || 0);
-                        const curr = parseInt(p.currentStock || 0);
-                        const buyQty = ideal > curr ? (ideal - curr) : 0;
+                        const ideal = parseInt(p.idealStock || 0); const curr = parseInt(p.currentStock || 0); const buyQty = ideal > curr ? (ideal - curr) : 0;
                         html += `<tr><td style="padding:5px;">${p.name}<br><small style="color:var(--text-muted)">${p.supplier||''}</small></td><td style="padding:5px; color:red;">${curr}</td><td style="padding:5px; font-weight:bold;">${buyQty > 0 ? buyQty : '-'}</td></tr>`;
                     });
-                    html += '</table>';
-                    listDiv.innerHTML = html;
+                    html += '</table>'; listDiv.innerHTML = html;
                 }
                 document.getElementById('modal-shopping').classList.remove('hidden');
             }
@@ -1176,10 +973,7 @@
             // PIX
             crc16(str) {
                 let crc = 0xFFFF;
-                for (let i = 0; i < str.length; i++) {
-                    crc ^= str.charCodeAt(i) << 8;
-                    for (let j = 0; j < 8; j++) { if ((crc & 0x8000) !== 0) crc = (crc << 1) ^ 0x1021; else crc = crc << 1; }
-                }
+                for (let i = 0; i < str.length; i++) { crc ^= str.charCodeAt(i) << 8; for (let j = 0; j < 8; j++) { if ((crc & 0x8000) !== 0) crc = (crc << 1) ^ 0x1021; else crc = crc << 1; } }
                 return (crc & 0xFFFF).toString(16).toUpperCase().padStart(4, '0');
             }
             generatePixPayload(amount) {
@@ -1214,8 +1008,7 @@
             }
 
             restoreData(input) {
-                const file = input.files[0];
-                if(!file) return;
+                const file = input.files[0]; if(!file) return;
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     try {
@@ -1225,23 +1018,39 @@
                         if(json.suppliers) this.suppliers = json.suppliers; if(json.products) this.products = json.products;
                         if(json.services) this.services = json.services; if(json.stockMovements) this.stockMovements = json.stockMovements;
                         const uid = this.user.uid;
-                        localStorage.setItem(`mei_data_${uid}`, JSON.stringify(this.txs));
-                        localStorage.setItem(`mei_profile_${uid}`, JSON.stringify(this.profile));
-                        localStorage.setItem(`mei_settings_${uid}`, JSON.stringify(this.settings));
-                        localStorage.setItem(`mei_clients_${uid}`, JSON.stringify(this.clients));
-                        localStorage.setItem(`mei_suppliers_${uid}`, JSON.stringify(this.suppliers));
-                        localStorage.setItem(`mei_products_${uid}`, JSON.stringify(this.products));
-                        localStorage.setItem(`mei_services_${uid}`, JSON.stringify(this.services));
-                        localStorage.setItem(`mei_stock_${uid}`, JSON.stringify(this.stockMovements));
+                        localStorage.setItem(`mei_data_${uid}`, JSON.stringify(this.txs)); localStorage.setItem(`mei_profile_${uid}`, JSON.stringify(this.profile)); localStorage.setItem(`mei_settings_${uid}`, JSON.stringify(this.settings)); localStorage.setItem(`mei_clients_${uid}`, JSON.stringify(this.clients)); localStorage.setItem(`mei_suppliers_${uid}`, JSON.stringify(this.suppliers)); localStorage.setItem(`mei_products_${uid}`, JSON.stringify(this.products)); localStorage.setItem(`mei_services_${uid}`, JSON.stringify(this.services)); localStorage.setItem(`mei_stock_${uid}`, JSON.stringify(this.stockMovements));
                         this.render(); this.renderHeader(); this.checkNFLink(); this.checkDASLink();
                         alert("Restaurado!");
                     } catch(e) { alert("Arquivo inválido"); }
                 };
                 reader.readAsText(file);
             }
+            
+            generateMockData() {
+                if(!confirm("Gerar dados teste?")) return;
+                const uid = this.user.uid;
+                this.clients.push({ name: "Cliente Exemplo Ltda", corpName: "Exemplo Comércio", doc: "12.345.678/0001-90", phone: "(11) 98888-7777", address: "Rua das Flores, 123" });
+                this.suppliers.push({ name: "Atacadão do Bairro", phone: "(11) 3333-4444", doc: "98.765.432/0001-10", address: "Av. Industrial, 500" });
+                this.products.push({ name: "Produto Teste A", price: 50.00, cost: 25.00, supplier: "Atacadão do Bairro", currentStock: 5, minStock: 10, idealStock: 20 });
+                this.services.push({ name: "Manutenção Padrão", price: 150.00, cost: 10.00 });
+                localStorage.setItem(`mei_clients_${uid}`, JSON.stringify(this.clients));
+                localStorage.setItem(`mei_suppliers_${uid}`, JSON.stringify(this.suppliers));
+                localStorage.setItem(`mei_products_${uid}`, JSON.stringify(this.products));
+                localStorage.setItem(`mei_services_${uid}`, JSON.stringify(this.services));
+                alert("Dados de teste gerados!");
+                this.renderRegList();
+            }
         }
         
-        try { window.app = new App(); } catch(e) { console.error("Erro ao iniciar APP:", e); alert("Erro crítico ao iniciar aplicação. Verifique o console."); }
+        // Inicialização Segura
+        window.addEventListener('load', () => {
+            try {
+                window.app = new App();
+            } catch(e) {
+                console.error("Erro ao iniciar APP:", e);
+                alert("Erro crítico ao iniciar aplicação. Verifique o console.");
+            }
+        });
     </script>
 </body>
 </html>
