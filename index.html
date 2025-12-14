@@ -807,6 +807,17 @@
                         if(!name) return alert("Digite seu nome.");
                         const cred = await createUserWithEmailAndPassword(this.auth, email, pass);
                         await updateProfile(cred.user, { displayName: name });
+                        
+                        // INICIALIZA LICENÇA COM 30 DIAS
+                        const uid = cred.user.uid;
+                        const expiry = Date.now() + (30 * 24 * 60 * 60 * 1000);
+                        const newLicense = { expiryDate: expiry };
+                        localStorage.setItem(`mei_license_${uid}`, JSON.stringify(newLicense));
+                        
+                        // Atualiza estado local caso onLoginSuccess já tenha rodado
+                        this.licenseData = newLicense;
+                        if(this.user) this.checkLicense();
+
                     } else {
                         await signInWithEmailAndPassword(this.auth, email, pass);
                     }
@@ -2192,4 +2203,5 @@
 </body>
 </html>
 ```
+255,7s
 Use Arrow Up and Arrow Down to select a turn, Enter to jump to it, and Escape to return to the chat.
