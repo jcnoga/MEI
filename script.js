@@ -56,6 +56,10 @@ class App {
         
         // Configurar evento do formulário
         this.setupEventListeners();
+
+        // 2. MODO DE OPERAÇÃO: Monitorar Status de Conexão (Local/Nuvem)
+        window.addEventListener('online', () => this.updateConnectionStatus());
+        window.addEventListener('offline', () => this.updateConnectionStatus());
     }
 
     setupEventListeners() {
@@ -70,17 +74,17 @@ class App {
 
     initFirebase() {
         try {
-            // Inicializar Firebase
             if (!firebaseConfig.apiKey) {
                 document.getElementById('config-warning').classList.remove('hidden');
                 return;
             }
             
-            // Inicializar Firebase
             const app = firebase.initializeApp(firebaseConfig);
             this.auth = firebase.auth();
             
-            // Escutar mudanças de autenticação
+            // 2. MODO DE OPERAÇÃO: Persistência local para manter login mesmo offline/refresh
+            this.auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+
             this.auth.onAuthStateChanged((user) => {
                 if (user) {
                     this.user = user;
@@ -89,12 +93,28 @@ class App {
                     this.user = null;
                     this.showAuth();
                 }
+                this.updateConnectionStatus();
             });
             
-            console.log("Firebase inicializado com sucesso!");
+            console.log("Firebase inicializado.");
         } catch (error) {
             console.error("Erro ao inicializar Firebase:", error);
             document.getElementById('config-warning').classList.remove('hidden');
+        }
+    }
+
+    // 2. MODO DE OPERAÇÃO: Atualiza UI baseado na conexão
+    updateConnectionStatus() {
+        const el = document.getElementById('connection-status');
+        if (!el) return;
+        
+        const isOnline = navigator.onLine;
+        if (isOnline) {
+            el.innerHTML = '<i class="fa-solid fa-cloud"></i> Nuvem (Online)';
+            el.style.color = 'var(--primary)';
+        } else {
+            el.innerHTML = '<i class="fa-solid fa-hdd"></i> Local (Offline)';
+            el.style.color = 'var(--text-muted)';
         }
     }
 
@@ -119,19 +139,18 @@ class App {
                 console.log("Registrando usuário:", email);
                 const cred = await this.auth.createUserWithEmailAndPassword(email, pass);
                 
-                // Atualizar perfil
                 await cred.user.updateProfile({ displayName: name });
                 
-                // INICIALIZA LICENÇA COM 30 DIAS
+                // 1. PERÍODO INICIAL: LIBERAÇÃO AUTOMÁTICA DE 90 DIAS
                 const uid = cred.user.uid;
-                const expiry = Date.now() + (30 * 24 * 60 * 60 * 1000);
+                const expiry = Date.now() + (90 * 24 * 60 * 60 * 1000); // 90 DIAS FIXO
                 const newLicense = { expiryDate: expiry };
                 localStorage.setItem(`mei_license_${uid}`, JSON.stringify(newLicense));
                 
                 this.licenseData = newLicense;
                 if(this.user) this.checkLicense();
                 
-                alert("Conta criada com sucesso!");
+                alert("Conta criada! Você recebeu 90 dias de acesso gratuito.");
                 
             } else {
                 console.log("Fazendo login:", email);
@@ -239,6 +258,7 @@ class App {
         this.checkNFLink();
         this.checkDASLink();
         this.checkDASAlert();
+        this.updateConnectionStatus();
         
         const adminArea = document.getElementById('admin-area');
         if (adminArea) {
@@ -248,11 +268,9 @@ class App {
                 adminArea.classList.add('hidden');
             }
         }
-        
-        console.log("App carregado com sucesso!");
     }
     
-    // --- NOVO SISTEMA DE LICENÇA ---
+    // --- LICENÇA ---
     checkLicense() {
         const now = Date.now();
         const statusEl = document.getElementById('license-status');
@@ -292,13 +310,11 @@ class App {
             if (navReg) navReg.disabled = true;
             if (navSup) navSup.disabled = true;
             if (btnNewTx) btnNewTx.disabled = true;
-            
-            alert("⚠️ Seu tempo de uso expirou! Por favor, renove sua licença na aba Configurações.");
         }
     }
 
     openCreditModal() {
-        // Generate random number 100-1000
+        // Gerar código aleatório
         this.randomCode = Math.floor(Math.random() * (1000 - 100 + 1)) + 100;
         const creditNum = document.getElementById('credit-random-num');
         const creditInput = document.getElementById('credit-code-input');
@@ -309,6 +325,39 @@ class App {
         if (modalCredits) modalCredits.classList.remove('hidden');
     }
 
+    // 4. BOTÃO SOLICITAR CRÉDITO: Ação do Botão
+    requestWhatsAppLicense() {
+        if (!this.randomCode) {
+            alert("Erro: Código não gerado. Feche e abra a janela novamente.");
+            return;
+        }
+
+        // Solicita quantidade de dias (Padrão 90)
+        let days = prompt("Quantos dias de licença deseja solicitar?", "90");
+        
+        // Validação básica
+        if (!days || isNaN(days) || days <= 0) {
+            days = "90";
+        }
+
+        const userName = this.user.displayName || "Usuário MEI";
+        const userEmail = this.user.email;
+        const phone = "5534997824990";
+        
+        // Formata o código composto: CÓDIGO-DIAS
+        const requestString = `${this.randomCode}-${days}`;
+
+        // Mensagem formatada
+        const message = `Olá, solicito liberação de créditos.%0A%0A` +
+                        `*Usuário:* ${encodeURIComponent(userName)}%0A` +
+                        `*Email:* ${encodeURIComponent(userEmail)}%0A` +
+                        `*Código de Solicitação:* ${requestString}`;
+
+        // Abrir WhatsApp
+        window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
+    }
+
+    // 3. REGRA DA CONTRA-SENHA: Soma dos dias
     validateCreditCode() {
         const input = document.getElementById('credit-code-input');
         if (!input) return;
@@ -324,8 +373,9 @@ class App {
         const passInput = parseInt(parts[0]);
         const daysInput = parseInt(parts[1]);
 
-        // Formula: (Random + 13) * 9 + 1954
-        const expectedPass = (this.randomCode + AUTH_CONST_A) * AUTH_CONST_B + AUTH_CONST_C;
+        // 3. FÓRMULA ATUALIZADA: Considera e soma o número de dias solicitados (daysInput)
+        // (Random + Days + 13) * 9 + 1954
+        const expectedPass = ((this.randomCode + AUTH_CONST_A) * AUTH_CONST_B + AUTH_CONST_C + daysInput);
 
         if (passInput === expectedPass && daysInput > 0) {
             const now = Date.now();

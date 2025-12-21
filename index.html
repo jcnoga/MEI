@@ -13,7 +13,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 
-    <!-- Importar Firebase com script direto (corrigido) -->
+    <!-- Importar Firebase com script direto -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 
@@ -36,7 +36,6 @@
                 <input type="email" id="auth-email" class="auth-input" placeholder="Email" required>
                 <input type="password" id="auth-pass" class="auth-input" placeholder="Senha" required>
                 
-                <!-- Link Esqueci Minha Senha Adicionado -->
                 <div style="text-align:right; width:100%; margin-bottom:15px; margin-top:-5px;">
                      <span onclick="app.recoverPassword()" style="color:var(--primary); cursor:pointer; font-size:0.8rem; text-decoration: underline;">Esqueci minha senha</span>
                 </div>
@@ -59,11 +58,14 @@
         <header>
             <div class="container flex justify-between">
                 <div class="flex" style="gap: 15px;">
-                    <!-- Botão de Sair adicionado no cabeçalho -->
                     <button onclick="app.logout()" class="btn-outline btn-sm" style="border:none; color:var(--danger); font-size:1.1rem; padding: 0;" title="Sair do App">
                         <i class="fa-solid fa-right-from-bracket"></i>
                     </button>
                     <div>
+                        <!-- ITEM 2: Indicador de Modo Local/Nuvem -->
+                        <div id="connection-status" style="font-size:0.7rem; font-weight:600; margin-bottom:2px; display:flex; align-items:center; gap:5px;">
+                            <i class="fa-solid fa-cloud"></i> Online
+                        </div>
                         <h2 style="font-size:1rem;" id="head-fantasy">Minha Empresa</h2>
                         <p style="font-size:0.75rem; color:var(--text-muted);" id="head-name">Usuário</p>
                     </div>
@@ -78,7 +80,6 @@
             <!-- VIEW: DASHBOARD -->
             <div id="view-home">
                 
-                <!-- ALERTA DAS (VISIVEL DINAMICAMENTE) -->
                 <div id="das-alert" class="alert-das hidden"></div>
 
                 <div class="card" style="background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white;">
@@ -90,21 +91,18 @@
                     </div>
                 </div>
 
-                <!-- Botão Nota Fiscal -->
                 <div id="nf-shortcut" class="hidden" style="margin-bottom: 15px;">
                     <button class="btn btn-secondary" onclick="app.openNFLink()">
                         <i class="fa-solid fa-file-invoice"></i> Emitir Nota Fiscal (Emissor Nacional)
                     </button>
                 </div>
 
-                <!-- Botão DAS -->
                 <div id="das-shortcut" class="hidden" style="margin-bottom: 15px;">
                     <button class="btn btn-warning" onclick="app.openDASLink()">
                         <i class="fa-solid fa-barcode"></i> Pagar DAS (MEI)
                     </button>
                 </div>
                 
-                <!-- Botão RPA (Movido das Configurações para cá) -->
                 <div id="rpa-shortcut" style="margin-bottom: 15px;">
                     <button class="btn btn-primary" onclick="app.openRPAModal()">
                         <i class="fa-solid fa-file-contract"></i> Gerar Recibo RPA
@@ -128,15 +126,12 @@
                     <button class="tab-btn" onclick="app.setRegTab('services')">Serviços</button>
                 </div>
 
-                <!-- Botões Específicos da Aba -->
                 <div class="flex justify-between" style="margin-bottom: 15px;">
                     <h3 id="reg-title">Lista</h3>
                     <div class="flex" style="gap:5px;">
-                        <!-- Botão PDF -->
                         <button class="btn-dark btn-sm" onclick="app.downloadRegPDF()" title="Baixar PDF">
                             <i class="fa-solid fa-file-pdf"></i>
                         </button>
-                        <!-- Botão Lista de Compras (Só aparece em Produtos) -->
                         <button id="btn-shopping-list" class="btn-warning btn-sm hidden" onclick="app.openShoppingList()">
                             <i class="fa-solid fa-cart-shopping"></i> Lista Compras
                         </button>
@@ -151,7 +146,6 @@
             <div id="view-settings" class="hidden">
                 <h2>Configurações</h2>
                 
-                <!-- NOVO: Card de Licença / Créditos -->
                 <div class="card" id="card-license">
                     <h3><i class="fa-solid fa-clock"></i> Licença de Uso</h3>
                     <div style="margin-top:10px; margin-bottom:15px;">
@@ -160,7 +154,6 @@
                     </div>
                     <button class="btn btn-warning" onclick="app.openCreditModal()">Solicitar Créditos / Renovar</button>
 
-                    <!-- Área Admin Oculta -->
                     <div id="admin-area" class="hidden" style="margin-top:15px; border-top:1px dashed var(--border); padding-top:10px; background:#fefce8; padding:10px; border-radius:8px;">
                         <p style="color:#b45309; font-size:0.8rem; font-weight:bold; margin-bottom:10px;"><i class="fa-solid fa-shield-halved"></i> Painel Admin (jcnvap)</p>
                         <div class="flex" style="gap:10px;">
@@ -181,9 +174,6 @@
                     </div>
                 </div>
                 
-                <!-- Card de RPA removido daqui e passado para o Início como botão -->
-
-                <!-- NOVO CARD: CONFIGURAÇÃO IRRF -->
                 <div class="card">
                     <h3><i class="fa-solid fa-table"></i> Tabela IRRF (Configuração)</h3>
                     <p style="font-size:0.75rem; color:var(--text-muted); margin-bottom:10px;">Edite as faixas e alíquotas para cálculo automático.</p>
@@ -196,9 +186,7 @@
                                 <th>Dedução R$</th>
                             </tr>
                         </thead>
-                        <tbody id="irrf-config-body">
-                            <!-- Preenchido via JS -->
-                        </tbody>
+                        <tbody id="irrf-config-body"></tbody>
                     </table>
                     <button class="btn btn-secondary btn-sm" style="margin-top:10px;" onclick="app.saveIRRFConfig()">Salvar Tabela</button>
                 </div>
@@ -212,14 +200,12 @@
                 <div class="card">
                     <h3><i class="fa-solid fa-folder-open"></i> Fiscal & Docs</h3>
                     
-                    <!-- Link Emissor NF -->
                     <label class="form-label">Link Emissor Nacional (NF):</label>
                     <div class="flex" style="gap:5px;">
                         <input type="text" id="conf-nf-link" class="auth-input" placeholder="https://www.nfse.gov.br/EmissorNacional" style="margin:0;">
                         <button class="btn-secondary btn-sm" onclick="app.saveNFLink()">Salvar</button>
                     </div>
                     
-                    <!-- Link Pagamento DAS -->
                     <label class="form-label">Link Pagamento DAS:</label>
                     <div class="flex" style="gap:5px;">
                         <input type="text" id="conf-das-link" class="auth-input" placeholder="https://www8.receita.fazenda.gov.br..." style="margin:0;">
@@ -237,7 +223,6 @@
                     <button class="btn btn-secondary" onclick="document.getElementById('file-input').click()"><i class="fa-solid fa-upload"></i> Restaurar</button>
                     <input type="file" id="file-input" accept=".json" class="hidden" onchange="app.restoreData(this)">
                     <hr style="border:0; border-top:1px solid var(--border); margin:15px 0;">
-                    <!-- Botão Adicionado: Gerar Dados de Teste -->
                     <button class="btn btn-warning" onclick="app.generateMockData()"><i class="fa-solid fa-database"></i> Gerar Dados de Teste</button>
                 </div>
 
@@ -253,7 +238,6 @@
                         <a href="https://wa.me/5534997824990" target="_blank" style="color:#25D366"><i class="fa-brands fa-whatsapp"></i></a>
                     </div>
                     
-                    <!-- Box de Doação - Atalho para aba Apoio -->
                     <div class="donation-box">
                         <p>Este app é gratuito. Apoie o desenvolvimento.</p>
                         <button class="btn btn-primary" onclick="app.navTo('support', document.querySelector('.nav-item:last-child'))" style="width:auto; margin:0 auto; font-size:0.9rem; padding:8px 20px;">
@@ -263,7 +247,7 @@
                 </div>
             </div>
 
-            <!-- VIEW: APOIO (ATUALIZADA) -->
+            <!-- VIEW: APOIO -->
             <div id="view-support" class="hidden" style="text-align: center; padding: 40px 20px;">
                 <i class="fa-solid fa-hand-holding-heart" style="font-size: 4rem; color: var(--primary); margin-bottom: 20px;"></i>
                 <h2 style="margin-bottom: 15px;">Apoie o Projeto ☕</h2>
@@ -274,18 +258,16 @@
                 <p style="font-weight:600; color:var(--text-muted);">Selecione um valor para gerar o Copia e Cola:</p>
                 
                 <div class="pix-grid">
-                    <button class="btn-pix" onclick="app.generatePixCopyPaste(5)">R$ 5,00</button>
-                    <button class="btn-pix" onclick="app.generatePixCopyPaste(9)">R$ 9,00</button>
-                    <button class="btn-pix" onclick="app.generatePixCopyPaste(12)">R$ 12,00</button>
-                    <button class="btn-pix" onclick="app.copyPixKeyOnly()">Outro</button>
+                    <button class="btn-pix" onclick="app.generatePixCopyPaste(5)"><i class="fa-regular fa-copy"></i> R$ 5,00</button>
+                    <button class="btn-pix" onclick="app.generatePixCopyPaste(9)"><i class="fa-regular fa-copy"></i> R$ 9,00</button>
+                    <button class="btn-pix" onclick="app.generatePixCopyPaste(12)"><i class="fa-regular fa-copy"></i> R$ 12,00</button>
+                    <button class="btn-pix" onclick="app.copyPixKeyOnly()"><i class="fa-regular fa-copy"></i> Outro</button>
                 </div>
 
-                <!-- Mensagem de Feedback -->
                 <div id="pix-feedback-msg" class="pix-feedback">
                     ✅ Código Pix Copiado com Sucesso!
                 </div>
 
-                <!-- Exibição do código (opcional, caso o copy falhe) -->
                 <div id="pix-display-area" class="pix-display-area"></div>
                 
                 <p style="margin-top:30px; font-size:0.8rem; color:var(--text-muted);">
@@ -302,18 +284,16 @@
         </nav>
     </section>
 
-    <!-- MODAL: NOVA TRANSAÇÃO (COM RADIOS) -->
+    <!-- MODAIS (INCLUINDO MODAL CREDITS COM WHATSAPP) -->
     <div id="modal-tx" class="modal-overlay hidden" onclick="if(event.target===this) app.closeModal('modal-tx')">
         <div class="modal-content">
             <div class="flex justify-between"><h2>Novo Lançamento</h2><i class="fa-solid fa-xmark" onclick="app.closeModal('modal-tx')"></i></div>
             
-            <!-- Indicador de Tipo (Visual) -->
             <div class="type-switch">
                 <div class="type-opt active inc" id="opt-inc" onclick="app.setType('income')">Entrada</div>
                 <div class="type-opt" id="opt-exp" onclick="app.setType('expense')">Saída</div>
             </div>
 
-            <!-- Area de Opções para Comerciante -->
             <div id="merchant-options" class="hidden">
                 <div class="radio-group">
                     <label class="radio-item">
@@ -330,7 +310,6 @@
                     </label>
                 </div>
 
-                <!-- Detalhes do Produto (Aparece na Venda/Compra) -->
                 <div id="tx-prod-details" class="hidden" style="margin-top:10px; padding:10px; background:#f8fafc; border-radius:10px; border:1px solid #e2e8f0;">
                     <label class="form-label">Produto</label>
                     <select id="tx-prod-select" class="auth-input" onchange="app.onTxProductChange()"></select>
@@ -364,16 +343,13 @@
         </div>
     </div>
 
-    <!-- MODAL: CADASTRO GENÉRICO -->
     <div id="modal-reg" class="modal-overlay hidden" onclick="if(event.target===this) app.closeModal('modal-reg')">
         <div class="modal-content">
             <div class="flex justify-between"><h2 id="reg-modal-title">Novo Item</h2><i class="fa-solid fa-xmark" onclick="app.closeModal('modal-reg')"></i></div>
             
             <div class="highlight-box">
-                <!-- Rótulo do campo Nome alterado para ter ID -->
                 <label class="form-label" id="reg-name-label">Nome</label>
                 <input type="text" id="reg-name" class="auth-input">
-                
                 <div id="reg-fields-extra"></div>
             </div>
             
@@ -381,12 +357,10 @@
         </div>
     </div>
 
-    <!-- MODAL: RPA (RECIBO DE PAGAMENTO A AUTÔNOMO) -->
     <div id="modal-rpa" class="modal-overlay hidden" onclick="if(event.target===this) app.closeModal('modal-rpa')">
         <div class="modal-content">
             <div class="flex justify-between"><h2>Gerar RPA</h2><i class="fa-solid fa-xmark" onclick="app.closeModal('modal-rpa')"></i></div>
             
-            <!-- BLOCO 1: CLIENTE (Contratante) -->
             <div class="highlight-box">
                 <span class="highlight-title" style="color:var(--primary-dark);">1. Contratante (Cliente)</span>
                 <label class="form-label">Selecione o Cliente</label>
@@ -401,7 +375,6 @@
                 </div>
             </div>
 
-            <!-- BLOCO 2: PRESTADOR (Fornecedor) -->
             <div class="highlight-box blue">
                 <span class="highlight-title" style="color:var(--secondary);">2. Prestador (Autônomo)</span>
                 <label class="form-label">Selecione o Prestador</label>
@@ -417,7 +390,6 @@
                 <input type="text" id="rpa-supp-addr" class="auth-input" placeholder="Endereço" style="margin-top:5px;">
             </div>
 
-            <!-- BLOCO 3: SERVIÇO E VALORES -->
             <div class="highlight-box orange">
                 <span class="highlight-title" style="color:#b45309;">3. Serviço & Valores</span>
                 
@@ -448,7 +420,6 @@
                 </div>
             </div>
 
-            <!-- Botões de Download Word e PDF -->
             <div class="flex" style="gap:10px; margin-top:15px;">
                 <button class="btn btn-primary" style="flex:1;" onclick="app.downloadRPAWord()">
                     <i class="fa-solid fa-file-word"></i> Word (.doc)
@@ -460,7 +431,6 @@
         </div>
     </div>
 
-    <!-- MODAL: MOVIMENTAÇÃO DE ESTOQUE (AVULSA) -->
     <div id="modal-stock" class="modal-overlay hidden" onclick="if(event.target===this) app.closeModal('modal-stock')">
         <div class="modal-content">
             <div class="flex justify-between"><h2>Movimentar Estoque</h2><i class="fa-solid fa-xmark" onclick="app.closeModal('modal-stock')"></i></div>
@@ -480,7 +450,6 @@
         </div>
     </div>
 
-    <!-- MODAL: LISTA DE COMPRAS -->
     <div id="modal-shopping" class="modal-overlay hidden" onclick="if(event.target===this) app.closeModal('modal-shopping')">
         <div class="modal-content">
             <div class="flex justify-between"><h2>Lista de Compras</h2><i class="fa-solid fa-xmark" onclick="app.closeModal('modal-shopping')"></i></div>
@@ -490,7 +459,6 @@
         </div>
     </div>
 
-    <!-- MODAIS DE PERFIL E SENHA -->
     <div id="modal-profile" class="modal-overlay hidden" onclick="if(event.target===this) app.closeModal('modal-profile')">
         <div class="modal-content">
             <div class="flex justify-between"><h2>Editar Dados</h2><i class="fa-solid fa-xmark" onclick="app.closeModal('modal-profile')"></i></div>
@@ -521,7 +489,7 @@
         </div>
     </div>
 
-    <!-- NOVO: MODAL SOLICITAÇÃO DE CRÉDITOS -->
+    <!-- MODAL CRÉDITOS (ITEM 4: BOTÃO SOLICITAR CRÉDITO) -->
     <div id="modal-credits" class="modal-overlay hidden" onclick="if(event.target===this) app.closeModal('modal-credits')">
         <div class="modal-content">
             <div class="flex justify-between"><h2>Renovar Licença</h2><i class="fa-solid fa-xmark" onclick="app.closeModal('modal-credits')"></i></div>
@@ -530,12 +498,17 @@
                 <p style="color:var(--text-muted);">Informe este código ao suporte:</p>
                 <h1 id="credit-random-num" style="font-size:3rem; color:var(--primary); margin:10px 0;">---</h1>
                 
+                <!-- BOTÃO DE SOLICITAÇÃO (SOLICITAR CRÉDITO / RENOVAR) -->
+                <button class="btn btn-outline" style="margin-bottom:20px; border-color:#25D366; color:#25D366;" onclick="app.requestWhatsAppLicense()">
+                    <i class="fa-brands fa-whatsapp"></i> Solicitar Crédito / Renovar
+                </button>
+                
                 <hr style="margin:20px 0; border:0; border-top:1px dashed var(--border);">
                 
                 <label class="form-label" style="text-align:left;">Contra-senha (xxxxxx-yy)</label>
                 <input type="text" id="credit-code-input" class="auth-input" placeholder="Digite o código recebido">
                 
-                <button class="btn btn-success btn-primary" style="margin-top:15px;" onclick="app.validateCreditCode()">Validar & Liberar</button>
+                <button class="btn btn-success btn-primary" style="margin-top:15px;" onclick="app.validateCreditCode()">Validar</button>
             </div>
         </div>
     </div>
