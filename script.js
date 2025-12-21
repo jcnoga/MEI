@@ -1,12 +1,12 @@
 // CONFIGURAÇÃO
 const firebaseConfig = {
-    apiKey: "AIzaSyCijldF4haJzh0nzu4fbPYGHJadyYuqTP4",
-    authDomain: "projmei.firebaseapp.com",
-    projectId: "projmei",
-    storageBucket: "projmei.firebasestorage.app",
-    messagingSenderId: "39066795540",
-    appId: "1:39066795540:web:edc72cedb442daee423101",
-    measurementId: "G-PE631DFGE0"
+  apiKey: "AIzaSyCijldF4haJzh0nzu4fbPYGHJadyYuqTP4",
+  authDomain: "projmei.firebaseapp.com",
+  projectId: "projmei",
+  storageBucket: "projmei.firebasestorage.app",
+  messagingSenderId: "39066795540",
+  appId: "1:39066795540:web:edc72cedb442daee423101",
+  measurementId: "G-PE631DFGE0"
 };
 const SEU_LINK_PDF = "https://drive.google.com/file/d/1gMocDMAey8q35-bcJsRip7Zm0v2mCrMS/view?usp=sharing"; 
 const DEFAULT_DAS_LINK = "https://www8.receita.fazenda.gov.br/SimplesNacional/Aplicacoes/ATSPO/pgmei.app/Identificacao";
@@ -319,9 +319,11 @@ class App {
         const creditNum = document.getElementById('credit-random-num');
         const creditInput = document.getElementById('credit-code-input');
         const modalCredits = document.getElementById('modal-credits');
+        const creditDays = document.getElementById('credit-days-request');
         
         if (creditNum) creditNum.innerText = this.randomCode;
         if (creditInput) creditInput.value = '';
+        if (creditDays) creditDays.value = '90'; // Reset para o padrão de 90 dias
         if (modalCredits) modalCredits.classList.remove('hidden');
     }
 
@@ -332,11 +334,12 @@ class App {
             return;
         }
 
-        // Solicita quantidade de dias (Padrão 90)
-        let days = prompt("Quantos dias de licença deseja solicitar?", "90");
+        // Solicita quantidade de dias do formulário (Padrão 90)
+        const creditDaysInput = document.getElementById('credit-days-request');
+        let days = creditDaysInput ? creditDaysInput.value : "90";
         
         // Validação básica
-        if (!days || isNaN(days) || days <= 0) {
+        if (!days || isNaN(days) || parseInt(days) <= 0) {
             days = "90";
         }
 
@@ -344,14 +347,11 @@ class App {
         const userEmail = this.user.email;
         const phone = "5534997824990";
         
-        // Formata o código composto: CÓDIGO-DIAS
-        const requestString = `${this.randomCode}-${days}`;
-
-        // Mensagem formatada
-        const message = `Olá, solicito liberação de créditos.%0A%0A` +
-                        `*Usuário:* ${encodeURIComponent(userName)}%0A` +
-                        `*Email:* ${encodeURIComponent(userEmail)}%0A` +
-                        `*Código de Solicitação:* ${requestString}`;
+        // Mensagem formatada conforme solicitado
+        const message = `Olá, solicito renovação de licença.%0A%0A` +
+                        `*Código Gerado:* ${this.randomCode}%0A` +
+                        `*Dias Solicitados:* ${days}%0A%0A` +
+                        `Por favor, gere a contra-senha para liberar o acesso.`;
 
         // Abrir WhatsApp
         window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
